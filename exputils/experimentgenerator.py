@@ -198,7 +198,13 @@ def load_configuration_data_from_ods(ods_filepath):
 
                     for variable_name in variable_names[file_idx]:
 
-                        experiments_data['experiments'][experiment_id]['files'][file_idx]['variables'][variable_name] = get_cell_data(sheet_data[row_idx][col_idx])
+                        if col_idx > len(sheet_data[row_idx]) - 1:
+                            # if there is no content in the final cells, the array that holds the data is shorter
+                            cur_cell_data = ''
+                        else:
+                            cur_cell_data = get_cell_data(sheet_data[row_idx][col_idx])
+
+                        experiments_data['experiments'][experiment_id]['files'][file_idx]['variables'][variable_name] = cur_cell_data
 
                         col_idx +=1
 

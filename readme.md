@@ -4,22 +4,14 @@
 Experiment Utilities (exputils) contains various tool for the execution of scientific experiments. 
 
 
-# Table of Contents
-
-* [Team Members](#team-members)
-
-* [Requirements](#requirements)
-
-* [Documentation](#documentation)
-
-
-
 # <a name="team-members"></a>Team Members
 
 * [Chris Reinke](http:www.scirei.net) <chris.reinke@inria.fr>
 
 
-# <a name="requirements"></a>Requirements
+# <a name="setup"></a>Setup
+
+## <a name="requirements"></a>Requirements
 
 Developed for Python 3.6.
 
@@ -27,6 +19,14 @@ Needs the following additional python packages:
 
 * [odfpy](https://github.com/eea/odfpy) (Anaconda: https://anaconda.org/conda-forge/odfpy) 
 * [defusedxml](https://github.com/tiran/defusedxml) (Anaconda: https://anaconda.org/conda-forge/defusedxml)
+
+## Installation
+
+To install the current version of the library:
+`pip install .`
+
+To install the library to allow that changes to the source code are directly usable:
+`pip install -e .`
 
 
 # <a name="documentation"></a>Documentation
