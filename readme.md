@@ -15,8 +15,8 @@ Experiment Utilities (exputils) contains various tool for the execution of scien
 
 Developed for Python 3.6.
 
-Needs the following additional python packages:
-
+Needs the following additional python packages which will be automatically installed:
+* numpy
 * [odfpy](https://github.com/eea/odfpy) (Anaconda: https://anaconda.org/conda-forge/odfpy) 
 * [defusedxml](https://github.com/tiran/defusedxml) (Anaconda: https://anaconda.org/conda-forge/defusedxml)
 
@@ -37,3 +37,7 @@ The function `generate_experiment_files` can be used to generate experiment file
 The parameters can be defined in an ODS file (LibreOffice Spreadsheet)
 
 TODO: More documentation
+
+
+# TODO
+* add code to allow to rerun experiments even if they are finished
