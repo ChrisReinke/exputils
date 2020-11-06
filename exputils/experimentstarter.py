@@ -25,7 +25,19 @@ def start_torque_experiments(directory='.', start_scripts='*.torque', is_paralle
                              post_start_wait_time=post_start_wait_time)
 
 
-def start_experiments(directory='.', start_scripts='*.sh', start_command='{}', is_parallel=True, is_chdir=False, verbose=False, post_start_wait_time=0):
+def start_experiments(directory='.', start_scripts='*.sh', start_command='{}', is_parallel=True, is_chdir=False, verbose=False, post_start_wait_time=0, is_rerun=False):
+    '''
+
+    :param directory:
+    :param start_scripts:
+    :param start_command:
+    :param is_parallel:
+    :param is_chdir:
+    :param verbose:
+    :param post_start_wait_time:
+    :param is_rerun: Should finished scripts be rerun. (default: False)
+    :return:
+    '''
 
     # TODO: do not restart experiments that have been added as jobs but have not been started yet
 
@@ -62,7 +74,7 @@ def start_experiments(directory='.', start_scripts='*.sh', start_command='{}', i
     # start every found script
     for [script_path, status] in scripts:
 
-        if status is None or status.lower() == 'none' or status.lower() == 'not started' or status.lower() == 'error' or status.lower() == 'unfinished':
+        if is_rerun or (status is None or status.lower() == 'none' or status.lower() == 'not started' or status.lower() == 'error' or status.lower() == 'unfinished'):
             # start the script
 
             if verbose:
