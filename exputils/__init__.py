@@ -6,4 +6,4 @@ from exputils.experimentstarter import start_slurm_experiments
 from exputils.experimentstarter import start_torque_experiments
 import exputils.misc
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
