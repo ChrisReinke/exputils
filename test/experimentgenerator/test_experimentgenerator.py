@@ -13,7 +13,7 @@ def test_generate_experiments(tmpdir):
 
     directory = os.path.join(tmpdir.strpath, 'test01')
 
-    exputils.generate_experiment_files(os.path.join(dir_path, 'test_01.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01'), os.path.join(dir_path, 'extra_file_02')])
+    exputils.run.generate_experiment_files(os.path.join(dir_path, 'test_01.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01'), os.path.join(dir_path, 'extra_file_02')])
 
     # group folders
     assert os.path.isdir(os.path.join(directory, 'group_01'))
@@ -84,7 +84,7 @@ def test_generate_experiments(tmpdir):
 
     directory = os.path.join(tmpdir.strpath, 'test02')
 
-    exputils.generate_experiment_files(os.path.join(dir_path, 'test_02.ods'), directory=directory, extra_files=os.path.join(dir_path, 'extra_file_01'))
+    exputils.run.generate_experiment_files(os.path.join(dir_path, 'test_02.ods'), directory=directory, extra_files=os.path.join(dir_path, 'extra_file_01'))
 
     # group folders
     assert os.path.isdir(os.path.join(directory))
@@ -126,7 +126,7 @@ def test_generate_experiments(tmpdir):
 
     directory = os.path.join(tmpdir.strpath, 'test03')
 
-    exputils.generate_experiment_files(os.path.join(dir_path, 'test_03.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01'), os.path.join(dir_path, 'extra_file_02')])
+    exputils.run.generate_experiment_files(os.path.join(dir_path, 'test_03.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01'), os.path.join(dir_path, 'extra_file_02')])
 
     # group folders
     assert os.path.isdir(os.path.join(directory, 'group_01'))
@@ -189,7 +189,7 @@ def test_generate_experiments(tmpdir):
 
     directory = os.path.join(tmpdir.strpath, 'test04')
 
-    exputils.generate_experiment_files(os.path.join(dir_path, 'test_04.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01'), os.path.join(dir_path, 'extra_file_02')])
+    exputils.run.generate_experiment_files(os.path.join(dir_path, 'test_04.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01'), os.path.join(dir_path, 'extra_file_02')])
 
     # file content
     with open(os.path.join(directory, 'group_01', 'experiment_000001', 'file_01'), 'r') as file:
@@ -202,7 +202,7 @@ def test_generate_experiments(tmpdir):
 
     directory = os.path.join(tmpdir.strpath, 'test05')
 
-    exputils.generate_experiment_files(os.path.join(dir_path, 'test_05.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01'), os.path.join(dir_path, 'extra_file_02')])
+    exputils.run.generate_experiment_files(os.path.join(dir_path, 'test_05.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01'), os.path.join(dir_path, 'extra_file_02')])
 
     # files
     assert os.path.isfile(os.path.join(directory, 'group_01', 'experiment_000001', 'file_03'))
@@ -258,7 +258,7 @@ def test_generate_experiments(tmpdir):
 
     directory = os.path.join(tmpdir.strpath, 'test06')
 
-    exputils.generate_experiment_files(os.path.join(dir_path, 'test_06.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01')], extra_experiment_files=[os.path.join(dir_path, 'extra_file_02')])
+    exputils.run.generate_experiment_files(os.path.join(dir_path, 'test_06.ods'), directory=directory, extra_files=[os.path.join(dir_path, 'extra_file_01')], extra_experiment_files=[os.path.join(dir_path, 'extra_file_02')])
 
     # files
 

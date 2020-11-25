@@ -3,7 +3,7 @@
 
 echo "Generate experiments ..."
 python -c "import exputils
-exputils.generate_experiment_files('experiment_configurations.ods', directory='./experiments/')"
+exputils.run.generate_experiment_files()"
 
 echo "Finished."
 

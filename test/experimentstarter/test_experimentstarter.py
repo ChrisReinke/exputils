@@ -18,7 +18,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    exputils.start_experiments(directory=directory, is_parallel=False)
+    exputils.run.start_experiments(directory=directory, is_parallel=False)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
@@ -35,7 +35,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    exputils.start_experiments(directory=directory, is_parallel=True)
+    exputils.run.start_experiments(directory=directory, is_parallel=True)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
@@ -52,7 +52,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    exputils.start_experiments(directory=directory, is_parallel=True, is_chdir=True)
+    exputils.run.start_experiments(directory=directory, is_parallel=True, is_chdir=True)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))

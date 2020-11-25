@@ -2,20 +2,19 @@
 
 # if param "rerun" is given then rerun all scripts
 is_rerun=False
-if [ $1 = "rerun" ]
+if [ "$1" = "rerun" ]
 then
   is_rerun=True
 fi
 
 echo "Start experiments via slurm ..."
 python -c "import exputils
-exputils.start_experiments(directory='./experiments/', 
-				 start_scripts='run_experiment.sh', 
-				 is_parallel=False, 
-				 is_chdir=True,
-				 verbose=True,
-				 post_start_wait_time=0.5,
-				 is_rerun=$is_rerun)"
+exputils.run.start_experiments(start_scripts='run_experiment.sh',
+                               is_parallel=False,
+                               is_chdir=True,
+                               verbose=True,
+                               post_start_wait_time=0.5,
+                               is_rerun=$is_rerun)"
 
 echo "Finished"
 

@@ -29,6 +29,11 @@ To install the library to allow that changes to the source code are directly usa
 `pip install -e .`
 
 
+Jupyter Gui extensions:
+conda install -c plotly plotly 
+
+jupyter nbextension enable --py widgetsnbextension
+
 # <a name="documentation"></a>Documentation
 
 ## <a name="dev_notes"></a>Generate experiment files to test different configurations / parameters
