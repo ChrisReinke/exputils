@@ -2,19 +2,32 @@ import exputils as eu
 import os
 import IPython
 from datetime import datetime
+import ipywidgets
+import base64
+from IPython.display import Javascript, display
 
-def create_new_cell(content):
-    '''
-    Creates a new cell under the current cell.
+def create_new_cell(code='', where='below'):
+    """Create a code cell in the IPython Notebook.
 
-    :param content: Content of the new cell.
-    :return:
-    '''
-    content = content.replace("\n", "\\n").replace("'", "\\'")
+    Parameters
+    code: unicode
+        Code to fill the new code cell with.
+    where: unicode
+        Where to add the new code cell.
+        Possible values include:
+            at_bottom
+            above
+            below"""
+    encoded_code = (base64.b64encode(str.encode(code))).decode()
 
-    IPython.display.display(
-        IPython.display.Javascript("""var cell = IPython.notebook.insert_cell_below();
-                                      cell.set_text('{}')""".format(content)))
+    out = ipywidgets.Output()
+    with out:
+        IPython.display.display_javascript("""
+                var code = IPython.notebook.insert_cell_{0}('code');
+                code.set_text(atob("{1}"));
+            """.format(where, encoded_code), raw=True)
+    out.clear_output()
+
 
 def save_config(config, name, directory=None, profile=None):
     '''
@@ -101,6 +114,12 @@ def add_children_to_widget(widget, children, idx=None):
         new_children_list[idx:idx] = children
 
     widget.children = tuple(new_children_list)
+
+
+def set_children_of_widget(widget, idxs, children):
+    children_widgets =  list(widget.children)
+    children_widgets[idxs] = children
+    widget.children = tuple(children_widgets)
 
 
 def generate_random_state_backup_name():

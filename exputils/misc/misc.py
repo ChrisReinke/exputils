@@ -83,13 +83,16 @@ def list_equal(list_a, list_b):
 
     for idx in range(len(list_a)):
 
-        if isinstance(list_a[idx], list) and isinstance(list_b[idx], list):
+        if type(list_a[idx]) != type(list_b[idx]):
+            return False
+
+        if isinstance(list_a[idx], list):
             if not list_equal(list_a[idx], list_b[idx]):
                 return False
-        elif isinstance(list_a[idx], tuple) and isinstance(list_b[idx], tuple):
+        elif isinstance(list_a[idx], tuple):
             if not list_equal(list_a[idx], list_b[idx]):
                 return False
-        elif isinstance(list_a[idx], np.ndarray) and isinstance(list_b[idx], np.ndarray):
+        elif isinstance(list_a[idx], np.ndarray):
             if not np.array_equal(list_a[idx], list_b[idx]):
                 return False
         elif list_a[idx] != list_b[idx]:
@@ -196,7 +199,7 @@ def get_dict_variable(base_dict, variable_str):
     :return: Item value.
     '''
 
-    # TODO: allow lists of lists, e.g. 'sub_var.var[:][1]'
+    # TODO: Feature - allow lists of lists, e.g. 'sub_var.var[:][1]'
 
     # get the string describing the first sub element in the given variable string
     variable_subelement_strings = variable_str.split('.')

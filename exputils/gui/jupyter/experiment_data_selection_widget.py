@@ -1,14 +1,18 @@
 import exputils as eu
 import ipywidgets
+import warnings
 from exputils.gui.jupyter.base_widget import BaseWidget
 from exputils.gui.jupyter.experiment_ids_selection_widget import ExperimentIDsSelectionWidget
 from exputils.gui.jupyter.repetition_ids_selection_widget import RepetitionIDsSelectionWidget
 from exputils.gui.jupyter.code_producer_widget import CodeProducerWidget
 
-# TODO: add selection of label_templates for data sources, experiments, and repetitions
-# TODO: add data source selection helper
-# TODO: add on_selection_changed event
-# TODO: keep for each selection attribute (e.g. datasources) an internal variable (self._datasources) which
+# TODO: Feature - add selection of label_templates for data sources, experiments, and repetitions
+# TODO: Feature - ordering of experiments
+# TODO: Feature - add data source selection helper
+# TODO: Feature - allow that changes of names in the experiment_data_loader are directly taken as updates here
+# TODO: Refactor - put the output widget into this class and allow to print errors and warnings to it if data is loaded
+# TODO: Feature - add on_selection_changed event
+# TODO: Refactor - keep for each selection attribute (e.g. datasources) an internal variable (self._datasources) which
 #       is updated if the selection changes. This allows to not overrider the config in the case of default values.
 
 CODE_TEMPLATE_MULTILINE = """selection_widget = ExperimentDataSelectionWidget(
@@ -141,21 +145,32 @@ class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
             main_box=eu.AttrDict(layout=eu.AttrDict(width='25%', height='99%')))
 
         # config for collecting the data
-        dc.get_experiment_data_func = eu.io.get_experiment_data  # function to get the data
+        dc.select_experiment_data_func = eu.data.select_experiment_data  # function to get the data
 
         return dc
 
 
-    def __init__(self, experiment_data, experiment_descriptions=None, config=None, **kwargs):
+    def __init__(self, experiment_data_object, experiment_descriptions=None, config=None, **kwargs):
+
         # constructor of BaseWidget
         super().__init__(config=config, **kwargs)
         # constructor of VBox
         super(BaseWidget, self).__init__(
-            children=[],
             **self.config.main_vbox)
 
-        self.experiment_data = experiment_data
-        self.experiment_descriptions = experiment_descriptions
+        # handle input of either data loader widget or data itsel
+        if isinstance(experiment_data_object, eu.gui.jupyter.ExperimentDataLoaderWidget):
+            if experiment_descriptions is not None:
+                warnings.warn('If an ExperimentDataLoaderWidget is provided, then the experiment_descriptions parameter will be ignored.')
+
+            self._experiment_data = experiment_data_object.experiment_data
+            self._experiment_descriptions = experiment_data_object.experiment_descriptions
+
+            # register event at widget, if it loads new data
+            experiment_data_object.on_experiment_data_loaded(self._on_new_experiment_data_handler)
+        else:
+            self._experiment_data = experiment_data_object
+            self._experiment_descriptions = experiment_descriptions
 
         self._selected_data = None
         self._selected_data_labels = None
@@ -248,6 +263,22 @@ class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
 
 
     @property
+    def experiment_data(self):
+        return self._experiment_data
+
+
+    @property
+    def experiment_descriptions(self):
+        return self._experiment_descriptions
+
+
+    def set_experiment_data(self, experiment_data, experiment_descriptions=None):
+        self._experiment_data = experiment_data
+        self._experiment_descriptions = experiment_descriptions
+        self._update_selections_to_new_experiment_data()
+
+
+    @property
     def selected_data(self):
         return self._selected_data
 
@@ -298,7 +329,10 @@ class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
         if not self.config.is_repetition_ids_selection:
             return self.config.repetition_ids
         else:
-            return self.repetition_ids_selection_multiselect_widget.selected_repetition_ids
+            rep_ids = self.repetition_ids_selection_multiselect_widget.selected_repetition_ids
+            if not rep_ids:
+                rep_ids = 'none'
+            return rep_ids
 
 
     @repetition_ids.setter
@@ -350,12 +384,31 @@ class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
     @data_filter.setter
     def data_filter(self, data_filter):
 
-        # TODO: handle different data_filter inputs
-
         if not self.config.is_data_filter_selection:
             self.config.data_filter = data_filter
         else:
             self.data_filter_text_widget.value = data_filter
+
+
+    @property
+    def selection(self):
+        '''AttrDict (dict) with the selected experiment data options.'''
+        return eu.AttrDict(
+            datasources=self.datasources,
+            experiment_ids=self.experiment_ids,
+            repetition_ids=self.repetition_ids,
+            output_format=self.output_format,
+            data_filter=self.data_filter)
+
+
+    @selection.setter
+    def selection(self, selection):
+        selection = eu.AttrDict(selection)
+        if 'datasources' in selection: self.datasources = selection.datasources
+        if 'experiment_ids' in selection: self.experiment_ids = selection.experiment_ids
+        if 'repetition_ids' in selection: self.repetition_ids = selection.repetition_ids
+        if 'output_format' in selection: self.output_format = selection.output_format
+        if 'data_filter' in selection: self.data_filter = selection.data_filter
 
 
     def on_data_collected(self, handler):
@@ -375,9 +428,9 @@ class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
             handler(descr)
 
 
-    def get_experiment_data(self):
+    def select_experiment_data(self):
 
-        data = self.config.get_experiment_data_func(
+        data = self.config.select_experiment_data_func(
             self.experiment_data,
             self.datasources,
             experiment_ids=self.experiment_ids,
@@ -401,32 +454,11 @@ class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
 
 
     def _get_experiment_data_button_on_click_handler(self, _):
-        self.get_experiment_data()
+        self.select_experiment_data()
 
 
     def _code_production_button_on_click_handler(self, _):
         eu.gui.jupyter.create_new_cell(r"print('hello world')")
-
-
-    @property
-    def selection(self):
-        '''AttrDict (dict) with the selected experiment data options.'''
-        return eu.AttrDict(
-            datasources=self.datasources,
-            experiment_ids=self.experiment_ids,
-            repetition_ids=self.repetition_ids,
-            output_format=self.output_format,
-            data_filter=self.data_filter)
-
-
-    @selection.setter
-    def selection(self, selection):
-        selection = eu.AttrDict(selection)
-        if 'datasources' in selection: self.datasources = selection.datasources
-        if 'experiment_ids' in selection: self.experiment_ids = selection.experiment_ids
-        if 'repetition_ids' in selection: self.repetition_ids = selection.repetition_ids
-        if 'output_format' in selection: self.output_format = selection.output_format
-        if 'data_filter' in selection: self.data_filter = selection.data_filter
 
 
     def get_widget_state(self):
@@ -469,3 +501,38 @@ class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
             output_format=self.output_format,
             data_filter=r"'{}'".format(self.data_filter),
             state_backup_name=r"'{}'".format(eu.gui.jupyter.misc.generate_random_state_backup_name()))
+
+
+    def _on_new_experiment_data_handler(self, event_descr):
+        '''
+        Called if the experiment data loader widget loaded new experiment data.
+        Updates the experiment_data of the selection widget.
+        '''
+        self.set_experiment_data(
+            event_descr['owner'].experiment_data,
+            event_descr['owner'].experiment_descriptions)
+
+
+    def _update_selections_to_new_experiment_data(self):
+
+        # create new experiment_id_selection
+        if self.config.is_experiment_ids_selection:
+            self.experiment_ids_selection_multiselect_widget = ExperimentIDsSelectionWidget(
+                self.experiment_data,
+                experiment_descriptions=self.experiment_descriptions,
+                **self.config.experiment_ids_selection.multiselect)
+            eu.gui.jupyter.set_children_of_widget(
+                self.experiment_ids_selection_hbox_widget,
+                1,
+                self.experiment_ids_selection_multiselect_widget)
+
+        # create new repetition_id_selection
+        if self.config.is_repetition_ids_selection:
+            self.repetition_ids_selection_multiselect_widget = RepetitionIDsSelectionWidget(
+                self.experiment_data,
+                experiment_descriptions=self.experiment_descriptions,
+                **self.config.repetition_ids_selection.multiselect)
+            eu.gui.jupyter.set_children_of_widget(
+                self.repetition_ids_selection_hbox_widget,
+                1,
+                self.repetition_ids_selection_multiselect_widget)

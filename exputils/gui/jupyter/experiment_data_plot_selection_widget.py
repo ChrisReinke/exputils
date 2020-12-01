@@ -1,12 +1,9 @@
 import exputils as eu
 import ipywidgets
-import warnings
 from exputils.gui.jupyter.experiment_data_selection_widget import ExperimentDataSelectionWidget
 import IPython
-import traceback
 
-#TODO: allow a data_loader_widget to be given as input, and if it loads new data to also update the current data and plot
-#TODO: layout: if a function selection is active, let the plot_config editor only be in the area below the dropdown box
+
 
 DEFAULT_PLOTLY_MEANSTD_SCATTER_CONFIG = """layout = dict(
     xaxis = dict(
@@ -15,7 +12,8 @@ DEFAULT_PLOTLY_MEANSTD_SCATTER_CONFIG = """layout = dict(
     yaxis = dict(
         title = '' 
         )
-    )"""
+    ),
+    default_group_label = 'rep <group_idx>'"""
 
 DEFAULT_PLOTLY_BOX_CONFIG = """layout = dict(
     xaxis = dict(
@@ -33,7 +31,8 @@ DEFAULT_PLOTLY_MEANSTD_BAR_CONFIG = """layout = dict(
     yaxis = dict(
         title = '' 
         )
-    )"""
+    ),
+    default_group_label = 'rep <group_idx>'"""
 
 CODE_TEMPLATE_MULTILINE = """# Plotting of <datasources> 
 import exputils as eu
@@ -41,9 +40,8 @@ import exputils as eu
 
 plot_config = <plot_function_config>
 
-selection_widget = ExperimentDataPlotSelectionWidget(
-    experiment_data, 
-    experiment_descriptions,
+selection_widget = eu.gui.jupyter.ExperimentDataPlotSelectionWidget(
+    experiment_data_loader,
     datasources=<datasources>,
     experiment_ids=<experiment_ids>,
     repetition_ids=<repetition_ids>,
@@ -68,7 +66,7 @@ import exputils as eu
 
 plot_config = <plot_function_config>
 
-selection_widget = ExperimentDataPlotSelectionWidget(experiment_data, experiment_descriptions, datasources=<datasources>, experiment_ids=<experiment_ids>, repetition_ids=<repetition_ids>, output_format=<output_format>, data_filter=<data_filter>, plot_function=<plot_function>, plot_function_config=plot_config, state_backup_name=<state_backup_name>, state_backup_variable_filter=['experiment_ids', 'repetition_ids'], is_datasources_selection=False, is_output_format_selection=False, is_data_filter_selection=False, is_plot_function_selection=False, is_plot_function_config_editor=False, is_code_producer=False)
+selection_widget = eu.gui.jupyter.ExperimentDataPlotSelectionWidget(experiment_data_loader, datasources=<datasources>, experiment_ids=<experiment_ids>, repetition_ids=<repetition_ids>, output_format=<output_format>, data_filter=<data_filter>, plot_function=<plot_function>, plot_function_config=plot_config, state_backup_name=<state_backup_name>, state_backup_variable_filter=['experiment_ids', 'repetition_ids'], is_datasources_selection=False, is_output_format_selection=False, is_data_filter_selection=False, is_plot_function_selection=False, is_plot_function_config_editor=False, is_code_producer=False)
 display(selection_widget)
 selection_widget.plot_data()"""
 
@@ -365,7 +363,6 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
 
 
     def set_widget_state(self, state):
-        # TODO: make ssure that the current configuration is still valid with this state
 
         if '_plot_function_configs' in state:
             self._plot_function_configs = state._plot_function_configs  # set all gui configs
@@ -390,9 +387,10 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
             self.figure_output.clear_output(wait=True)
 
         with self.figure_output:
+            print('Plotting ...')
 
             # load experimental data before plotting
-            self.get_experiment_data()
+            self.select_experiment_data()
 
             plot_config = self.plot_function_config
             if isinstance(plot_config, BaseException):
@@ -403,6 +401,7 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
                     labels=self.selected_data_labels,
                     config=plot_config)
 
+                self.figure_output.clear_output(wait=True)
                 IPython.display.display(display_obiect)
 
 

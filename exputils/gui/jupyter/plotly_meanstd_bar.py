@@ -2,6 +2,7 @@ import exputils as eu
 import numpy as np
 import plotly.subplots
 
+
 def plotly_meanstd_bar(data=None, config=None, **kwargs):
     '''
     param repetition_ids: Either scalar int with single id, list with several that are used for each experiment, or a dict with repetition ids per experiment.
@@ -83,6 +84,11 @@ def plotly_meanstd_bar(data=None, config=None, **kwargs):
         # if only labels for mean-traces are given, then add an empty label for the sub figure
         if isinstance(config.labels, list) and not isinstance(config.labels[0], tuple):
             config.labels = [('', config.labels)]
+        # if no labels are given for elements, then create an empty list for element labels
+        for ds_idx in range(len(config.labels)):
+            for trace_idx in range(len(config.labels[ds_idx][1])):
+                if not isinstance(config.labels[ds_idx][1][trace_idx], tuple):
+                    config.labels[ds_idx][1][trace_idx] = (config.labels[ds_idx][1][trace_idx], [])
 
     # subplot_titles
     if config.labels and ('subplot_titles' not in config.subplots or config.subplots.subplot_titles == []):
@@ -119,57 +125,64 @@ def plotly_meanstd_bar(data=None, config=None, **kwargs):
         subplot_traces = []
 
         # create for each experiment a trace
-        for data_idx, cur_data in enumerate(subplot_data):  # data source
+        for trace_idx, cur_data in enumerate(subplot_data):  # data source
 
             means = []
             stds = []
             group_labels = []
 
-            # collect data over elements
-            for elem_idx, elem_data in enumerate(cur_data):  # data elements
+            if np.ndim(cur_data) == 0 or np.ndim(cur_data) == 1:
+                means.append(np.nanmean(cur_data))
+                stds.append(np.nanstd(cur_data))
+                group_labels.append('')
+            else:
+                # collect data over elements
+                for elem_idx, elem_data in enumerate(cur_data):  # data elements
 
-                # get element data which could be in matrix format or array format
-                if np.ndim(elem_data) == 1:
-                    cur_elem_data = elem_data
-                elif np.ndim(elem_data) == 2:
-                    if elem_data.shape[0] == 1:
-                        cur_elem_data = elem_data[0, :]
-                    elif elem_data.shape[1] == 1:
-                        cur_elem_data = elem_data[1, 0]
+                    # get element data which could be in matrix format or array format
+                    if np.ndim(elem_data) == 1:
+                        cur_elem_data = elem_data
+                    elif np.ndim(elem_data) == 2:
+                        if elem_data.shape[0] == 1:
+                            cur_elem_data = elem_data[0, :]
+                        elif elem_data.shape[1] == 1:
+                            cur_elem_data = elem_data[1, 0]
+                        else:
+                            raise ValueError('Invalid data format!')
                     else:
                         raise ValueError('Invalid data format!')
-                else:
-                    raise ValueError('Invalid data format!')
 
-                means.append(np.nanmean(cur_elem_data))
-                stds.append(np.nanstd(cur_elem_data))
+                    means.append(np.nanmean(cur_elem_data))
+                    stds.append(np.nanstd(cur_elem_data))
 
-                # handle trace for mean values
-                group_label = config.default_group_label
-                if len(config.group_labels) > elem_idx:
-                    group_label = config.group_labels[elem_idx]
-                group_label = eu.misc.replace_str_from_dict(str(group_label), {'<group_idx>': elem_idx})
+                    # handle trace for mean values
+                    group_label = config.default_group_label
+                    if len(config.group_labels) > elem_idx:
+                        group_label = config.group_labels[elem_idx]
+                    group_label = eu.misc.replace_str_from_dict(str(group_label), {'<group_idx>': elem_idx})
 
-                group_labels.append(group_label)
+                    group_labels.append(group_label)
 
             # handle trace for mean values
-            trace_label = config.default_trace_label
-            if len(config.trace_labels) > data_idx:
-                trace_label = config.trace_labels[data_idx]
-            trace_label = eu.misc.replace_str_from_dict(str(trace_label), {'<trace_idx>': data_idx})
+            if config.labels:
+                trace_label = config.labels[subplot_idx][1][trace_idx][0]
+            else:
+                trace_label = config.default_trace_label
+                if len(config.trace_labels) > trace_idx:
+                    trace_label = config.trace_labels[trace_idx]
+            trace_label = eu.misc.replace_str_from_dict(str(trace_label), {'<trace_idx>': trace_idx})
 
             trace_params = dict(
                 x=group_labels,
                 y=means,
                 error_y=dict(type='data', array=stds),
-                name=trace_label,
-            )
+                name=trace_label)
 
             trace_config = config.default_trace.copy()
             if len(config.default_subplot_traces) > subplot_idx:
                 trace_config = eu.combine_dicts(config.default_subplot_traces[subplot_idx], trace_config)
-            if len(config.traces) > data_idx:
-                trace_config = eu.combine_dicts(config.traces[data_idx], trace_config)
+            if len(config.traces) > trace_idx:
+                trace_config = eu.combine_dicts(config.traces[trace_idx], trace_config)
 
             trace_params = eu.combine_dicts(trace_config, trace_params)
 
@@ -178,7 +191,7 @@ def plotly_meanstd_bar(data=None, config=None, **kwargs):
             if isinstance(trace_legendgroup, str):
                 trace_legendgroup = eu.misc.replace_str_from_dict(
                     trace_legendgroup,
-                    {'<trace_idx>': data_idx,
+                    {'<trace_idx>': trace_idx,
                      '<subplot_idx>': subplot_idx})
             trace_params.legendgroup = trace_legendgroup
 

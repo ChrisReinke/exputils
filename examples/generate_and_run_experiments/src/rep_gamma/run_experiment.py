@@ -1,5 +1,5 @@
 import numpy as np
-from exputils.logging import log
+from exputils.data import log
 import experiment_config
 
 

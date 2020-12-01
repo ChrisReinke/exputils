@@ -1,4 +1,4 @@
-from exputils.logging import log
+from exputils.data import log
 import numpy as np
 
 def run_subexperiment():

@@ -1,5 +1,5 @@
 import exputils
-from exputils.logging import log
+from exputils.data import log
 from sub_experiment import run_subexperiment
 
 def run_experiment():
@@ -16,7 +16,7 @@ def run_experiment():
 def display_log():
 
     # load the saved logging
-    mylog = exputils.logging.Logger()
+    mylog = exputils.data.Logger()
     mylog.load()
 
     for prop_name, prop_values in mylog.items():

@@ -1,4 +1,5 @@
 from exputils.gui.jupyter.multi_selection_widget import MultiSelectionWidget
+import warnings
 import exputils as eu
 
 class ExperimentIDsSelectionWidget(MultiSelectionWidget):
@@ -43,19 +44,20 @@ class ExperimentIDsSelectionWidget(MultiSelectionWidget):
         else:
             # detect ids from the experiment_descriptions
             for exp_descr in experiment_descriptions.values():
-                self.experiment_ids.append(exp_descr['id'])
+                if exp_descr['is_load_data']:
+                    self.experiment_ids.append(exp_descr['id'])
 
-                choice_str = eu.misc.replace_str_from_dict(
-                    self.config.label_template,
-                    exp_descr,
-                    pattern_format='<{}>')
-                choices.append(choice_str)
+                    choice_str = eu.misc.replace_str_from_dict(
+                        self.config.label_template,
+                        exp_descr,
+                        pattern_format='<{}>')
+                    choices.append(choice_str)
 
-                title_str = eu.misc.replace_str_from_dict(
-                    self.config.title_label_template,
-                    exp_descr,
-                    pattern_format='<{}>')
-                title_labels.append(title_str)
+                    title_str = eu.misc.replace_str_from_dict(
+                        self.config.title_label_template,
+                        exp_descr,
+                        pattern_format='<{}>')
+                    title_labels.append(title_str)
 
         if not self.config.title_labels:
             self.config.title_labels = title_labels
@@ -85,6 +87,9 @@ class ExperimentIDsSelectionWidget(MultiSelectionWidget):
             selected_choices_idxs = []
             for exp_id in selected_experiment_ids:
                 # find exp_id in  self.experiment_ids
-                selected_choices_idxs.append(self.experiment_ids.index(exp_id))
+                if exp_id in self.experiment_ids:
+                    selected_choices_idxs.append(self.experiment_ids.index(exp_id))
+                else:
+                    warnings.warn('Experiment id {!r} does not exists in list of experiment ID\'s. Setting will be ignored.'.format(exp_id))
 
             self.selected_choices_idxs = selected_choices_idxs

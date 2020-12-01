@@ -1,7 +1,6 @@
 import numpy as np
-import os
+from exputils.data import log
 import experiment_config
-
 
 def run(**config):
 
@@ -9,17 +8,21 @@ def run(**config):
     np.random.seed(config['seed'])
 
     # do random walk
-    values = np.empty(config['n_steps'])
-
     val = config['init_value']
+
+    log.add_value('step', 0)
+    log.add_value('value', val)
+
     for step in range(config['n_steps']):
-        values[step] = val
+        direction = -1.0 if np.random.randint(2) == 0 else 1.0
         val += config['force'] + np.random.normal(0.0, config['sigma'])
 
-    # save the values
-    if not os.path.isdir(config['results_directory']):
-        os.makedirs(config['results_directory'])
-    np.save(os.path.join(config['results_directory'], 'values.npy'), values)
+        log.add_value('step', step + 1)
+        log.add_value('value', val)
+
+    # save log
+    log.save()
+
 
 if __name__ == '__main__':
 

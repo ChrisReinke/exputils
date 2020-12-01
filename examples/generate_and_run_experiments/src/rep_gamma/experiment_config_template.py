@@ -10,6 +10,4 @@ def get_config():
     config['force'] = <force>
     config['shape'] = <shape>
 
-    config['results_directory'] = './results'
-
     return config

@@ -15,6 +15,12 @@ class MultiSelectionWidget(ipywidgets.VBox):
         dc.title_labels = []
 
         dc.is_select_all_choice = True
+        dc.all_selected_title_label = 'all'
+
+        # defines if an extra choice called none is given
+        dc.is_select_none_choice = False
+
+        dc.none_selected_title_label = 'none'
 
         dc.main_vbox = eu.AttrDict()
 
@@ -37,6 +43,7 @@ class MultiSelectionWidget(ipywidgets.VBox):
 
         # define if the events for checkboxes are active
         self._is_on_select_all_checkbox_changed_active = True
+        self._is_on_select_none_checkbox_changed_active = True
         self._is_on_checkbox_changed_active = True
 
         self._is_selection_changed_event_active = True
@@ -55,17 +62,24 @@ class MultiSelectionWidget(ipywidgets.VBox):
 
             self.choice_checkboxes.append(chkbox)
 
+
+        checkboxes_list = self.choice_checkboxes
+
         if self.config.is_select_all_choice:
             self.select_all_checkbox = ipywidgets.Checkbox(
                 description='all',
                 value=True,
                 **self.config.checkboxes)
-
             self.select_all_checkbox.observe(self._on_select_all_checkbox_changed)
+            checkboxes_list = [self.select_all_checkbox] + checkboxes_list
 
-            checkboxes_list = [self.select_all_checkbox] + self.choice_checkboxes
-        else:
-            checkboxes_list = self.choice_checkboxes
+        if self.config.is_select_none_choice:
+            self.select_none_checkbox = ipywidgets.Checkbox(
+                description='none',
+                value=False,
+                **self.config.checkboxes)
+            self.select_none_checkbox.observe(self._on_select_none_checkbox_changed)
+            checkboxes_list = [self.select_none_checkbox] + checkboxes_list
 
         self.multi_checkbox_vbox_widget = ipywidgets.VBox(
             children=checkboxes_list,
@@ -81,9 +95,11 @@ class MultiSelectionWidget(ipywidgets.VBox):
 
         super().__init__(children=[self.accordion_widget], **self.config.main_vbox)
 
+
     @property
     def is_all_selected(self):
         return len(self.selected_choices) == len(self.choices)
+
 
     @property
     def selected_choices(self):
@@ -92,6 +108,7 @@ class MultiSelectionWidget(ipywidgets.VBox):
             if chkbox.value:
                 choices.append(self.choices[chkbox_idx])
         return choices
+
 
     @selected_choices.setter
     def selected_choices(self, selected_choices):
@@ -102,6 +119,9 @@ class MultiSelectionWidget(ipywidgets.VBox):
         if selected_choices == 'all':
             for chkbox in self.choice_checkboxes:
                 chkbox.value = True
+        elif selected_choices == 'none':
+            for chkbox in self.choice_checkboxes:
+                chkbox.value = False
         else:
             for choice_idx, choice in enumerate(self.choices):
                 if choice in selected_choices:
@@ -112,6 +132,7 @@ class MultiSelectionWidget(ipywidgets.VBox):
         self._is_selection_changed_event_active = old_is_selection_changed_event_active
         self._call_selection_changed_event()
 
+
     @property
     def selected_choices_idxs(self):
         idxs = []
@@ -119,6 +140,7 @@ class MultiSelectionWidget(ipywidgets.VBox):
             if chkbox.value:
                 idxs.append(chkbox_idx)
         return idxs
+
 
     @selected_choices_idxs.setter
     def selected_choices_idxs(self, selected_choices_idxs):
@@ -135,9 +157,11 @@ class MultiSelectionWidget(ipywidgets.VBox):
         self._is_selection_changed_event_active = old_is_selection_changed_event_active
         self._call_selection_changed_event()
 
+
     @property
     def selected_choices_inds(self):
         return [chkbox.value for chkbox in self.choice_checkboxes]
+
 
     @selected_choices_inds.setter
     def selected_choices_inds(self, selected_choices_inds):
@@ -151,6 +175,7 @@ class MultiSelectionWidget(ipywidgets.VBox):
         self._is_selection_changed_event_active = old_is_selection_changed_event_active
         self._call_selection_changed_event()
 
+
     def on_selection_changed(self, handler):
         '''
         Register an event handler for changes of the selected choices.
@@ -158,15 +183,16 @@ class MultiSelectionWidget(ipywidgets.VBox):
         '''
         self._on_selection_changed_event_handlers.append(handler)
 
+
     def _update_titel(self):
 
         if self.config.title in ['SELECTED_CHOICES', 'TITLE_LABELS']:
             selected_choices_idxs = self.selected_choices_idxs
 
             if self.config.is_select_all_choice and self.select_all_checkbox.value == True:
-                title = 'all'
+                title = self.config.all_selected_title_label
             elif not selected_choices_idxs:
-                title = 'None'
+                title = self.config.none_selected_title_label
             else:
                 if self.config.title == 'SELECTED_CHOICES':
                     labels = self.choices
@@ -195,6 +221,7 @@ class MultiSelectionWidget(ipywidgets.VBox):
             for handler in self._on_selection_changed_event_handlers:
                 handler(descr)
 
+
     def _on_select_all_checkbox_changed(self, event_descr):
 
         if self._is_on_select_all_checkbox_changed_active:
@@ -205,13 +232,47 @@ class MultiSelectionWidget(ipywidgets.VBox):
                 old_state = self._is_on_checkbox_changed_active
                 self._is_on_checkbox_changed_active = False
 
+                old_is_on_select_none_checkbox_changed_active = self._is_on_select_none_checkbox_changed_active
+                self._is_on_select_none_checkbox_changed_active = False
+
                 for chkbox in self.choice_checkboxes:
                     chkbox.value = event_descr['new']
 
+                if self.config.is_select_none_choice:
+                    self.select_none_checkbox.value = not event_descr['new']
+
+                self._is_on_select_none_checkbox_changed_active = old_is_on_select_none_checkbox_changed_active
                 self._is_on_checkbox_changed_active = old_state
 
                 # call event, that the selection changed
                 self._call_selection_changed_event()
+
+
+    def _on_select_none_checkbox_changed(self, event_descr):
+
+        if self._is_on_select_none_checkbox_changed_active:
+
+            # only react to changes of the value of a check box
+            if event_descr['name'] == 'value' and event_descr['type'] == 'change':
+
+                old_state = self._is_on_checkbox_changed_active
+                self._is_on_checkbox_changed_active = False
+
+                old_is_on_select_all_checkbox_changed_active = self._is_on_select_all_checkbox_changed_active
+                self._is_on_select_all_checkbox_changed_active = False
+
+                for chkbox in self.choice_checkboxes:
+                    chkbox.value = not event_descr['new']
+
+                if self.config.is_select_all_choice:
+                    self.select_all_checkbox.value = not event_descr['new']
+
+                self._is_on_select_all_checkbox_changed_active = old_is_on_select_all_checkbox_changed_active
+                self._is_on_checkbox_changed_active = old_state
+
+                # call event, that the selection changed
+                self._call_selection_changed_event()
+
 
     def _on_checkbox_changed(self, event_descr):
 
@@ -220,16 +281,17 @@ class MultiSelectionWidget(ipywidgets.VBox):
             # only react to changes of the value of a check box
             if event_descr['name'] == 'value' and event_descr['type'] == 'change':
 
+                # deactivate the event for "select all" checkbox
+                # to not call this event again
+                old_is_on_select_all_checkbox_changed_active = self._is_on_select_all_checkbox_changed_active
+                self._is_on_select_all_checkbox_changed_active = False
+
+                old_is_on_select_none_checkbox_changed_active = self._is_on_select_none_checkbox_changed_active
+                self._is_on_select_none_checkbox_changed_active = False
+
+                # all checkbox
                 if event_descr['new'] == False and self.config.is_select_all_choice:
-
-                    # deactivate the event for "select all" checkbox
-                    # to not call this event again
-                    old_state = self._is_on_select_all_checkbox_changed_active
-                    self._is_on_select_all_checkbox_changed_active = False
-
                     self.select_all_checkbox.value = False
-
-                    self._is_on_select_all_checkbox_changed_active = old_state
 
                 elif event_descr['new'] == True and self.config.is_select_all_choice:
 
@@ -241,12 +303,30 @@ class MultiSelectionWidget(ipywidgets.VBox):
                             break
 
                     if is_all_selected:
-                        old_state = self._is_on_select_all_checkbox_changed_active
-                        self._is_on_select_all_checkbox_changed_active = False
-
                         self.select_all_checkbox.value = True
+                        # if self.config.is_select_none_choice:
+                        #     self.select_none_checkbox.value = False
 
-                        self._is_on_select_all_checkbox_changed_active = old_state
+                # none checkbox
+                if event_descr['new'] == True and self.config.is_select_none_choice:
+                    self.select_none_checkbox.value = False
+
+                elif event_descr['new'] == False and self.config.is_select_none_choice:
+
+                    # check if no choices are selected, if yes, then also activate the "select none" option
+                    is_none_selected = True
+                    for chkbox in self.choice_checkboxes:
+                        if chkbox.value == True:
+                            is_none_selected = False
+                            break
+
+                    if is_none_selected:
+                        self.select_none_checkbox.value = True
+                        # if self.config.is_select_all_choice:
+                        #     self.select_all_checkbox.value = False
+
+                self._is_on_select_all_checkbox_changed_active = old_is_on_select_all_checkbox_changed_active
+                self._is_on_select_none_checkbox_changed_active = old_is_on_select_none_checkbox_changed_active
 
                 # call event, that the selection changed
                 self._call_selection_changed_event()

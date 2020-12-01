@@ -4,7 +4,12 @@ import pandas as pd
 import qgrid
 import os
 from exputils.gui.jupyter.base_widget import BaseWidget
+import IPython
+import warnings
 
+# TODO: Feature - ordering of experiments
+# TODO: Feature - allow to filter datasources that should be loaded
+# TODO: Feature - progress bar during data loading
 
 class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
@@ -12,8 +17,8 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
     def default_config():
         dc = BaseWidget.default_config()
 
-        dc.load_experiment_descriptions_function = eu.stat.load_experiment_descriptions
-        dc.load_experiment_data_function = eu.stat.load_experiment_statistics
+        dc.load_experiment_descriptions_function = eu.data.load_experiment_descriptions
+        dc.load_experiment_data_function = eu.data.load_experiment_data
         dc.experiments_directory = os.path.join('..', eu.DEFAULT_EXPERIMENTS_DIRECTORY)
 
         dc.main_box = eu.AttrDict(
@@ -75,6 +80,8 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
                 'name': {'editable': True},
                 'description': {'editable': True}})
 
+        dc.output_widget = eu.AttrDict()
+
         return dc
 
 
@@ -109,6 +116,9 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             self,
             [self.top_button_box, self.qgrid_widget, self.load_data_btn])
 
+        # create an output widget
+        self._output_widget = None
+
         self._update_qgrid()
 
         # register events
@@ -116,21 +126,40 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         self.reset_descr_btn.on_click(self._handle_reset_descr_button_on_click)
         self.load_data_btn.on_click(self._handle_load_data_button_on_click)
 
+    def _prepare_output_widget(self):
+
+        if self._output_widget is None:
+            self._output_widget = ipywidgets.Output(**self.config.output_widget)
+            IPython.display.display(self._output_widget)
+        else:
+            warnings.resetwarnings()
+            self._output_widget.clear_output(wait=False)
+
+        return self._output_widget
+
 
     def _handle_load_descr_button_on_click(self, btn):
-        self.update_experiment_descriptions(is_reset=False)
-        self._update_qgrid()
+        # errors are plotted in output widget and it will be cleaned after next button press
+        with self._prepare_output_widget():
+            self.update_experiment_descriptions(is_reset=False)
+            self._update_qgrid()
 
 
     def _handle_reset_descr_button_on_click(self, btn):
-        self.update_experiment_descriptions(is_reset=True)
-        self._update_qgrid()
+        # errors are plotted in output widget and it will be cleaned after next button press
+        with self._prepare_output_widget():
+            self.update_experiment_descriptions(is_reset=True)
+            self._update_qgrid()
 
 
     def _handle_load_data_button_on_click(self, btn):
-        # load data and save widget state
-        self.load_data()
-        self.backup_state()
+        # errors are plotted in output widget and it will be cleaned after next button press
+        with self._prepare_output_widget():
+            # load data and save widget state
+            print('Load data ...')
+            self.load_data()
+            self.backup_state()
+            print('Data successfully loaded.')
 
 
     def _handle_qgrid_cell_edited(self, event, widget):
@@ -212,21 +241,20 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         '''Updates the experiment descriptions by adding new experiments and removing old experiments.'''
 
         # load experiment descriptions
-        exp_descr = self.config.load_experiment_descriptions_function(self.config.experiments_directory)
+        new_exp_descr = self.config.load_experiment_descriptions_function(self.config.experiments_directory)
 
         if not self.experiment_descriptions or is_reset:
-            self.experiment_descriptions = exp_descr
+            self.experiment_descriptions = new_exp_descr
         else:
             # combine existing descriptions and new list
 
             # remove non-existing elements from exisiting descriptions
-            deleted_experiments = set(exp_descr.keys()).difference(set(self.experiment_descriptions.keys()))
-
+            deleted_experiments = set(self.experiment_descriptions.keys()).difference(set(new_exp_descr.keys()))
             for deleted_exp in deleted_experiments:
                 del self.experiment_descriptions[deleted_exp]
 
             # add new elements
-            self.experiment_descriptions = eu.combine_dicts(self.experiment_descriptions, exp_descr)
+            self.experiment_descriptions = eu.combine_dicts(self.experiment_descriptions, new_exp_descr)
 
         self._call_experiment_descriptions_updated_event()
 

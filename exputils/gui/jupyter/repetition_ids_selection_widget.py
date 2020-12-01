@@ -11,9 +11,12 @@ class RepetitionIDsSelectionWidget(MultiSelectionWidget):
     def default_config():
         dc = eu.gui.jupyter.MultiSelectionWidget.default_config()
 
-        # if true, returns 'all' for selected_experiment_ids property if all experiments
-        # are selected instead of a list of all experiments
+        # if true, returns 'all' for selected_experiment_ids property if all repetitions
+        # are selected instead of a list of all repetition ids
         dc.is_return_all_string = True
+
+        # defines if an extra choice called none is given
+        dc.is_select_non_choice = True
 
         return dc
 
@@ -24,8 +27,6 @@ class RepetitionIDsSelectionWidget(MultiSelectionWidget):
         self.repetition_ids = []
 
         # choice strings that are displayed to the user, can include ids, name, short_name, ...
-        choices = []
-
         all_repetition_ids = []
 
         # only extract ids automatically, if an experiment description is given

@@ -4,12 +4,10 @@ import plotly
 import plotly.subplots
 import exputils as eu
 
-# TODO: allow to give element labels as a list with same structure as data
-# TODO: allow to first unselect certain experiments, and then switch to their elements, to just see the selected experiments
+# TODO: Feature - allow to first unselect certain experiments, and then switch to their elements, to just see the selected experiments
 #       https://webappl.blogspot.com/2020/05/plotly-eventregister.html, see plotly_restyle event
 #       I believe I need to create a Figure object for this purpose
-# TODO: custom x values
-# TODO: create as object
+# TODO: Feature - custom x values
 
 def plotly_meanstd_scatter(data=None, config=None, **kwargs):
     '''
@@ -65,14 +63,14 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         default_trace=eu.AttrDict(),
 
         default_mean_trace=eu.AttrDict(
-            legendgroup='<subplot_idx>-<data_idx>',  # subplot_idx, data_idx
+            legendgroup='<subplot_idx>-<trace_idx>',  # subplot_idx, trace_idx
             hoverinfo='text+x',
         ),
         default_subplot_mean_traces=[],  # default config of traces per subplot
         mean_traces=[],
 
         default_std_trace=eu.AttrDict(
-            legendgroup='<mean_trace_legendgroup>',  # subplot_idx, data_idx, mean_trace_legendgroup
+            legendgroup='<mean_trace_legendgroup>',  # subplot_idx, trace_idx, mean_trace_legendgroup
             hoverinfo='none',
             showlegend=False,
         ),
@@ -81,7 +79,7 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
 
         default_element_trace=eu.AttrDict(  # overall default
             legendgroup=None,
-            # subplot_idx, data_idx, elem_idx, subelem_idx, mean_trace_legendgroup, std_trace_legendgroup
+            # subplot_idx, trace_idx, elem_idx, subelem_idx, mean_trace_legendgroup, std_trace_legendgroup
         ),
         default_subplot_element_traces=[],  # default per subplot
         default_data_element_traces=[],  # default per data item
@@ -91,18 +89,16 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
 
         labels=[],  # holds all labels in a specific structure
 
-        default_mean_label='<data_idx>',
+        default_mean_label='<trace_idx>',
         mean_labels=[],
 
         default_element_label='<mean_label> - <subelem_idx>',
-        # possible replacements: <mean_label>, <subelem_idx>, <elem_idx>, <data_idx>
+        # possible replacements: <mean_label>, <subelem_idx>, <elem_idx>, <trace_idx>
         element_labels=[],
 
         default_colors=plotly.colors.DEFAULT_PLOTLY_COLORS,
     )
     config = eu.combine_dicts(kwargs, config, default_config)
-
-    default_string_replace_pattern = '<{}>'
 
     if data is None:
         data = np.array([])
@@ -120,6 +116,12 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         # if only labels for mean-traces are given, then add an empty label for the sub figure
         if isinstance(config.labels, list) and not isinstance(config.labels[0], tuple):
             config.labels = [('', config.labels)]
+
+        # if no labels are given for elements, then create an empty list for element labels
+        for ds_idx in range(len(config.labels)):
+            for trace_idx in range(len(config.labels[ds_idx][1])):
+                if not isinstance(config.labels[ds_idx][1][trace_idx], tuple):
+                    config.labels[ds_idx][1][trace_idx] = (config.labels[ds_idx][1][trace_idx], [])
 
     # subplot_titles
     if config.labels and ('subplot_titles' not in config.subplots or config.subplots.subplot_titles == []):
@@ -159,13 +161,12 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         subplot_elem_traces = []
 
         # iterate over traces
-        for data_idx, cur_data in enumerate(subplot_data):
+        for trace_idx, cur_data in enumerate(subplot_data):
 
             # calculate the mean and std over the trace elements
             mean_data = np.nanmean(cur_data, axis=0)
             std_data = np.nanstd(cur_data, axis=0)
 
-            # TODO: allow setting of custom x values
             # this can not simply be done by seeting the x attribute of the trace, because the std trace has an extra
             x_values = list(range(len(mean_data)))
 
@@ -175,17 +176,17 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
 
             # define label of the trace
             if config.labels:
-                mean_label = config.labels[subplot_idx][1][data_idx]
+                mean_label = config.labels[subplot_idx][1][trace_idx][0]
             else:
                 mean_label = config.default_mean_label
-                if len(config.mean_labels) > data_idx:
-                    mean_label = config.mean_labels[data_idx]
-            mean_label = eu.misc.replace_str_from_dict(str(mean_label), {'<data_idx>': data_idx})
+                if len(config.mean_labels) > trace_idx:
+                    mean_label = config.mean_labels[trace_idx]
+            mean_label = eu.misc.replace_str_from_dict(str(mean_label), {'<trace_idx>': trace_idx})
 
             mean_trace_params = dict(
                 x=x_values,
                 y=mean_data,
-                line=dict(color=config.default_colors[data_idx % len(config.default_colors)]),
+                line=dict(color=config.default_colors[trace_idx % len(config.default_colors)]),
                 name=mean_label,
                 text=info_text,
             )
@@ -193,8 +194,8 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
             mean_trace_config = eu.combine_dicts(config.default_mean_trace, config.default_trace)
             if len(config.default_subplot_mean_traces) > subplot_idx:
                 mean_trace_config = eu.combine_dicts(config.default_subplot_mean_traces[subplot_idx], mean_trace_config)
-            if len(config.mean_traces) > data_idx:
-                mean_trace_config = eu.combine_dicts(config.mean_traces[data_idx], mean_trace_config)
+            if len(config.mean_traces) > trace_idx:
+                mean_trace_config = eu.combine_dicts(config.mean_traces[trace_idx], mean_trace_config)
 
             mean_trace_params = eu.combine_dicts(mean_trace_config, mean_trace_params)
 
@@ -202,9 +203,8 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
             mean_trace_legendgroup = mean_trace_params.legendgroup
             if isinstance(mean_trace_legendgroup, str):
                 mean_trace_legendgroup = eu.misc.replace_str_from_dict(mean_trace_legendgroup,
-                                                                       {'data_idx': data_idx,
-                                                                        'subplot_idx': subplot_idx},
-                                                                       pattern_format=default_string_replace_pattern)
+                                                                       {'<trace_idx>': trace_idx,
+                                                                        '<subplot_idx>': subplot_idx})
             mean_trace_params.legendgroup = mean_trace_legendgroup
 
             cur_mean_trace = plotly_scatter_plotter(**mean_trace_params)
@@ -214,7 +214,7 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
 
             if config.std.style.lower() == 'shaded':
 
-                fill_color = config.default_colors[data_idx % len(config.default_colors)]
+                fill_color = config.default_colors[trace_idx % len(config.default_colors)]
                 fill_color = fill_color.replace('rgb', 'rgba')
                 fill_color = fill_color.replace(')', ', 0.2)')
 
@@ -233,7 +233,7 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
                     y=mean_data[::config.std.steps],
                     error_y=dict(type='data', array=std_data, visible=True),
                     mode='markers',
-                    line=dict(color=config.default_colors[data_idx % len(config.default_colors)]),
+                    line=dict(color=config.default_colors[trace_idx % len(config.default_colors)]),
                     marker=dict(size=0, opacity=0),
                 )
 
@@ -244,18 +244,17 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
             std_trace_config = eu.combine_dicts(config.default_std_trace, config.default_trace)
             if len(config.default_subplot_std_traces) > subplot_idx:
                 std_trace_config = eu.combine_dicts(config.default_subplot_std_traces[subplot_idx], std_trace_config)
-            if len(config.std_traces) > data_idx:
-                std_trace_config = eu.combine_dicts(config.std_traces[data_idx], std_trace_config)
+            if len(config.std_traces) > trace_idx:
+                std_trace_config = eu.combine_dicts(config.std_traces[trace_idx], std_trace_config)
             std_trace_params = eu.combine_dicts(std_trace_config, std_trace_params)
 
             # handle legendgroup
             std_trace_legendgroup = std_trace_params.legendgroup
             if isinstance(std_trace_legendgroup, str):
                 std_trace_legendgroup = eu.misc.replace_str_from_dict(std_trace_legendgroup,
-                                                                      {'data_idx': data_idx,
-                                                                       'subplot_idx': subplot_idx,
-                                                                       'mean_trace_legendgroup': mean_trace_legendgroup},
-                                                                      pattern_format=default_string_replace_pattern)
+                                                                      {'<trace_idx>': trace_idx,
+                                                                       '<subplot_idx>': subplot_idx,
+                                                                       '<mean_trace_legendgroup>': mean_trace_legendgroup})
             std_trace_params.legendgroup = std_trace_legendgroup
 
             cur_std_trace = plotly_scatter_plotter(**std_trace_params)
@@ -267,20 +266,20 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
             cur_color_coeff = 0 + color_coeff_step
             for cur_elem_idx in range(n_elems):
 
-                cur_elem_data = cur_data[cur_elem_idx, :]
-
-                element_label = config.default_element_label
-                if len(config.element_labels) > data_idx:
-                    element_label = config.element_labels[data_idx]
+                if config.labels and len(config.labels[subplot_idx][1][trace_idx][1]) > cur_elem_idx:
+                    element_label = config.labels[subplot_idx][1][trace_idx][1][cur_elem_idx]
+                else:
+                    element_label = config.default_element_label
+                if len(config.element_labels) > trace_idx:
+                    element_label = config.element_labels[trace_idx]
                 element_label = eu.misc.replace_str_from_dict(str(element_label),
-                                                              {'data_idx': data_idx,
-                                                               'subelem_idx': cur_elem_idx,
-                                                               'elem_idx': elem_idx,
-                                                               'mean_label': mean_label},
-                                                              pattern_format=default_string_replace_pattern)
+                                                              {'<trace_idx>': trace_idx,
+                                                               '<subelem_idx>': cur_elem_idx,
+                                                               '<elem_idx>': elem_idx,
+                                                               '<mean_label>': mean_label})
 
                 color = eu.gui.misc.transform_color_str_to_tuple(
-                    config.default_colors[data_idx % len(config.default_colors)])
+                    config.default_colors[trace_idx % len(config.default_colors)])
                 color = (color[0],
                          int(color[1] * cur_color_coeff),
                          int(color[2] * cur_color_coeff),
@@ -311,14 +310,14 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
                 # handle legendgroup
                 element_trace_legendgroup = element_trace_params.legendgroup
                 if isinstance(element_trace_legendgroup, str):
-                    element_trace_legendgroup = eu.misc.replace_str_from_dict(element_trace_legendgroup,
-                                                                              {'subelem_idx': cur_elem_idx,
-                                                                               'elem_idx': elem_idx,
-                                                                               'data_idx': data_idx,
-                                                                               'subplot_idx': subplot_idx,
-                                                                               'mean_trace_legendgroup': mean_trace_legendgroup,
-                                                                               'std_trace_legendgroup': std_trace_legendgroup},
-                                                                              pattern_format=default_string_replace_pattern)
+                    element_trace_legendgroup = eu.misc.replace_str_from_dict(
+                        element_trace_legendgroup,
+                        {'<subelem_idx>': cur_elem_idx,
+                         '<elem_idx>': elem_idx,
+                         '<trace_idx>': trace_idx,
+                         '<subplot_idx>': subplot_idx,
+                         '<mean_trace_legendgroup>': mean_trace_legendgroup,
+                         '<std_trace_legendgroup>': std_trace_legendgroup})
                 element_trace_params.legendgroup = element_trace_legendgroup
 
                 cur_elem_trace = plotly_scatter_plotter(**element_trace_params)
