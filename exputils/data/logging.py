@@ -2,7 +2,7 @@ import exputils
 import os
 
 # TODO: Feature - tensorbord output
-
+# TODO: Featrue - allow to log sub values, for example: agent.epsilon
 
 class Logger:
     '''

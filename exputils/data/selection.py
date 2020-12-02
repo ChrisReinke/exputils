@@ -76,6 +76,11 @@ def select_experiment_data(experiment_data, datasources, experiment_ids='all', r
     data_labels = []
     for datasource_idx, datasource in enumerate(datasources):
 
+        is_transpose = False
+        if datasource.endswith('\''):
+            datasource = datasource[:-1]
+            is_transpose = True
+
         # identify the type of data
         # 3 types exist:
         #   - exp_data: data directly for an experiment, does not contain single dataitems for repetitions
@@ -180,7 +185,15 @@ def select_experiment_data(experiment_data, datasources, experiment_ids='all', r
 
                         cur_data = np.full(data_shape, np.nan)
                         for rep_idx, rep_data in enumerate(cur_data_per_rep):
-                            cur_data[rep_idx] = rep_data
+
+                            # create the correct slicing to add the rep_data into the whole array
+                            rep_data_shape = np.shape(rep_data)
+                            if len(data_shape) == 1:
+                                slices = rep_idx
+                            else:
+                                slices = tuple([rep_idx] + [slice(0, d) for d in rep_data_shape])
+
+                            cur_data[slices] = rep_data
                     else:
                         # otherwise keep data in list form over repetitions
                         cur_data = cur_data_per_rep
@@ -189,6 +202,9 @@ def select_experiment_data(experiment_data, datasources, experiment_ids='all', r
                 # data does not exists
                 warnings.warn('Data {!r} for experiment {!r} does not exist! Data is set to None.'.format(datasource, experiment_id))
                 cur_data = None
+
+            if is_transpose:
+                cur_data = np.transpose(cur_data)
 
             cur_experiments_data.append(cur_data)
 

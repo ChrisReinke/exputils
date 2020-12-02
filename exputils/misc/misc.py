@@ -85,7 +85,6 @@ def list_equal(list_a, list_b):
 
         if type(list_a[idx]) != type(list_b[idx]):
             return False
-
         if isinstance(list_a[idx], list):
             if not list_equal(list_a[idx], list_b[idx]):
                 return False
@@ -93,7 +92,7 @@ def list_equal(list_a, list_b):
             if not list_equal(list_a[idx], list_b[idx]):
                 return False
         elif isinstance(list_a[idx], np.ndarray):
-            if not np.array_equal(list_a[idx], list_b[idx]):
+            if not np.array_equal(list_a[idx], list_b[idx], equal_nan=True):
                 return False
         elif list_a[idx] != list_b[idx]:
             return False

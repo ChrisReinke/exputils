@@ -7,29 +7,35 @@ import IPython
 
 DEFAULT_PLOTLY_MEANSTD_SCATTER_CONFIG = """layout = dict(
     xaxis = dict(
-        title = '' 
+        title = '', 
+        range = [None, None] 
         ),
     yaxis = dict(
-        title = '' 
+        title = '', 
+        range = [None, None]
         )
     ),
     default_group_label = 'rep <group_idx>'"""
 
 DEFAULT_PLOTLY_BOX_CONFIG = """layout = dict(
     xaxis = dict(
-        title = '' 
+        title = '', 
+        range = [None, None] 
         ),
     yaxis = dict(
-        title = '' 
+        title = '', 
+        range = [None, None] 
         )
     )"""
 
 DEFAULT_PLOTLY_MEANSTD_BAR_CONFIG = """layout = dict(
     xaxis = dict(
-        title = '' 
+        title = '', 
+        range = [None, None] 
         ),
     yaxis = dict(
-        title = '' 
+        title = '', 
+        range = [None, None] 
         )
     ),
     default_group_label = 'rep <group_idx>'"""
@@ -43,8 +49,8 @@ plot_config = <plot_function_config>
 selection_widget = eu.gui.jupyter.ExperimentDataPlotSelectionWidget(
     experiment_data_loader,
     datasources=<datasources>,
-    experiment_ids=<experiment_ids>,
-    repetition_ids=<repetition_ids>,
+    experiment_ids='all',
+    repetition_ids='all',
     output_format=<output_format>,
     data_filter=<data_filter>,
     plot_function=<plot_function>,
@@ -66,7 +72,7 @@ import exputils as eu
 
 plot_config = <plot_function_config>
 
-selection_widget = eu.gui.jupyter.ExperimentDataPlotSelectionWidget(experiment_data_loader, datasources=<datasources>, experiment_ids=<experiment_ids>, repetition_ids=<repetition_ids>, output_format=<output_format>, data_filter=<data_filter>, plot_function=<plot_function>, plot_function_config=plot_config, state_backup_name=<state_backup_name>, state_backup_variable_filter=['experiment_ids', 'repetition_ids'], is_datasources_selection=False, is_output_format_selection=False, is_data_filter_selection=False, is_plot_function_selection=False, is_plot_function_config_editor=False, is_code_producer=False)
+selection_widget = eu.gui.jupyter.ExperimentDataPlotSelectionWidget(experiment_data_loader, datasources=<datasources>, experiment_ids='all', repetition_ids='all', output_format=<output_format>, data_filter=<data_filter>, plot_function=<plot_function>, plot_function_config=plot_config, state_backup_name=<state_backup_name>, state_backup_variable_filter=['experiment_ids', 'repetition_ids'], is_datasources_selection=False, is_output_format_selection=False, is_data_filter_selection=False, is_plot_function_selection=False, is_plot_function_config_editor=False, is_code_producer=False)
 display(selection_widget)
 selection_widget.plot_data()"""
 

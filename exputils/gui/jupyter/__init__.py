@@ -4,6 +4,7 @@ from exputils.gui.jupyter.experiment_ids_selection_widget import ExperimentIDsSe
 from exputils.gui.jupyter.repetition_ids_selection_widget import RepetitionIDsSelectionWidget
 from exputils.gui.jupyter.experiment_data_selection_widget import ExperimentDataSelectionWidget
 from exputils.gui.jupyter.experiment_data_plot_selection_widget import ExperimentDataPlotSelectionWidget
+from exputils.gui.jupyter.text_selection_accordion_widget import TextSelectionAccordionWidget
 from exputils.gui.jupyter.base_widget import BaseWidget
 
 from exputils.gui.jupyter.plotly_meanstd_scatter import plotly_meanstd_scatter

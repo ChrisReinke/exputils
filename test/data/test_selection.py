@@ -5,16 +5,28 @@ import exputils as eu
 def create_test_data():
 
     experiment_data = {
-        'exp0': {'repetition_data': [{'rep_values': np.array([45,46,47])},
-                                     {'rep_values': np.array([78,79,80])}],
+        'exp0': {'repetition_data': [{'rep_values': np.array([45,46,47]),
+                                      'rep_values_1': np.array([62,53]),
+                                      'rep_values_2': np.array([56]),
+                                      'rep_values_3': 456},
+                                     {'rep_values': np.array([78,79,80]),
+                                      'rep_values_1': np.array([75,15,56]),
+                                      'rep_values_2': np.array([35]),
+                                      'rep_values_3': 753}],
                  'sub_dict_1': {'values': np.array([[10, 11, 12, 13], [20, 21, 22, 23]]),
                                 'no_rep_stat': np.array([10, 20, 30]),
                                 'scalar_stat': 1.0},
                  'sub_dict_2': {'values': np.array([[30, 31, 32, 33], [40, 41, 42, 43]]),
                                 'no_rep_stat': np.array([110, 120, 130]),
                                 'scalar_stat': 2.0}},
-        'exp1': {'repetition_data': [{'rep_values': np.array([87,88,89])},
-                                     {'rep_values': np.array([56,57,58])}],
+        'exp1': {'repetition_data': [{'rep_values': np.array([87,88,89]),
+                                      'rep_values_1': np.array([62,53,45]),
+                                      'rep_values_2': np.array([65]),
+                                      'rep_values_3': 657},
+                                     {'rep_values': np.array([56,57,58]),
+                                      'rep_values_1': np.array([86]),
+                                      'rep_values_2': np.array([76]),
+                                      'rep_values_3': 754}],
                  'sub_dict_1': {'values': np.array([[110, 111, 112, 113], [120, 121, 122, 123]]),
                                 'no_rep_stat': np.array([210, 220, 230]),
                                 'scalar_stat': 3.0},
@@ -234,6 +246,55 @@ def test_different_datatypes():
 
     target_data = [[np.array([experiment_data['exp0']['repetition_data'][1]['rep_values']]),
                     np.array([experiment_data['exp1']['repetition_data'][1]['rep_values']])]]
+
+    assert eu.misc.list_equal(data, target_data)
+
+    # repetition data of different size
+    data, _ = eu.data.select_experiment_data(experiment_data,
+                                        datasources='rep_values_1',
+                                        experiment_ids='all',
+                                        repetition_ids='all')
+
+    # exp 1
+    target_array1 = np.full((2,3), np.nan)
+    target_array1[0,:2] = np.array([experiment_data['exp0']['repetition_data'][0]['rep_values_1']])
+    target_array1[1,:3] = np.array([experiment_data['exp0']['repetition_data'][1]['rep_values_1']])
+
+    # exp 2
+    target_array2 = np.full((2,3), np.nan)
+    target_array2[0,:3] = np.array([experiment_data['exp1']['repetition_data'][0]['rep_values_1']])
+    target_array2[1,:1] = np.array([experiment_data['exp1']['repetition_data'][1]['rep_values_1']])
+
+    target_data = [[target_array1,
+                    target_array2]]
+
+    assert eu.misc.list_equal(data, target_data)
+
+
+    # repetition data of size 1
+    data, _ = eu.data.select_experiment_data(experiment_data,
+                                        datasources='rep_values_2',
+                                        experiment_ids='all',
+                                        repetition_ids='all')
+
+    target_data = [[np.array([experiment_data['exp0']['repetition_data'][0]['rep_values_2'][0],
+                              experiment_data['exp0']['repetition_data'][1]['rep_values_2'][0]]),
+                    np.array([experiment_data['exp1']['repetition_data'][0]['rep_values_2'][0],
+                              experiment_data['exp1']['repetition_data'][1]['rep_values_2'][0]])]]
+
+    assert eu.misc.list_equal(data, target_data)
+
+
+    # repetition data of type scalar
+    data, _ = eu.data.select_experiment_data(experiment_data,
+                                        datasources='rep_values_3',
+                                        experiment_ids='all',
+                                        repetition_ids='all')
+
+    target_data = [[np.array([experiment_data['exp0']['repetition_data'][0]['rep_values_3'],
+                              experiment_data['exp0']['repetition_data'][1]['rep_values_3']]),
+                    np.array([experiment_data['exp1']['repetition_data'][0]['rep_values_3'],
+                              experiment_data['exp1']['repetition_data'][1]['rep_values_3']])]]
 
     assert eu.misc.list_equal(data, target_data)
 

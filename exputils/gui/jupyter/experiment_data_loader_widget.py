@@ -90,7 +90,6 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         super().__init__(config=config, **kwargs)
         # constructor of GridspecLayout
         super(BaseWidget, self).__init__(
-            children=[],
             **self.config.main_box)
 
         self.experiment_descriptions = None
