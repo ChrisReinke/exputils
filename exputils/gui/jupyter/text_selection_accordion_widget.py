@@ -1,21 +1,15 @@
-#TODO: Feature - finish text selction accordion widget
-#TODO: title updated by content of the variables
-#TODO: events for change of values
-
-# default_config = eu.AttrDict(
-#     datasource_label='<datasource>',
-#     # either string with template for all data sources or a list with a string for each label
-#     experiment_label='<name>',
-#     repetition_label='<id>',
-
 import ipywidgets
 import exputils as eu
+
+#TODO: Feature - events for change of values
 
 class TextSelectionAccordionWidget(ipywidgets.Accordion):
 
     @staticmethod
     def default_config():
         dc = eu.AttrDict()
+
+        dc.title = '<selection>'
 
         dc.main_accordion = eu.AttrDict(
             #layout=eu.AttrDict(width='100%')
@@ -38,9 +32,6 @@ class TextSelectionAccordionWidget(ipywidgets.Accordion):
         )
 
         dc.selection_elements = []
-        #   eu.AttrDict(
-        #
-        #       )
 
         return dc
 
@@ -55,7 +46,26 @@ class TextSelectionAccordionWidget(ipywidgets.Accordion):
 
         selection_hbox_widgets = []
 
+        # create selection_elements as list of AttrDicts to have a consitent datatype
+        self.selection_elements = []
         for elem_descr in self.config.selection_elements:
+
+            if isinstance(elem_descr, str):
+                elem_name = elem_descr
+                elem_label = elem_descr
+                elem_title_label = elem_descr
+            else:
+                elem_name = elem_descr['name']
+                elem_label = elem_descr.get('label', elem_name)
+                elem_title_label = elem_descr.get('title_label', elem_label)
+
+            self.selection_elements.append(eu.AttrDict(
+                name=elem_name,
+                label = elem_label,
+                title_label = elem_title_label))
+
+        # create the gui elements
+        for elem_descr in self.selection_elements:
 
             label = ipywidgets.Label(
                 value=elem_descr.label,
@@ -75,6 +85,10 @@ class TextSelectionAccordionWidget(ipywidgets.Accordion):
             selection_hbox_widgets.append(hbox)
             self.selection_text_widgets[elem_descr.name] = text_widget
 
+            text_widget.observe(
+                self._on_text_value_changed,
+                names='value')
+
         main_vbox = ipywidgets.VBox(
             children=selection_hbox_widgets,
             **self.config.main_vbox
@@ -86,8 +100,8 @@ class TextSelectionAccordionWidget(ipywidgets.Accordion):
     @property
     def selection(self):
         selection = eu.AttrDict()
-        for elem_descr in self.config.selection_elements:
-            selection[elem_descr['name']] = self.selection_text_widgets[elem_descr['name']].value
+        for elem_descr in self.selection_elements:
+            selection[elem_descr.name] = self.selection_text_widgets[elem_descr.name].value
         return selection
 
 
@@ -97,4 +111,35 @@ class TextSelectionAccordionWidget(ipywidgets.Accordion):
             self.selection_text_widgets[elem_name].value = elem_value
 
 
+    def _on_text_value_changed(self, event_descr):
+        self._update_title()
 
+
+    def _update_title(self):
+
+        if self.config.title is None:
+            title_str = ''
+        else:
+            title_str = self.config.title
+
+            # create selection title
+            if '<selection>' in title_str:
+
+                selection_str_elements = []
+                for elem_descr in self.selection_elements:
+
+                    if elem_descr.title_label.endswith(':'):
+                        delimiter = ''
+                    else:
+                        delimiter = ':'
+
+                    selection_str_elements.append('{}{} {}'.format(
+                        elem_descr.title_label,
+                        delimiter,
+                        self.selection_text_widgets[elem_descr.name].value))
+
+                title_str = title_str.replace(
+                    '<selection>',
+                    ', '.join(selection_str_elements))
+
+        self.set_title(0, title_str)
