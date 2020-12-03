@@ -9,8 +9,8 @@ def start_slurm_experiments(directory=None, start_scripts='*.slurm', is_parallel
     return start_experiments(directory=directory,
                              start_scripts=start_scripts,
                              start_command='sbatch {}',
-                             is_parallel=is_parallel,
-                             is_chdir = True, # added, otherwise the sbatch does not work
+                             parallel=is_parallel,
+                             is_chdir = True,  # added, otherwise the sbatch does not work
                              verbose=verbose,
                              post_start_wait_time=post_start_wait_time)
 
@@ -20,19 +20,20 @@ def start_torque_experiments(directory=None, start_scripts='*.torque', is_parall
     return start_experiments(directory=directory,
                              start_scripts=start_scripts,
                              start_command='qsub {}',
-                             is_parallel=is_parallel,
-                             is_chdir = True, # added, otherwise the sbatch does not work
+                             parallel=is_parallel,
+                             is_chdir = True,  # added, otherwise the sbatch does not work
                              verbose=verbose,
                              post_start_wait_time=post_start_wait_time)
 
 
-def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', is_parallel=True, is_chdir=False, verbose=False, post_start_wait_time=0, is_rerun=False):
+def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', parallel=True, is_chdir=False, verbose=False, post_start_wait_time=0, is_rerun=False):
     '''
 
-    :param directory:
-    :param start_scripts:
+    :param directory: Directory in which the start scripts are searched.
+    :param start_scripts: Filename of the start script file. Can include * to search for scripts.
     :param start_command:
-    :param is_parallel:
+    :param parallel: True if processes are started and executed in parallel. False if they are executed one after the other.
+                     A integer number defines how many processes can run in parallel.
     :param is_chdir:
     :param verbose:
     :param post_start_wait_time:
@@ -93,8 +94,26 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                 process = subprocess.Popen(start_command.format(script_path).split(), cwd=script_directory)
 
             # if not parallel, then wait until current process is finished
-            if not is_parallel:
+            if not parallel:
+                # parallel is False or None
                 process.wait()
+            elif parallel != True:
+                # parallel is a number that tell how many process can be open at the same time
+
+                is_wait = True
+                while is_wait:
+
+                    # detect number of active processes
+                    n_active_proceeses = 0
+                    for p in processes:
+                        if p.poll() is None:
+                            n_active_proceeses += 1
+
+                    # wait if the maximum number of processes are currently running
+                    is_wait = n_active_proceeses >= parallel
+
+                    if is_wait:
+                        time.sleep(0.5) # sleep half a second before checking again
 
             if post_start_wait_time > 0:
                 time.sleep(post_start_wait_time)

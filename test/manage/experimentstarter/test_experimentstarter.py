@@ -19,7 +19,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, is_parallel=False)
+    eu.manage.start_experiments(directory=directory, parallel=False)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
@@ -36,7 +36,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, is_parallel=True)
+    eu.manage.start_experiments(directory=directory, parallel=True)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
@@ -53,7 +53,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, is_parallel=True, is_chdir=True)
+    eu.manage.start_experiments(directory=directory, parallel=True, is_chdir=True)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
