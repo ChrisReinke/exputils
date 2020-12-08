@@ -25,3 +25,4 @@ from exputils.gui.jupyter.ipynbname import get_notebook_path
 DEFAULT_CONFIG_DIRECTORY = '.ipython_config'
 
 # TODO: Refactor - create plotly plots as objects
+# TODO: Feature - create table widget that shows statistical significant difference measures for same data that is given to bar or box plots
