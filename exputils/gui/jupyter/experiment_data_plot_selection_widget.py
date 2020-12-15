@@ -4,17 +4,16 @@ from exputils.gui.jupyter.experiment_data_selection_widget import ExperimentData
 import IPython
 
 
-
 DEFAULT_PLOTLY_MEANSTD_SCATTER_CONFIG = """layout = dict(
     xaxis = dict(
         title = '', 
-        range = [None, None] 
-        ),
+        range = [None, None]),
     yaxis = dict(
         title = '', 
-        range = [None, None]
-        )
+        range = [None, None]),
     ),
+    moving_average = dict(
+        n=1),
     default_group_label = 'rep <group_idx>'"""
 
 DEFAULT_PLOTLY_BOX_CONFIG = """layout = dict(

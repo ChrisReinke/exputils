@@ -255,6 +255,11 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             # add new elements
             self.experiment_descriptions = eu.combine_dicts(self.experiment_descriptions, new_exp_descr)
 
+            # do not keep the repetition ids from existing ones, but use the ones from the new discriptions
+            # otherwise, if new repetitions are added, they will not be used
+            for new_descr in new_exp_descr.values():
+                self.experiment_descriptions[new_descr.id].repetition_ids = new_descr.repetition_ids
+
         self._call_experiment_descriptions_updated_event()
 
 

@@ -5,5 +5,6 @@ from exputils.misc.misc import get_dict_variable
 from exputils.misc.misc import str_to_slices
 from exputils.misc.misc import list_equal
 from exputils.misc.misc import dict_equal
+from exputils.misc.misc import moving_average
 
 

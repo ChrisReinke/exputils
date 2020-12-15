@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def numpy_vstack_2d_default(array1, array2, default_value=np.nan):
 
     if len(array1) == 0:
@@ -331,3 +330,34 @@ def do_subdict_boolean_filtering(data, filter):
             ret_val = filter
 
     return ret_val
+
+
+def moving_average(data, n, mode='fill_start'):
+
+    data = np.array(data)
+
+    if data.ndim == 1:
+
+        ret = np.cumsum(data, dtype=float)
+        ret[n:] = ret[n:] - ret[:-n]
+        moving_mean = ret[n - 1:] / n
+
+        if mode == 'fill_start':
+            moving_mean =  np.hstack((np.full(n-1, moving_mean[0]), moving_mean))
+
+    elif data.ndim == 2:
+
+        ret = np.cumsum(data, dtype=float, axis=1)
+        ret[:, n:] = ret[:, n:] - ret[:, :-n]
+        moving_mean = ret[:, n - 1:] / n
+
+        if mode == 'fill_start':
+            moving_mean = np.hstack((np.tile(np.transpose([moving_mean[:,0]]), (1, n-1)), moving_mean))
+
+    else:
+        raise ValueError('Can compute the moving average only for arrays of dimension 1 or 2!')
+
+    return moving_mean
+
+
+

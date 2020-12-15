@@ -22,6 +22,7 @@ Developed and tested for Python 3.6.
 
 Needs several additional python packages which will be automatically installed during the installation:
  * numpy
+ * dill
  * odfpy
  * ipywidgets
  * qgrid

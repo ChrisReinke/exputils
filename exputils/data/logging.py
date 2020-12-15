@@ -1,88 +1,103 @@
-import exputils
-import os
+from exputils.data.logger import Logger
 
-# TODO: Feature - tensorbord output
-# TODO: Featrue - allow to log sub values, for example: agent.epsilon
+# holds the global logger object
+log = Logger()
 
-class Logger:
+def reset():
     '''
-
-        Configuration:
-            numpy_log_mode: String that defines how numpy data is logged.
-                'npy': each property is loggend in an individual npy file
-                'npz': all properties are combined in a npz file
-                'cnpz': all properties are combined in a compressed npz file
-
-            numpy_npz_filename: Name of the npz file if numpy data should be saved in a npz or compressed npz.
-
+    Resets the log to an empty exputils.data.Logger.
     '''
+    global log
+    log = Logger()
 
-    def __init__(self, **config):
+def get_log():
+    '''
+    Returns the current logger.
+    '''
+    global log
+    return log
 
-        self.directory = config.get('directory', None) # npy, npz
-        self.numpy_log_mode = config.get('numpy_log_mode', 'npy') # npy, npz
-        self.numpy_npz_filename = config.get('numpy_npz_filename', 'logging.npz')
+def set_log(new_log):
+    '''
+    Sets the given logger to be the global log
+    '''
+    global log
+    log = new_log
 
-        self.data = dict()
+def set_directory(directory):
+    '''
+    Sets the directory path for the log.
+    '''
+    log.directory = directory
 
-    @property
-    def directory(self):
-        directory = self._directory
-        if directory is None:
-             directory = exputils.DEFAULT_DATA_DIRECTORY
-        return directory
+def get_directory():
+    '''
+    Returns the directory path of the log.
+    '''
+    return log.directory
 
-    @directory.setter
-    def directory(self, value):
-        self._directory = value
+def contains(name):
+    '''
+    Returns True if items for the the given name exists in the log. Otherwise False.
+    '''
+    return (name in log)
 
-    def __getitem__(self, key):
-        return self.data[key]
+def get_item(name):
+    '''
+    Returns the item from the log with the given name.
+    '''
+    return log[name]
 
+def add_value(name, value):
+    '''
+    Adds a new value to the log. Values are stored in numpy arrays.
+    '''
+    log.add_value(name, value)
 
-    def __contains__(self, item):
-        return item in self.data
+def get_values(name):
+    '''
+    Returns the values for the given name. Values are stored in numpy arrays.
+    '''
+    return log[name]
 
+def add_object(name, obj):
+    '''
+    Adds a new object to the log. Objects are stored in a list and saved as files using dill.
+    '''
+    log.add_object(name, obj)
 
-    def items(self):
-        return self.data.items()
+def get_objects(name):
+    '''
+    Returns the objects for the given name. Objects are stored in a list.
+    '''
+    return log[name]
 
+def add_single_object(name, obj):
+    '''
+    Adds a single object to the log which is directly written to the hard drive and not stored in memory.
+    The objects is saved via dill.
+    '''
+    log.add_single_object(name, obj)
 
-    def add_value(self, name, value):
-        if name not in self.data:
-            self.data[name] = []
+def items():
+    '''
+    Returns the items in the log as a list of tuples with the name and values of the items.
+    '''
+    return log.items()
 
-        self.data[name].append(value)
+def save(directory=None):
+    '''
+    Saves the log to its defined directory.
 
+    :param directory: Optional path to the directory.
+    '''
+    log.save(directory=directory)
 
-    def get_log_directory(self, directory=None):
-        if directory is None:
-            if self.directory is None:
-                directory = exputils.DEFAULT_DATA_DIRECTORY
-            else:
-                directory = self.directory
-        if directory is None:
-            raise ValueError('A directory in which the log will be saved must be provided!')
+def load(directory=None, load_objects=False):
+    '''
+    Loads the items from a log directory into the log.
 
-
-    def save(self, directory=None):
-        directory = self.directory if directory is None else directory
-
-        if directory is None:
-            raise ValueError('A directory in which the log will be saved must be provided!')
-
-        if self.numpy_log_mode.lower() == 'npy':
-            path = directory
-        else:
-            path = os.path.join(directory, self.numpy_npz_filename)
-
-        exputils.io.save_dict_to_numpy_files(self.data, path, self.numpy_log_mode)
-
-
-    def load(self, directory=None):
-        directory = self.directory if directory is None else directory
-
-        if directory is None:
-            raise ValueError('A directory in which the log will be saved must be provided!')
-
-        self.data = exputils.io.load_numpy_files(directory)
+    :param directory: Optional path to the directory.
+    :param load_objects: If True then also objects (dill files) are loaded. Default: False.
+    '''
+    log.load(directory=directory, load_objects=load_objects)

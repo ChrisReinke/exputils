@@ -1,4 +1,3 @@
-# plotly_meanstd_scatter
 import numpy as np
 import plotly
 import plotly.subplots
@@ -11,9 +10,22 @@ import exputils as eu
 
 def plotly_meanstd_scatter(data=None, config=None, **kwargs):
     '''
-    param repetition_ids: Either scalar int with single id, list with several that are used for each experiment, or a dict with repetition ids per experiment.
+    Plots a plotly scatter (Scattergl or Scatter) plot.
+
+    Configuration:
+
+        - moving_average: Display the moving average over the steps per trace-element.
+            - n: number of steps over which the average should be computed.
+
     '''
     default_config = eu.AttrDict(
+
+        # allows to display the moving average per element over n steps
+        moving_average=eu.AttrDict(
+            n=1,
+            mode='fill_start'
+        ),
+
         subplots=eu.AttrDict(  # paramters for the 'plotly.subplots.make_subplots' function
             rows=None,
             cols=None,
@@ -162,6 +174,12 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
 
         # iterate over traces
         for trace_idx, cur_data in enumerate(subplot_data):
+
+            if config.moving_average is not None and config.moving_average.n != 1:
+                cur_data = eu.misc.moving_average(
+                    cur_data,
+                    config.moving_average.n,
+                    config.moving_average.mode)
 
             # calculate the mean and std over the trace elements
             mean_data = np.nanmean(cur_data, axis=0)

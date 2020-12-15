@@ -6,11 +6,9 @@ from exputils.data.statistics import calc_repetition_statistics
 from exputils.data.statistics import calc_statistics_over_repetitions
 # from exputils.data.statistics import collect_1D_values
 # from exputils.data.statistics import collect_counters
+from exputils.data.logger import Logger
+import exputils.data.logging
 
-from exputils.data.logging import Logger
-
-# holds the global logging
-log = Logger()
 
 
 

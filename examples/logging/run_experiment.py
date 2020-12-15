@@ -1,5 +1,5 @@
 import exputils
-from exputils.data import log
+import  exputils.data.logging as log
 from sub_experiment import run_subexperiment
 
 def run_experiment():
