@@ -176,7 +176,8 @@ def plotly_meanstd_bar(data=None, config=None, **kwargs):
                 x=group_labels,
                 y=means,
                 error_y=dict(type='data', array=stds),
-                name=trace_label)
+                name=trace_label,
+                marker_color=config.default_colors[trace_idx % len(config.default_colors)])
 
             trace_config = config.default_trace.copy()
             if len(config.default_subplot_traces) > subplot_idx:

@@ -191,7 +191,8 @@ def plotly_box(data=None, config=None, **kwargs):
             trace_params = eu.AttrDict(
                 x=elem_labels,
                 y=data_points,
-                name=trace_label)
+                name=trace_label,
+                marker_color=config.default_colors[trace_idx % len(config.default_colors)])
 
             trace_config = config.default_trace.copy()
             if len(config.default_subplot_traces) > subplot_idx:
