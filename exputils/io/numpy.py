@@ -12,7 +12,6 @@ def save_dict_to_numpy_files(data, path='.', mode = 'npy'):
     :param path: Path to folder if npy files are saved, or to the npz file.
     :param mode: Defines if npy files or one npz file are saved: 'npy', 'npz', 'cnpz' - compressed. (Default: 'npy')
     '''
-    eu.io.makedirs(path)
 
     # save logs in numpy format if they exist
     if mode.lower() == 'npy':
@@ -51,7 +50,7 @@ def load_numpy_files(directory):
 
     for file in glob(os.path.join(directory, '*.npz')):
         stat_name = os.path.splitext(os.path.basename(file))[0]
-        stat_vals = dict(np.load(file))
+        stat_vals = eu.AttrDict(np.load(file))
 
         # numpy encapsulates scalars as darrays with an empty shape
         # recover the original type

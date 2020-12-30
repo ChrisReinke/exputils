@@ -95,4 +95,8 @@ def load_single_experiment_data(experiment_directory, data_directory=None):
 
     statistics = eu.io.load_numpy_files(os.path.join(experiment_directory, data_directory))
 
+    # TODO: Refactor - make loading of npz files without the 'logging' sub-direcotry as a general cases
+    if len(statistics) == 1 and 'logging' in statistics:
+        statistics = statistics['logging']
+
     return statistics
