@@ -10,6 +10,8 @@ import warnings
 # TODO: Feature - ordering of experiments
 # TODO: Feature - allow to filter datasources that should be loaded
 # TODO: Feature - progress bar during data loading
+# TODO: Bugfix - If the order of the items is changed rapidely (buttons quicly pressed) then sometimes a wrong item gets selected afterwards
+#                It is unclear what causes this issue.
 
 class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
@@ -53,6 +55,31 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             button_style = '',  # 'success', 'info', 'warning', 'danger' or ''
             tooltip = 'Reset all experiment descriptions.')
 
+        dc.move_buttons_box = eu.AttrDict(
+            layout=eu.AttrDict(
+                width='100%',
+                display='flex',
+                flex_flow='row',
+                align_items='stretch'))
+
+        dc.move_up_button = eu.AttrDict(
+            layout=eu.AttrDict(
+                width = '50%',
+                height = 'auto'),
+            description = u'\u02C5', # 'down',
+            disabled = False,
+            button_style = '',  # 'success', 'info', 'warning', 'danger' or ''
+            tooltip = 'Moves the selected experiments up in the order.  (Only works if data is not filtered.)')
+
+        dc.move_down_button = eu.AttrDict(
+            layout=eu.AttrDict(
+                width = '50%',
+                height = 'auto'),
+            description = u'\u02C4', #'up',
+            disabled = False,
+            button_style = '',  # 'success', 'info', 'warning', 'danger' or ''
+            tooltip = 'Moves the selected experiments down in the order.  (Only works if data is not filtered.)')
+
         dc.load_data_button = eu.AttrDict(
             layout=eu.AttrDict(
                 width = 'auto',
@@ -64,6 +91,7 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
         # naming of columns in the dataframe (key: name in experiment_description dict, value: name in dataframe)
         dc.dataframe_column_names = {'id': 'experiment id',
+                                     'order': 'order',
                                      'is_load_data': 'load data',
                                      'short_name': 'short name',
                                      'name': 'name',
@@ -72,7 +100,8 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
         dc.qgrid_widget = eu.AttrDict(
             show_toolbar = True,
-            grid_options = {'autoEdit': True},
+            grid_options = {'autoEdit': True,
+                            'sortable': False},
             column_options = {'editable': False},
             column_definitions = {
                 'load data': {'editable': True},
@@ -109,11 +138,19 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         self.top_button_box = ipywidgets.Box(
             children=[self.load_descr_btn, self.reset_descr_btn],
             **self.config.top_button_box)
+
         self.qgrid_widget = ipywidgets.Box()  # initialize with dummy, will be overridden by update function
+
+        self.move_up_btn = ipywidgets.Button(**self.config.move_up_button)
+        self.move_down_btn = ipywidgets.Button(**self.config.move_down_button)
+        self.move_buttons_box = ipywidgets.Box(
+            children=[self.move_down_btn, self.move_up_btn],
+            **self.config.move_buttons_box)
+
         self.load_data_btn = ipywidgets.Button(**self.config.load_data_button)
         eu.gui.jupyter.add_children_to_widget(
             self,
-            [self.top_button_box, self.qgrid_widget, self.load_data_btn])
+            [self.top_button_box, self.qgrid_widget, self.move_buttons_box, self.load_data_btn])
 
         # create an output widget
         self._output_widget = None
@@ -124,6 +161,10 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         self.load_descr_btn.on_click(self._handle_load_descr_button_on_click)
         self.reset_descr_btn.on_click(self._handle_reset_descr_button_on_click)
         self.load_data_btn.on_click(self._handle_load_data_button_on_click)
+        self.move_up_btn.on_click(self._handle_move_up_button_on_click)
+        self.move_down_btn.on_click(self._handle_move_down_button_on_click)
+
+        self._handle_qgrid_cell_edited_is_active = True
 
     def _prepare_output_widget(self):
 
@@ -161,20 +202,64 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             print('Data successfully loaded.')
 
 
+    def _handle_move_up_button_on_click(self, btn):
+        # errors are plotted in output widget and it will be cleaned after next button press
+        # with self._prepare_output_widget():
+        try:
+            self.move_up_btn.disabled = True
+            self.move_down_btn.disabled = True
+
+            self.move_experiments_up()
+        finally:
+            self.move_up_btn.disabled = False
+            self.move_down_btn.disabled = False
+
+    def _handle_move_down_button_on_click(self, btn):
+        # errors are plotted in output widget and it will be cleaned after next button press
+        with self._prepare_output_widget():
+            try:
+                self.move_up_btn.disabled = True
+                self.move_down_btn.disabled = True
+
+                self.move_experiments_down()
+            finally:
+                self.move_up_btn.disabled = False
+                self.move_down_btn.disabled = False
+
+
     def _handle_qgrid_cell_edited(self, event, widget):
+        with self._prepare_output_widget():
 
-        # update the experiment_description
-        if event['name'] == 'cell_edited':
+            if self._handle_qgrid_cell_edited_is_active:
 
-            for expdescr_prop_name, df_col_name in self.config.dataframe_column_names.items():
-                if df_col_name == event['column']:
-                    self.experiment_descriptions[event['index']][expdescr_prop_name] = event['new']
-                    break
+                # update the experiment_description
+                if event['name'] == 'cell_edited':
 
-            self.backup_state()
+                    for expdescr_prop_name, df_col_name in self.config.dataframe_column_names.items():
+                        if df_col_name == event['column']:
+                            self.experiment_descriptions[event['index']][expdescr_prop_name] = event['new']
+                            break
 
-            self._call_experiment_descriptions_updated_event()
+                    self.backup_state()
 
+                    self._call_experiment_descriptions_updated_event()
+
+
+    def _handle_qgrid_filter_changed(self, event, widget):
+        with self._prepare_output_widget():
+
+            # identify if a filter is active or not
+            is_filter_active = len(self.qgrid_widget.df) != len(self.qgrid_widget.get_changed_df())
+
+            if is_filter_active:
+                # do not allow to change order
+                self.move_up_btn.disabled = True
+                self.move_down_btn.disabled = True
+
+            else:
+                # allow to change order
+                self.move_up_btn.disabled = False
+                self.move_down_btn.disabled = False
 
     def _update_qgrid(self):
 
@@ -198,6 +283,19 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         eu.gui.jupyter.add_children_to_widget(self, self.qgrid_widget, idx=1)
 
         self.qgrid_widget.on('cell_edited', self._handle_qgrid_cell_edited)
+
+        self.qgrid_widget.on('filter_changed', self._handle_qgrid_filter_changed)
+
+        self.sort_grid_by_order()
+
+
+    def sort_grid_by_order(self):
+        # hack to resort the experiments in the grid according to the order field
+        content = dict(
+            type='change_sort',
+            sort_field=self.config.dataframe_column_names['order'],
+            sort_ascending=True)
+        self.qgrid_widget._handle_qgrid_msg_helper(content)
 
 
     def on_experiment_descriptions_updated(self, handler):
@@ -236,6 +334,160 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
                 type='change'))
 
 
+    def move_experiments_up(self, selected_items=None, is_select_changed_items=True):
+
+        try:
+            self._handle_qgrid_cell_edited_is_active = False
+
+            if selected_items is None:
+                selected_items = self.qgrid_widget.get_selected_df()
+
+            if len(selected_items) > 0:
+
+                order_col_name = self.config.dataframe_column_names['order']
+                experiment_id_col_name = self.config.dataframe_column_names['id']
+
+                # select according to the order
+                selected_items = selected_items.sort_values(by=order_col_name)
+                qgrid_df = self.qgrid_widget.get_changed_df()
+
+                # make order the index to allow to seach by it
+                all_items_sorted_by_order = qgrid_df.sort_values(by=order_col_name).reset_index().set_index(order_col_name)
+
+                selected_idx = len(selected_items) - 1
+                while selected_idx >= 0:
+
+                    # identify current block of consequetively selected items
+                    current_block_exp_ids = []
+
+                    is_block = True
+                    last_item_order = None
+                    while is_block and selected_idx >= 0:
+                        cur_item_order = selected_items.iloc[selected_idx][order_col_name]
+
+                        if last_item_order is None or last_item_order - cur_item_order == 1:
+                            current_block_exp_ids.append(selected_items.index[selected_idx])
+                            selected_idx -= 1
+                            last_item_order = cur_item_order
+                        else:
+                            is_block = False
+
+                    order_of_highest_block_item = qgrid_df.loc[current_block_exp_ids[0]][order_col_name]
+
+                    # only change orders if the block is not at the end of the list
+                    if order_of_highest_block_item < len(qgrid_df) - 1:
+
+                        # change the order of item below the block
+                        exp_id_of_current_item_above_block = all_items_sorted_by_order.loc[order_of_highest_block_item + 1][experiment_id_col_name]
+
+                        new_order = order_of_highest_block_item - len(current_block_exp_ids) + 1
+                        self.qgrid_widget.edit_cell(
+                            exp_id_of_current_item_above_block,
+                            order_col_name,
+                            new_order)
+                        self.experiment_descriptions[exp_id_of_current_item_above_block]['order'] = new_order
+
+                        # subtract 1 to all selected items in the block
+                        for block_item_exp_id in current_block_exp_ids:
+                            new_order = qgrid_df.loc[block_item_exp_id]['order'] + 1
+
+                            self.qgrid_widget.edit_cell(
+                                block_item_exp_id,
+                                order_col_name,
+                                new_order)
+                            self.experiment_descriptions[block_item_exp_id]['order'] = new_order
+
+                        #resort the experiments in the grid according to the order field
+                        self.sort_grid_by_order()
+
+                        # reslect the old elements
+                        if is_select_changed_items:
+                            self.qgrid_widget.change_selection(selected_items.index)
+
+                        self.backup_state()
+
+                        self._call_experiment_descriptions_updated_event()
+        finally:
+            self._handle_qgrid_cell_edited_is_active = True
+
+
+    def move_experiments_down(self, selected_items=None, is_select_changed_items=True):
+
+        try:
+            self._handle_qgrid_cell_edited_is_active = False
+
+            if selected_items is None:
+                selected_items = self.qgrid_widget.get_selected_df()
+
+            if len(selected_items) > 0:
+
+                order_col_name = self.config.dataframe_column_names['order']
+                experiment_id_col_name = self.config.dataframe_column_names['id']
+
+                # select according to the order
+                selected_items = selected_items.sort_values(by=order_col_name)
+                qgrid_df = self.qgrid_widget.get_changed_df()
+
+                # make order the index to allow to seach by it
+                all_items_sorted_by_order = qgrid_df.sort_values(by=order_col_name).reset_index().set_index(order_col_name)
+
+                selected_idx = 0
+                while selected_idx < len(selected_items):
+
+                    # identify current block of consequetively selected items
+                    current_block_exp_ids = []
+
+                    is_block = True
+                    last_item_order = None
+                    while is_block and selected_idx < len(selected_items):
+                        cur_item_order = selected_items.iloc[selected_idx][order_col_name]
+
+                        if last_item_order is None or cur_item_order - last_item_order == 1:
+                            current_block_exp_ids.append(selected_items.index[selected_idx])
+                            selected_idx += 1
+                            last_item_order = cur_item_order
+                        else:
+                            is_block = False
+
+                    order_of_lowest_block_item = qgrid_df.loc[current_block_exp_ids[0]][order_col_name]
+
+                    # only change orders if the block is not at the end of the list
+                    if order_of_lowest_block_item > 0:
+
+                        # change the order of item below the block
+                        exp_id_of_current_item_below_block = all_items_sorted_by_order.loc[order_of_lowest_block_item - 1][experiment_id_col_name]
+
+                        new_order = order_of_lowest_block_item + len(current_block_exp_ids) - 1
+                        self.qgrid_widget.edit_cell(
+                            exp_id_of_current_item_below_block,
+                            order_col_name,
+                            new_order)
+                        self.experiment_descriptions[exp_id_of_current_item_below_block]['order'] = new_order
+
+                        # subtract 1 to all selected items in the block
+                        for block_item_exp_id in current_block_exp_ids:
+                            new_order = qgrid_df.loc[block_item_exp_id]['order'] - 1
+
+                            self.qgrid_widget.edit_cell(
+                                block_item_exp_id,
+                                order_col_name,
+                                new_order)
+                            self.experiment_descriptions[block_item_exp_id]['order'] = new_order
+
+                        #resort the experiments in the grid according to the order field
+                        self.sort_grid_by_order()
+
+                        # reslect the old elements
+                        if is_select_changed_items:
+                            self.qgrid_widget.change_selection(selected_items.index)
+
+                        self.backup_state()
+
+                        self._call_experiment_descriptions_updated_event()
+        finally:
+            self._handle_qgrid_cell_edited_is_active = True
+
+
     def update_experiment_descriptions(self, is_reset=False):
         '''Updates the experiment descriptions by adding new experiments and removing old experiments.'''
 
@@ -252,8 +504,22 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             for deleted_exp in deleted_experiments:
                 del self.experiment_descriptions[deleted_exp]
 
+            # kepp current order and add new experiments at the end of the list
+            # get current order of experiment
+            sorted_existing_experiment_ids = eu.data.get_ordered_experiment_ids_from_descriptions(self.experiment_descriptions)
+            sorted_new_experiment_ids = eu.data.get_ordered_experiment_ids_from_descriptions(new_exp_descr)
+
+            # remove existing experiment ids from the sorted list of new experiment ids
+            for existing_exp_id in sorted_existing_experiment_ids:
+                if existing_exp_id in sorted_new_experiment_ids:
+                    sorted_new_experiment_ids.remove(existing_exp_id)
+
             # add new elements
             self.experiment_descriptions = eu.combine_dicts(self.experiment_descriptions, new_exp_descr)
+
+            # update the order of the experiments according to the sorted lists
+            for order, exp_id in enumerate(sorted_existing_experiment_ids + sorted_new_experiment_ids):
+                self.experiment_descriptions[exp_id].order = order
 
             # do not keep the repetition ids from existing ones, but use the ones from the new discriptions
             # otherwise, if new repetitions are added, they will not be used

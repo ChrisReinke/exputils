@@ -42,8 +42,14 @@ class ExperimentIDsSelectionWidget(MultiSelectionWidget):
                 title_labels.append(exp_id)
 
         else:
+
+            # show experiments in the order defined by the descriptions
+            ordered_exp_ids = eu.data.get_ordered_experiment_ids_from_descriptions(experiment_descriptions)
+
             # detect ids from the experiment_descriptions
-            for exp_descr in experiment_descriptions.values():
+            for exp_id in ordered_exp_ids:
+                exp_descr =  experiment_descriptions[exp_id]
+
                 if exp_descr['is_load_data']:
                     self.experiment_ids.append(exp_descr['id'])
 
