@@ -7,7 +7,6 @@ from exputils.gui.jupyter.base_widget import BaseWidget
 import IPython
 import warnings
 
-# TODO: Feature - ordering of experiments
 # TODO: Feature - allow to filter datasources that should be loaded
 # TODO: Feature - progress bar during data loading
 # TODO: Bugfix - If the order of the items is changed rapidely (buttons quicly pressed) then sometimes a wrong item gets selected afterwards

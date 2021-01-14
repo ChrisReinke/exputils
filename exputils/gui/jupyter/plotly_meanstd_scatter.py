@@ -26,6 +26,10 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
             mode='fill_start'
         ),
 
+        data_filter=eu.AttrDict(
+            every_nth_step=None,
+        ),
+
         subplots=eu.AttrDict(  # paramters for the 'plotly.subplots.make_subplots' function
             rows=None,
             cols=None,
@@ -175,20 +179,23 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         # iterate over traces
         for trace_idx, cur_data in enumerate(subplot_data):
 
+            # create a moving average over the data if requested
             if config.moving_average is not None and config.moving_average.n != 1:
                 cur_data = eu.misc.moving_average(
                     cur_data,
                     config.moving_average.n,
                     config.moving_average.mode)
 
-            # calculate the mean and std over the trace elements
+            # define standard x_values
+            x_values = list(range(cur_data.shape[1]))
+
+            # filter the data if requested
+            if config.data_filter.every_nth_step is not None:
+                cur_data = cur_data[:, ::config.data_filter.every_nth_step]
+                x_values = x_values[::config.data_filter.every_nth_step]
+
             mean_data = np.nanmean(cur_data, axis=0)
             std_data = np.nanstd(cur_data, axis=0)
-
-            # this can not simply be done by seeting the x attribute of the trace, because the std trace has an extra
-            x_values = list(range(len(mean_data)))
-
-            # handle trace for mean values
 
             info_text = ['{} ± {}'.format(mean_data[idx], std_data[idx]) for idx in range(len(mean_data))]
 

@@ -7,7 +7,6 @@ from exputils.gui.jupyter.repetition_ids_selection_widget import RepetitionIDsSe
 from exputils.gui.jupyter.code_producer_widget import CodeProducerWidget
 
 # TODO: Feature - add selection of label_templates for data sources, experiments, and repetitions
-# TODO: Feature - ordering of experiments
 # TODO: Feature - add data source selection helper
 # TODO: Feature - allow that changes of names in the experiment_data_loader are directly taken as updates here
 # TODO: Refactor - put the output widget into this class and allow to print errors and warnings to it if data is loaded
