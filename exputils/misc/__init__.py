@@ -6,5 +6,4 @@ from exputils.misc.misc import str_to_slices
 from exputils.misc.misc import list_equal
 from exputils.misc.misc import dict_equal
 from exputils.misc.misc import moving_average
-
-
+from exputils.misc.misc import call_function_from_config

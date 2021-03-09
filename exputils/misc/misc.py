@@ -1,4 +1,6 @@
 import numpy as np
+import copy
+from exputils.misc.attrdict import combine_dicts
 
 def numpy_vstack_2d_default(array1, array2, default_value=np.nan):
 
@@ -360,4 +362,19 @@ def moving_average(data, n, mode='fill_start'):
     return moving_mean
 
 
+def call_function_from_config(config, *args, func_attribute_name='func', **argv):
+    '''Calls a function that is defined as a config dictionary or AttrDict.'''
+
+    if isinstance(config, dict) and func_attribute_name in config:
+
+        func_handle = config[func_attribute_name]
+
+        function_arguments = copy.deepcopy(config)
+        del function_arguments[func_attribute_name]
+        function_arguments = combine_dicts(argv, function_arguments)
+
+        return func_handle(*args, **function_arguments)
+
+    else:
+        return config
 

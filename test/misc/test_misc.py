@@ -256,3 +256,47 @@ def test_moving_average():
     output = eu.misc.moving_average(input, n=3)
     print(output)
     assert np.array_equal(output, [[4, 4, 4, 6, np.nan, np.nan],[40, 40, 40, 60, 80, 100]], equal_nan=True)
+
+
+
+def test_call_function_from_config():
+
+    def my_func(x,y,z):
+        return x + y + z
+
+    config = eu.AttrDict(
+        func=my_func,
+        x=1,
+        y=2,
+        z=3,
+    )
+    out = eu.misc.call_function_from_config(config)
+    assert out == 6
+
+    config = eu.AttrDict(
+        func=my_func,
+        x=1,
+        y=2,
+    )
+    out = eu.misc.call_function_from_config(config, z=4)
+    assert out == 7
+
+    config = eu.AttrDict(
+        func=my_func,
+        x=1,
+        y=2,
+        z=3,
+    )
+    out = eu.misc.call_function_from_config(config, z=4)
+    assert out == 7
+
+    config = eu.AttrDict(
+        cls=my_func,
+        x=1,
+        y=2,
+        z=3,
+    )
+    out = eu.misc.call_function_from_config(config, func_attribute_name='cls', z=4)
+    assert out == 7
+
+
