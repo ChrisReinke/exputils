@@ -179,6 +179,10 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         # iterate over traces
         for trace_idx, cur_data in enumerate(subplot_data):
 
+            # in case the data is only 1 point, add an extra dimension
+            if np.ndim(cur_data) == 1:
+                cur_data = np.array([cur_data]).transpose()
+
             # create a moving average over the data if requested
             if config.moving_average is not None and config.moving_average.n != 1:
                 cur_data = eu.misc.moving_average(

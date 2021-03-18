@@ -1,5 +1,5 @@
 
-Current version: 0.2.1 (06/01/2021)
+Current version: 0.2.3 (18/03/2021)
 
 # Introduction
 
