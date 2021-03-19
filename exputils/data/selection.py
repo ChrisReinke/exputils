@@ -116,75 +116,100 @@ def select_experiment_data(experiment_data, datasources, experiment_ids='all', r
         cur_experiments_labels = []
 
         for experiment_id in experiment_ids:
-            try:
-                if data_type == 'exp_data':
-                    rep_ids = []
+            if data_type == 'exp_data':
+                rep_ids = []
+                try:
                     cur_data = eu.misc.get_dict_variable(experiment_data[experiment_id], datasource)
+                except (KeyError, IndexError):
+                    # data does not exists
+                    warnings.warn('Data {!r} for experiment {!r} does not exist! Data is set to None.'.format(datasource,
+                                                                                                              experiment_id))
+                    cur_data = None
 
-                elif data_type == 'exp_rep_data':
 
-                    # if all repetition ids should be taken, then use a slice operator
-                    rep_ids = repetition_ids.copy()
-                    if rep_ids == ['all']:
-                        rep_ids = slice(None)
+            elif data_type == 'exp_rep_data':
 
+                # if all repetition ids should be taken, then use a slice operator
+                rep_ids = repetition_ids.copy()
+                if rep_ids == ['all']:
+                    rep_ids = slice(None)
+
+                try:
                     cur_data = eu.misc.get_dict_variable(experiment_data[experiment_id], datasource)
                     cur_data = cur_data[rep_ids]
+                except (KeyError, IndexError):
+                    # data does not exists
+                    warnings.warn('Data {!r} for experiment {!r} does not exist! Data is set to None.'.format(datasource,
+                                                                                                              experiment_id))
+                    cur_data = None
 
-                elif data_type == 'rep_data':
+            elif data_type == 'rep_data':
 
-                    # how to store the data depends on the datatype:
-                    #   scalar --> 1D numpy array
-                    #   nD numpy array --> (n+1)D numpy array with first dimension over repetitions
-                    #   other object --> list
+                # how to store the data depends on the datatype:
+                #   scalar --> 1D numpy array
+                #   nD numpy array --> (n+1)D numpy array with first dimension over repetitions
+                #   other object --> list
 
-                    cur_repetition_data = experiment_data[experiment_id]['repetition_data']
+                cur_repetition_data = experiment_data[experiment_id]['repetition_data']
 
-                    rep_ids = repetition_ids.copy()
-                    if rep_ids == ['all']:
-                        n_loaded_repetitions = len(cur_repetition_data)
-                        rep_ids = list(range(n_loaded_repetitions))
+                rep_ids = repetition_ids.copy()
+                if rep_ids == ['all']:
+                    n_loaded_repetitions = len(cur_repetition_data)
+                    rep_ids = list(range(n_loaded_repetitions))
 
-                    # go over each repetition and store data in a list
-                    cur_data_per_rep = []
-                    is_numpy_array_type = True
-                    final_np_array_shape = []
-                    for rep_id in rep_ids:
+                # go over each repetition and store data in a list
+                cur_data_per_rep = []
+                is_numpy_array_type = True
+                final_np_array_shape = []
+                is_data_exist_inds = []
+                for rep_id in rep_ids:
+
+                    try:
                         cur_rep_data = eu.misc.get_dict_variable(cur_repetition_data[rep_id], datasource)
-                        cur_data_per_rep.append(cur_rep_data)
+                        is_data_exist_inds.append(True)
+                    except (KeyError, IndexError):
+                        # data does not exists in this repetition
+                        warnings.warn('Data {!r} for repetition {!r} of experiment {!r} does not exist.'.format(datasource, rep_id, experiment_id))
+                        cur_rep_data = None
+                        is_data_exist_inds.append(False)
 
-                        # detetct if the data can be put into an numpy array,
-                        # and detect the maximum shape of the array
-                        if is_numpy_array_type:
+                    cur_data_per_rep.append(cur_rep_data)
 
-                            cur_np_array_shape = None
-                            if np.isscalar(cur_rep_data):
-                                cur_np_array_shape = [1]
-                            elif isinstance(cur_rep_data, np.ndarray):
-                                cur_np_array_shape = cur_rep_data.shape
+                    # detetct if the data can be put into an numpy array,
+                    # and detect the maximum shape of the array
+                    if is_numpy_array_type and is_data_exist_inds[-1]:
+
+                        cur_np_array_shape = None
+                        if np.isscalar(cur_rep_data):
+                            cur_np_array_shape = [1]
+                        elif isinstance(cur_rep_data, np.ndarray):
+                            cur_np_array_shape = cur_rep_data.shape
+                        else:
+                            is_numpy_array_type = False
+
+                        if cur_np_array_shape is not None:
+                            # check if all data have same number of dimensions
+                            if not final_np_array_shape:
+                                final_np_array_shape = cur_np_array_shape
+                            elif len(final_np_array_shape) == len(cur_np_array_shape):
+                                final_np_array_shape = np.maximum(final_np_array_shape, cur_np_array_shape)
                             else:
                                 is_numpy_array_type = False
 
-                            if cur_np_array_shape is not None:
-                                # check if all data have same number of dimensions
-                                if not final_np_array_shape:
-                                    final_np_array_shape = cur_np_array_shape
-                                elif len(final_np_array_shape) == len(cur_np_array_shape):
-                                    final_np_array_shape = np.maximum(final_np_array_shape, cur_np_array_shape)
-                                else:
-                                    is_numpy_array_type = False
+                if is_numpy_array_type:
+                    # if the data can be transformed into a numpy array
+                    if len(final_np_array_shape) == 1 and final_np_array_shape[0] == 1:
+                        # if the data per repetition is only a scalar, then do not create
+                        # create an extra dimensions for it, this replicates the default beahvior of numpy
+                        data_shape = [len(cur_data_per_rep)]
+                    else:
+                        data_shape = [len(cur_data_per_rep)] + list(final_np_array_shape)
 
-                    if is_numpy_array_type:
-                        # if the data can be transformed into a numpy array
-                        if len(final_np_array_shape) == 1 and final_np_array_shape[0] == 1:
-                            # if the data per repetition is only a scalar, then do not create
-                            # create an extra dimensions for it, this replicates the default beahvior of numpy
-                            data_shape = [len(cur_data_per_rep)]
-                        else:
-                            data_shape = [len(cur_data_per_rep)] + list(final_np_array_shape)
+                    cur_data = np.full(data_shape, np.nan)
+                    for rep_idx, rep_data in enumerate(cur_data_per_rep):
 
-                        cur_data = np.full(data_shape, np.nan)
-                        for rep_idx, rep_data in enumerate(cur_data_per_rep):
+                        # only set values if data exisited for the repetition
+                        if is_data_exist_inds[rep_idx]:
 
                             # create the correct slicing to add the rep_data into the whole array
                             rep_data_shape = np.shape(rep_data)
@@ -194,14 +219,13 @@ def select_experiment_data(experiment_data, datasources, experiment_ids='all', r
                                 slices = tuple([rep_idx] + [slice(0, d) for d in rep_data_shape])
 
                             cur_data[slices] = rep_data
-                    else:
-                        # otherwise keep data in list form over repetitions
-                        cur_data = cur_data_per_rep
+                else:
+                    # otherwise keep data in list form over repetitions
+                    cur_data = cur_data_per_rep
 
-            except (KeyError, IndexError):
-                # data does not exists
-                warnings.warn('Data {!r} for experiment {!r} does not exist! Data is set to None.'.format(datasource, experiment_id))
-                cur_data = None
+                # set data to None if no repetition had some data
+                if not np.any(is_data_exist_inds):
+                    cur_data = None
 
             if is_transpose:
                 cur_data = np.transpose(cur_data)

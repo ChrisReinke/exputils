@@ -304,7 +304,75 @@ def test_different_datatypes():
     # these cases are tested in the test_datasource_experimentid_repetitionid_filters() function
 
 
+def test_incomplete_repetition_data():
 
+    #################################################
+    # array data
+
+    experiment_data, experiment_descriptions = create_test_data()
+
+    # make data incomplete for exp0
+    experiment_data['exp0']['repetition_data'][0] = eu.AttrDict()
+
+    # collect data
+    data, _ = eu.data.select_experiment_data(experiment_data,
+                                        datasources='rep_values',
+                                        experiment_ids='all')
+
+    target_data = [[np.array([  [np.nan, np.nan, np.nan],
+                                experiment_data['exp0']['repetition_data'][1]['rep_values']]),
+                    np.array([experiment_data['exp1']['repetition_data'][0]['rep_values'],
+                               experiment_data['exp1']['repetition_data'][1]['rep_values']])]]
+
+    assert eu.misc.list_equal(data, target_data)
+
+
+    # make data fully incomplete for exp0
+    experiment_data['exp0']['repetition_data'][1] = eu.AttrDict()
+
+    # collect data
+    data, _ = eu.data.select_experiment_data(experiment_data,
+                                        datasources='rep_values',
+                                        experiment_ids='all')
+
+    target_data = [[None,
+                    np.array([experiment_data['exp1']['repetition_data'][0]['rep_values'],
+                               experiment_data['exp1']['repetition_data'][1]['rep_values']])]]
+
+    assert eu.misc.list_equal(data, target_data)
+
+
+    #################################################
+    # scalar data
+
+    experiment_data, experiment_descriptions = create_test_data()
+
+    # make data incomplete for exp0
+    experiment_data['exp0']['repetition_data'][0] = eu.AttrDict()
+
+    # collect data
+    data, _ = eu.data.select_experiment_data(experiment_data,
+                                        datasources='rep_values_3',
+                                        experiment_ids='all')
+
+    target_data = [[np.array([ np.nan,
+                                experiment_data['exp0']['repetition_data'][1]['rep_values_3']]),
+                    np.array([experiment_data['exp1']['repetition_data'][0]['rep_values_3'],
+                               experiment_data['exp1']['repetition_data'][1]['rep_values_3']])]]
+    assert eu.misc.list_equal(data, target_data)
+
+    # make data fully incomplete for exp0
+    experiment_data['exp0']['repetition_data'][1] = eu.AttrDict()
+
+    # collect data
+    data, _ = eu.data.select_experiment_data(experiment_data,
+                                        datasources='rep_values_3',
+                                        experiment_ids='all')
+
+    target_data = [[None,
+                    np.array([experiment_data['exp1']['repetition_data'][0]['rep_values_3'],
+                               experiment_data['exp1']['repetition_data'][1]['rep_values_3']])]]
+    assert eu.misc.list_equal(data, target_data)
 
 
 def test_data_filter():
