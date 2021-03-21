@@ -179,180 +179,183 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         # iterate over traces
         for trace_idx, cur_data in enumerate(subplot_data):
 
-            # in case the data is only 1 point, add an extra dimension
-            if np.ndim(cur_data) == 1:
-                cur_data = np.array([cur_data]).transpose()
+            # do not plot data, if it does not exits
+            if cur_data is not None:
 
-            # create a moving average over the data if requested
-            if config.moving_average is not None and config.moving_average.n != 1:
-                cur_data = eu.misc.moving_average(
-                    cur_data,
-                    config.moving_average.n,
-                    config.moving_average.mode)
+                # in case the data is only 1 point, add an extra dimension
+                if np.ndim(cur_data) == 1:
+                    cur_data = np.array([cur_data]).transpose()
 
-            # define standard x_values
-            x_values = list(range(cur_data.shape[1]))
+                # create a moving average over the data if requested
+                if config.moving_average is not None and config.moving_average.n != 1:
+                    cur_data = eu.misc.moving_average(
+                        cur_data,
+                        config.moving_average.n,
+                        config.moving_average.mode)
 
-            # filter the data if requested
-            if config.data_filter.every_nth_step is not None:
-                cur_data = cur_data[:, ::config.data_filter.every_nth_step]
-                x_values = x_values[::config.data_filter.every_nth_step]
+                # define standard x_values
+                x_values = list(range(cur_data.shape[1]))
 
-            mean_data = np.nanmean(cur_data, axis=0)
-            std_data = np.nanstd(cur_data, axis=0)
+                # filter the data if requested
+                if config.data_filter.every_nth_step is not None:
+                    cur_data = cur_data[:, ::config.data_filter.every_nth_step]
+                    x_values = x_values[::config.data_filter.every_nth_step]
 
-            info_text = ['{} ± {}'.format(mean_data[idx], std_data[idx]) for idx in range(len(mean_data))]
+                mean_data = np.nanmean(cur_data, axis=0)
+                std_data = np.nanstd(cur_data, axis=0)
 
-            # define label of the trace
-            if config.labels:
-                mean_label = config.labels[subplot_idx][1][trace_idx][0]
-            else:
-                mean_label = config.default_mean_label
-                if len(config.mean_labels) > trace_idx:
-                    mean_label = config.mean_labels[trace_idx]
-            mean_label = eu.misc.replace_str_from_dict(str(mean_label), {'<trace_idx>': trace_idx})
+                info_text = ['{} ± {}'.format(mean_data[idx], std_data[idx]) for idx in range(len(mean_data))]
 
-            mean_trace_params = dict(
-                x=x_values,
-                y=mean_data,
-                line=dict(color=config.default_colors[trace_idx % len(config.default_colors)]),
-                name=mean_label,
-                text=info_text,
-            )
-
-            mean_trace_config = eu.combine_dicts(config.default_mean_trace, config.default_trace)
-            if len(config.default_subplot_mean_traces) > subplot_idx:
-                mean_trace_config = eu.combine_dicts(config.default_subplot_mean_traces[subplot_idx], mean_trace_config)
-            if len(config.mean_traces) > trace_idx:
-                mean_trace_config = eu.combine_dicts(config.mean_traces[trace_idx], mean_trace_config)
-
-            mean_trace_params = eu.combine_dicts(mean_trace_config, mean_trace_params)
-
-            # handle legendgroup
-            mean_trace_legendgroup = mean_trace_params.legendgroup
-            if isinstance(mean_trace_legendgroup, str):
-                mean_trace_legendgroup = eu.misc.replace_str_from_dict(mean_trace_legendgroup,
-                                                                       {'<trace_idx>': trace_idx,
-                                                                        '<subplot_idx>': subplot_idx})
-            mean_trace_params.legendgroup = mean_trace_legendgroup
-
-            cur_mean_trace = plotly_scatter_plotter(**mean_trace_params)
-            subplot_mean_traces.append(cur_mean_trace)
-
-            # handle trace for std values
-
-            if config.std.style.lower() == 'shaded':
-
-                fill_color = config.default_colors[trace_idx % len(config.default_colors)]
-                fill_color = fill_color.replace('rgb', 'rgba')
-                fill_color = fill_color.replace(')', ', 0.2)')
-
-                std_trace_params = dict(
-                    x=x_values + x_values[::-1],
-                    y=np.hstack((mean_data + std_data, mean_data[::-1] - std_data[::-1])),
-                    fill='tozerox',
-                    line=dict(color='rgba(255,255,255,0)'),
-                    fillcolor=fill_color,
-                )
-
-            elif config.std.style.lower() == 'errorbar':
-
-                std_trace_params = dict(
-                    x=x_values[::config.std.steps],
-                    y=mean_data[::config.std.steps],
-                    error_y=dict(type='data', array=std_data, visible=True),
-                    mode='markers',
-                    line=dict(color=config.default_colors[trace_idx % len(config.default_colors)]),
-                    marker=dict(size=0, opacity=0),
-                )
-
-            else:
-                raise ValueError(
-                    'Unknown config.std.style ({!r})! Options: \'shaded\', \'errorbar\''.format(config.std.type))
-
-            std_trace_config = eu.combine_dicts(config.default_std_trace, config.default_trace)
-            if len(config.default_subplot_std_traces) > subplot_idx:
-                std_trace_config = eu.combine_dicts(config.default_subplot_std_traces[subplot_idx], std_trace_config)
-            if len(config.std_traces) > trace_idx:
-                std_trace_config = eu.combine_dicts(config.std_traces[trace_idx], std_trace_config)
-            std_trace_params = eu.combine_dicts(std_trace_config, std_trace_params)
-
-            # handle legendgroup
-            std_trace_legendgroup = std_trace_params.legendgroup
-            if isinstance(std_trace_legendgroup, str):
-                std_trace_legendgroup = eu.misc.replace_str_from_dict(std_trace_legendgroup,
-                                                                      {'<trace_idx>': trace_idx,
-                                                                       '<subplot_idx>': subplot_idx,
-                                                                       '<mean_trace_legendgroup>': mean_trace_legendgroup})
-            std_trace_params.legendgroup = std_trace_legendgroup
-
-            cur_std_trace = plotly_scatter_plotter(**std_trace_params)
-            subplot_mean_traces.append(cur_std_trace)
-
-            # traces for each data element
-            n_elems = cur_data.shape[0]
-            color_coeff_step = 1 / n_elems
-            cur_color_coeff = 0 + color_coeff_step
-            for cur_elem_idx in range(n_elems):
-
-                if config.labels and len(config.labels[subplot_idx][1][trace_idx][1]) > cur_elem_idx:
-                    element_label = config.labels[subplot_idx][1][trace_idx][1][cur_elem_idx]
+                # define label of the trace
+                if config.labels:
+                    mean_label = config.labels[subplot_idx][1][trace_idx][0]
                 else:
-                    element_label = config.default_element_label
-                if len(config.element_labels) > trace_idx:
-                    element_label = config.element_labels[trace_idx]
-                element_label = eu.misc.replace_str_from_dict(str(element_label),
-                                                              {'<trace_idx>': trace_idx,
-                                                               '<subelem_idx>': cur_elem_idx,
-                                                               '<elem_idx>': elem_idx,
-                                                               '<mean_label>': mean_label})
+                    mean_label = config.default_mean_label
+                    if len(config.mean_labels) > trace_idx:
+                        mean_label = config.mean_labels[trace_idx]
+                mean_label = eu.misc.replace_str_from_dict(str(mean_label), {'<trace_idx>': trace_idx})
 
-                color = eu.gui.misc.transform_color_str_to_tuple(
-                    config.default_colors[trace_idx % len(config.default_colors)])
-                color = (color[0],
-                         int(color[1] * cur_color_coeff),
-                         int(color[2] * cur_color_coeff),
-                         int(color[3] * cur_color_coeff))
-                color = eu.gui.misc.transform_color_tuple_to_str(color)
-                cur_color_coeff += color_coeff_step
-
-                element_trace_params = dict(
+                mean_trace_params = dict(
                     x=x_values,
-                    y=cur_data[cur_elem_idx, :],
-                    line=dict(color=color),
-                    name=element_label,
-                    visible=True,
+                    y=mean_data,
+                    line=dict(color=config.default_colors[trace_idx % len(config.default_colors)]),
+                    name=mean_label,
+                    text=info_text,
                 )
 
-                element_trace_config = eu.combine_dicts(config.default_element_trace, config.default_trace)
-                if len(config.default_subplot_element_traces) > subplot_idx:
-                    element_trace_config = eu.combine_dicts(config.default_subplot_element_traces[subplot_idx],
-                                                            element_trace_config)
-                if len(config.default_data_element_traces) > cur_elem_idx:
-                    element_trace_config = eu.combine_dicts(config.default_data_element_traces[cur_elem_idx],
-                                                            element_trace_config)
-                if len(config.element_traces) > elem_idx:
-                    element_trace_config = eu.combine_dicts(config.element_traces[elem_idx], element_trace_config)
+                mean_trace_config = eu.combine_dicts(config.default_mean_trace, config.default_trace)
+                if len(config.default_subplot_mean_traces) > subplot_idx:
+                    mean_trace_config = eu.combine_dicts(config.default_subplot_mean_traces[subplot_idx], mean_trace_config)
+                if len(config.mean_traces) > trace_idx:
+                    mean_trace_config = eu.combine_dicts(config.mean_traces[trace_idx], mean_trace_config)
 
-                element_trace_params = eu.combine_dicts(element_trace_config, element_trace_params)
+                mean_trace_params = eu.combine_dicts(mean_trace_config, mean_trace_params)
 
                 # handle legendgroup
-                element_trace_legendgroup = element_trace_params.legendgroup
-                if isinstance(element_trace_legendgroup, str):
-                    element_trace_legendgroup = eu.misc.replace_str_from_dict(
-                        element_trace_legendgroup,
-                        {'<subelem_idx>': cur_elem_idx,
-                         '<elem_idx>': elem_idx,
-                         '<trace_idx>': trace_idx,
-                         '<subplot_idx>': subplot_idx,
-                         '<mean_trace_legendgroup>': mean_trace_legendgroup,
-                         '<std_trace_legendgroup>': std_trace_legendgroup})
-                element_trace_params.legendgroup = element_trace_legendgroup
+                mean_trace_legendgroup = mean_trace_params.legendgroup
+                if isinstance(mean_trace_legendgroup, str):
+                    mean_trace_legendgroup = eu.misc.replace_str_from_dict(mean_trace_legendgroup,
+                                                                           {'<trace_idx>': trace_idx,
+                                                                            '<subplot_idx>': subplot_idx})
+                mean_trace_params.legendgroup = mean_trace_legendgroup
 
-                cur_elem_trace = plotly_scatter_plotter(**element_trace_params)
-                subplot_elem_traces.append(cur_elem_trace)
+                cur_mean_trace = plotly_scatter_plotter(**mean_trace_params)
+                subplot_mean_traces.append(cur_mean_trace)
 
-                elem_idx += 1
+                # handle trace for std values
+
+                if config.std.style.lower() == 'shaded':
+
+                    fill_color = config.default_colors[trace_idx % len(config.default_colors)]
+                    fill_color = fill_color.replace('rgb', 'rgba')
+                    fill_color = fill_color.replace(')', ', 0.2)')
+
+                    std_trace_params = dict(
+                        x=x_values + x_values[::-1],
+                        y=np.hstack((mean_data + std_data, mean_data[::-1] - std_data[::-1])),
+                        fill='tozerox',
+                        line=dict(color='rgba(255,255,255,0)'),
+                        fillcolor=fill_color,
+                    )
+
+                elif config.std.style.lower() == 'errorbar':
+
+                    std_trace_params = dict(
+                        x=x_values[::config.std.steps],
+                        y=mean_data[::config.std.steps],
+                        error_y=dict(type='data', array=std_data, visible=True),
+                        mode='markers',
+                        line=dict(color=config.default_colors[trace_idx % len(config.default_colors)]),
+                        marker=dict(size=0, opacity=0),
+                    )
+
+                else:
+                    raise ValueError(
+                        'Unknown config.std.style ({!r})! Options: \'shaded\', \'errorbar\''.format(config.std.type))
+
+                std_trace_config = eu.combine_dicts(config.default_std_trace, config.default_trace)
+                if len(config.default_subplot_std_traces) > subplot_idx:
+                    std_trace_config = eu.combine_dicts(config.default_subplot_std_traces[subplot_idx], std_trace_config)
+                if len(config.std_traces) > trace_idx:
+                    std_trace_config = eu.combine_dicts(config.std_traces[trace_idx], std_trace_config)
+                std_trace_params = eu.combine_dicts(std_trace_config, std_trace_params)
+
+                # handle legendgroup
+                std_trace_legendgroup = std_trace_params.legendgroup
+                if isinstance(std_trace_legendgroup, str):
+                    std_trace_legendgroup = eu.misc.replace_str_from_dict(std_trace_legendgroup,
+                                                                          {'<trace_idx>': trace_idx,
+                                                                           '<subplot_idx>': subplot_idx,
+                                                                           '<mean_trace_legendgroup>': mean_trace_legendgroup})
+                std_trace_params.legendgroup = std_trace_legendgroup
+
+                cur_std_trace = plotly_scatter_plotter(**std_trace_params)
+                subplot_mean_traces.append(cur_std_trace)
+
+                # traces for each data element
+                n_elems = cur_data.shape[0]
+                color_coeff_step = 1 / n_elems
+                cur_color_coeff = 0 + color_coeff_step
+                for cur_elem_idx in range(n_elems):
+
+                    if config.labels and len(config.labels[subplot_idx][1][trace_idx][1]) > cur_elem_idx:
+                        element_label = config.labels[subplot_idx][1][trace_idx][1][cur_elem_idx]
+                    else:
+                        element_label = config.default_element_label
+                    if len(config.element_labels) > trace_idx:
+                        element_label = config.element_labels[trace_idx]
+                    element_label = eu.misc.replace_str_from_dict(str(element_label),
+                                                                  {'<trace_idx>': trace_idx,
+                                                                   '<subelem_idx>': cur_elem_idx,
+                                                                   '<elem_idx>': elem_idx,
+                                                                   '<mean_label>': mean_label})
+
+                    color = eu.gui.misc.transform_color_str_to_tuple(
+                        config.default_colors[trace_idx % len(config.default_colors)])
+                    color = (color[0],
+                             int(color[1] * cur_color_coeff),
+                             int(color[2] * cur_color_coeff),
+                             int(color[3] * cur_color_coeff))
+                    color = eu.gui.misc.transform_color_tuple_to_str(color)
+                    cur_color_coeff += color_coeff_step
+
+                    element_trace_params = dict(
+                        x=x_values,
+                        y=cur_data[cur_elem_idx, :],
+                        line=dict(color=color),
+                        name=element_label,
+                        visible=True,
+                    )
+
+                    element_trace_config = eu.combine_dicts(config.default_element_trace, config.default_trace)
+                    if len(config.default_subplot_element_traces) > subplot_idx:
+                        element_trace_config = eu.combine_dicts(config.default_subplot_element_traces[subplot_idx],
+                                                                element_trace_config)
+                    if len(config.default_data_element_traces) > cur_elem_idx:
+                        element_trace_config = eu.combine_dicts(config.default_data_element_traces[cur_elem_idx],
+                                                                element_trace_config)
+                    if len(config.element_traces) > elem_idx:
+                        element_trace_config = eu.combine_dicts(config.element_traces[elem_idx], element_trace_config)
+
+                    element_trace_params = eu.combine_dicts(element_trace_config, element_trace_params)
+
+                    # handle legendgroup
+                    element_trace_legendgroup = element_trace_params.legendgroup
+                    if isinstance(element_trace_legendgroup, str):
+                        element_trace_legendgroup = eu.misc.replace_str_from_dict(
+                            element_trace_legendgroup,
+                            {'<subelem_idx>': cur_elem_idx,
+                             '<elem_idx>': elem_idx,
+                             '<trace_idx>': trace_idx,
+                             '<subplot_idx>': subplot_idx,
+                             '<mean_trace_legendgroup>': mean_trace_legendgroup,
+                             '<std_trace_legendgroup>': std_trace_legendgroup})
+                    element_trace_params.legendgroup = element_trace_legendgroup
+
+                    cur_elem_trace = plotly_scatter_plotter(**element_trace_params)
+                    subplot_elem_traces.append(cur_elem_trace)
+
+                    elem_idx += 1
 
         mean_traces.append(subplot_mean_traces)
         elem_traces.append(subplot_elem_traces)
