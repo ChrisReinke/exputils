@@ -117,6 +117,8 @@ def select_experiment_data(experiment_data, datasources, experiment_ids='all', r
 
         for experiment_id in experiment_ids:
 
+            rep_ids = []
+
             # check if the data exisits
             if experiment_id not in experiment_data:
                 warnings.warn('Data {!r} for experiment {!r} does not exist! Data is set to None.'.format(datasource,
