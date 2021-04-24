@@ -1,6 +1,13 @@
 import numpy as np
 import copy
+import random
 from exputils.misc.attrdict import combine_dicts
+# try to import torch, so that its seed can be set by the seed() - function
+try:
+    import torch
+except ImportError:
+    torch = None
+
 
 def numpy_vstack_2d_default(array1, array2, default_value=np.nan):
 
@@ -378,3 +385,37 @@ def call_function_from_config(config, *args, func_attribute_name='func', **argv)
     else:
         return config
 
+
+
+def seed(seed=None, is_set_random=True, is_set_numpy=True, is_set_torch=True):
+    '''
+    Sets the random seed for random, numpy and pytorch (if it exists as a package).
+
+    :param seed: Seed (integer) or configuration dictionary which contains a 'seed' property.
+                 If None is given, a seed is chosen via torch.seed().
+    :param is_set_random: Should random seed of random be set. (default=True)
+    :param is_set_numpy: Should random seed of numpy.random be set. (default=True)
+    :param is_set_torch: Should random seed of torch be set. (default=True)
+    :return: Seed that was set.
+    '''
+
+    if seed is None:
+        if torch:
+            seed = torch.seed()
+        else:
+            seed = np.randint(10000000000000)
+
+    elif isinstance(seed, dict):
+        seed = seed.get('seed', None)
+
+    if is_set_numpy:
+        np.random.seed(seed)
+
+    if is_set_random:
+        random.seed(seed)
+
+    if torch:
+        if is_set_torch:
+            torch.manual_seed(seed)
+
+    return seed
