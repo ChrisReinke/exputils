@@ -63,7 +63,7 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
         dc.move_up_button = eu.AttrDict(
             layout=eu.AttrDict(
-                width = '50%',
+                width = '25%',
                 height = 'auto'),
             description = u'\u02C5', # 'down',
             disabled = False,
@@ -72,12 +72,21 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
         dc.move_down_button = eu.AttrDict(
             layout=eu.AttrDict(
-                width = '50%',
+                width = '25%',
                 height = 'auto'),
             description = u'\u02C4', #'up',
             disabled = False,
             button_style = '',  # 'success', 'info', 'warning', 'danger' or ''
             tooltip = 'Moves the selected experiments down in the order.  (Only works if data is not filtered.)')
+
+        dc.sort_by_id_button = eu.AttrDict(
+            layout=eu.AttrDict(
+                width='50%',
+                height='auto'),
+            description='Sort by Experiment ID',  # 'up',
+            disabled=False,
+            button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+            tooltip='Resorts the experiments according to their ID.')
 
         dc.load_data_button = eu.AttrDict(
             layout=eu.AttrDict(
@@ -142,8 +151,9 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
         self.move_up_btn = ipywidgets.Button(**self.config.move_up_button)
         self.move_down_btn = ipywidgets.Button(**self.config.move_down_button)
+        self.sort_by_id_button = ipywidgets.Button(**self.config.sort_by_id_button)
         self.move_buttons_box = ipywidgets.Box(
-            children=[self.move_down_btn, self.move_up_btn],
+            children=[self.move_down_btn, self.move_up_btn, self.sort_by_id_button],
             **self.config.move_buttons_box)
 
         self.load_data_btn = ipywidgets.Button(**self.config.load_data_button)
@@ -162,6 +172,7 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         self.load_data_btn.on_click(self._handle_load_data_button_on_click)
         self.move_up_btn.on_click(self._handle_move_up_button_on_click)
         self.move_down_btn.on_click(self._handle_move_down_button_on_click)
+        self.sort_by_id_button.on_click(self._handle_sort_by_id_button_on_click)
 
         self._handle_qgrid_cell_edited_is_active = True
 
@@ -203,15 +214,15 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
     def _handle_move_up_button_on_click(self, btn):
         # errors are plotted in output widget and it will be cleaned after next button press
-        # with self._prepare_output_widget():
-        try:
-            self.move_up_btn.disabled = True
-            self.move_down_btn.disabled = True
+        with self._prepare_output_widget():
+            try:
+                self.move_up_btn.disabled = True
+                self.move_down_btn.disabled = True
 
-            self.move_experiments_up()
-        finally:
-            self.move_up_btn.disabled = False
-            self.move_down_btn.disabled = False
+                self.move_experiments_up()
+            finally:
+                self.move_up_btn.disabled = False
+                self.move_down_btn.disabled = False
 
     def _handle_move_down_button_on_click(self, btn):
         # errors are plotted in output widget and it will be cleaned after next button press
@@ -225,6 +236,10 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
                 self.move_up_btn.disabled = False
                 self.move_down_btn.disabled = False
 
+    def _handle_sort_by_id_button_on_click(self, btn):
+        # errors are plotted in output widget and it will be cleaned after next button press
+        with self._prepare_output_widget():
+            self.resort_experiments_by_id()
 
     def _handle_qgrid_cell_edited(self, event, widget):
         with self._prepare_output_widget():
@@ -484,6 +499,33 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
                         self._call_experiment_descriptions_updated_event()
         finally:
+            self._handle_qgrid_cell_edited_is_active = True
+
+
+    def resort_experiments_by_id(self):
+        '''
+        Resets the order of the experiments according to their IDs.
+        '''
+        try:
+            # don't allow to change the qgrid during the operation
+            self._handle_qgrid_cell_edited_is_active = False
+
+            # sort experiments according to ids
+            # get list of experiment ids
+            sorted_existing_experiment_ids = sorted(list(self.experiment_descriptions.keys()))
+
+            # update the order of the experiments according to the sorted list
+            for order, exp_id in enumerate(sorted_existing_experiment_ids):
+                self.experiment_descriptions[exp_id].order = order
+
+            # update the gui according to the new order
+            self._update_qgrid()
+
+            # inform others the descriptions are changed
+            self._call_experiment_descriptions_updated_event()
+
+        finally:
+            # qgrid can be changed again
             self._handle_qgrid_cell_edited_is_active = True
 
 

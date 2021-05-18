@@ -8,6 +8,7 @@ import collections
 
 # TODO: Feature - allow to load data from several campaigns
 # TODO: Feature - allow to define a black_list or white_list of data that should not be loaded
+# TODO: allow to load single experiments by just providing the id
 
 def load_experiment_descriptions(experiments_directory=None,
                                  experiment_directory_template=None,
