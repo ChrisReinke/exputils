@@ -42,6 +42,7 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         ),
         init_mode='mean_std',  # mean_std, mean, elements
         plotly_format='webgl',  # webgl or svg
+        error_type='std', # std or sem (standard error of the mean)
         layout=eu.AttrDict(
 
             default_xaxis=eu.AttrDict(),
@@ -202,7 +203,13 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
                     x_values = x_values[::config.data_filter.every_nth_step]
 
                 mean_data = np.nanmean(cur_data, axis=0)
-                std_data = np.nanstd(cur_data, axis=0)
+
+                if config.error_type == 'std':
+                    std_data = np.nanstd(cur_data, axis=0)
+                elif config.error_type == 'sem':
+                    std_data = np.nanstd(cur_data, axis=0, ddof=1) / np.sqrt(np.shape(cur_data)[0])
+                else:
+                    raise ValueError('Unknown error_type!')
 
                 info_text = ['{} ± {}'.format(mean_data[idx], std_data[idx]) for idx in range(len(mean_data))]
 

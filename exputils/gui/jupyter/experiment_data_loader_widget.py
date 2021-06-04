@@ -583,6 +583,12 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
     def load_data(self):
 
+        # delete old data to free memory
+        if self.experiment_data:
+            keys = list(self.experiment_data.keys())
+            for key in keys:
+                del self.experiment_data[key]
+
         experiment_data = self.config.load_experiment_data_function(self.experiment_descriptions)
 
         # some data loader functions give as extra argument the experiment descriptions
