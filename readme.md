@@ -18,16 +18,19 @@ Main features:
 
 ## <a name="requirements"></a>Requirements
 
-Developed and tested for Python 3.6.
+Developed and tested for Python 3.6, and the Linux OS (developed under Ubuntu 18.04).
 
 Needs several additional python packages which will be automatically installed during the installation:
- * numpy
- * dill
- * odfpy
- * ipywidgets
- * qgrid
- * plotly
- * cloudpickle 
+* numpy >= 1.19.5
+* six >= 1.15.0
+* ipywidgets >= 7.5.1
+* qgrid >= 1.3.1
+* plotly >= 4.13.0
+* cloudpickle >= 1.6.0
+* dill >= 0.3.3
+* odfpy >= 1.4.1
+* tabulate >= 0.8.9
+* scipy >= 1.5.4
 
 ## Installation
 
@@ -49,8 +52,7 @@ For using Jupyter GUIs with Jupyter Notebook, run the following command.
 I recommend to use the [Jupyter Notebooks Extensions](https://github.com/ipython-contrib/jupyter_contrib_nbextensions) to allow for example code folding or folding of headlines.
 Install the extensions with these commands:
 
-`pip install jupyter_contrib_nbextensions`
-
+`pip install jupyter_contrib_nbextensions` \
 `jupyter contrib nbextension install --user`
 
 # <a name="overview"></a>Overview
