@@ -3,6 +3,7 @@ import os
 import subprocess
 import time
 import exputils
+import numpy as np
 
 def start_slurm_experiments(directory=None, start_scripts='*.slurm', is_parallel=True, verbose=False, post_start_wait_time=0):
 
@@ -45,6 +46,21 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
 
     if directory is None:
         directory = os.path.join('.', exputils.DEFAULT_EXPERIMENTS_DIRECTORY)
+
+    # handle number of parallel processes
+    if isinstance(parallel, bool):
+        if parallel:
+            n_parallel = np.inf
+        else:
+            n_parallel = 1
+    elif isinstance(parallel, int):
+        if parallel <= 0:
+            raise ValueError('Number of parallel processes must be larger 0!')
+        else:
+            n_parallel = parallel
+    else:
+        raise ValueError('Argument \'parallel\' must be either a bool or an integer number!')
+
 
     # holds tuples of (startscript_path, status)
     scripts = []
@@ -94,10 +110,9 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                 process = subprocess.Popen(start_command.format(script_path).split(), cwd=script_directory)
 
             # if not parallel, then wait until current process is finished
-            if not parallel:
-                # parallel is False or None
+            if n_parallel == 1:
                 process.wait()
-            elif parallel != True:
+            else:
                 # parallel is a number that tell how many process can be open at the same time
 
                 is_wait = True
