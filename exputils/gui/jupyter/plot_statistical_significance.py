@@ -1,0 +1,367 @@
+import exputils as eu
+import numpy as np
+import plotly.subplots
+import scipy.stats
+from tabulate import tabulate
+
+# TODO: finish the tool
+
+def plot_statistical_significance(data=None, config=None, **kwargs):
+    '''
+    '''
+    default_config = eu.AttrDict(
+        subplots=eu.AttrDict(
+            rows=None,
+            cols=None,
+            print_grid=False
+        ),
+        init_mode='mean_std',  # mean_std, mean, elements
+        layout=eu.AttrDict(
+
+            default_xaxis=eu.AttrDict(),  # if several subplots, then these are the default values for all xaxis config in fig.layout
+            default_yaxis=eu.AttrDict(),  # if several subplots, then these are the default values for all yaxis config in fig.layout
+
+            xaxis=eu.AttrDict(),
+            yaxis=eu.AttrDict(),
+
+            boxmode='group',
+
+            updatemenus=[
+                eu.AttrDict(
+                    type="buttons",
+                    active=0,
+                    buttons=[
+                         eu.AttrDict(label='normal',
+                                     method='restyle',
+                                     args=[{'boxpoints': False}]),
+                         eu.AttrDict(label='all',
+                              method='restyle',
+                              args=[{'boxpoints': 'all'}]),
+                         eu.AttrDict(label='suspectedoutliers',
+                              method='restyle',
+                              args=[{'boxpoints': 'suspectedoutliers'}]),
+                         eu.AttrDict(label='outliers',
+                              method='restyle',
+                              args=[{'boxpoints': 'outliers'}]),
+                     ],
+                     direction='right',
+                     pad={'t': 70},
+                     x=1,
+                     xanchor='right',
+                     y=0,
+                     yanchor='top'
+                     ),
+            ]
+        ),
+
+        default_trace=eu.AttrDict(
+            legendgroup=None,
+            boxmean='sd',
+        ),
+        default_subplot_traces=[],
+        traces=[],
+
+        labels=[],  # holds all labels in a specific structure
+
+        default_trace_label='<trace_idx>',
+        trace_labels=[],
+
+        default_group_label='<group_idx>',
+        group_labels=[],
+
+        default_colors=plotly.colors.DEFAULT_PLOTLY_COLORS,
+    )
+    config = eu.combine_dicts(kwargs, config, default_config)
+
+    if data is None:
+        data = np.array([])
+
+    # format data in form [subplot_idx:list][trace_idx:list][elems_per_trace:numpy.ndarray]
+    if isinstance(data, np.ndarray):
+        data = [[data]]
+    elif isinstance(data, list) and isinstance(data[0], np.ndarray):
+        data = [data]
+    elif not isinstance(data, list) and not isinstance(data[0], list) and not isinstance(data[0][0], np.ndarray):
+        raise ValueError('Unsupported type of data!')
+
+    # handle different input formats of labels
+    if config.labels:
+        # if only labels for mean-traces are given, then add an empty label for the sub figure
+        if isinstance(config.labels, list) and not isinstance(config.labels[0], tuple):
+            config.labels = [('', config.labels)]
+        # if no labels are given for elements, then create an empty list for element labels
+        for ds_idx in range(len(config.labels)):
+            for trace_idx in range(len(config.labels[ds_idx][1])):
+                if not isinstance(config.labels[ds_idx][1][trace_idx], tuple):
+                    config.labels[ds_idx][1][trace_idx] = (config.labels[ds_idx][1][trace_idx], [])
+
+    # subplot_titles
+    if config.labels and ('subplot_titles' not in config.subplots or config.subplots.subplot_titles == []):
+        config.subplots.subplot_titles = [subplot_labels[0] for subplot_labels in config.labels]
+
+    # identify the number of subplots
+    n_subplots = len(data)
+
+    # if not defined, set rows and cols of subplots
+    if config.subplots.rows is None and config.subplots.cols is None:
+        config.subplots.rows = n_subplots
+        config.subplots.cols = 1
+    elif config.subplots.rows is not None and config.subplots.cols is None:
+        config.subplots.cols = int(np.ceil(n_subplots / config.subplots.rows))
+    elif config.subplots.rows is None and config.subplots.cols is not None:
+        config.subplots.rows = int(np.ceil(n_subplots / config.subplots.cols))
+
+    # handle init mode
+    if config.init_mode == 'normal':
+        if len(config.layout.updatemenus) > 0:
+            config.layout.updatemenus[0]['active'] = 0
+        config.default_trace.boxpoints = False
+    elif config.init_mode == 'all':
+        if len(config.layout.updatemenus) > 0:
+            config.layout.updatemenus[0]['active'] = 1
+        config.default_trace.boxpoints = 'all'
+    elif config.init_mode == 'suspectedoutliers':
+        if len(config.layout.updatemenus) > 0:
+            config.layout.updatemenus[0]['active'] = 2
+        config.default_trace.boxpoints = 'suspectedoutliers'
+    elif config.init_mode == 'outliers':
+        if len(config.layout.updatemenus) > 0:
+            config.layout.updatemenus[0]['active'] = 3
+        config.default_trace.boxpoints = 'outliers'
+
+    # make figure with subplots
+    fig = plotly.subplots.make_subplots(**config.subplots)
+
+    traces = []
+
+    # interate over subplots
+    for subplot_idx, subplot_data in enumerate(data):
+
+        trace_labels = []
+        data_per_trace = []
+
+        # collect the data for each trace
+        for trace_idx, cur_data in enumerate(subplot_data):
+
+            # handle trace for mean values
+            if config.labels:
+                trace_label = config.labels[subplot_idx][1][trace_idx][0]
+            else:
+                trace_label = config.default_trace_label
+                if len(config.trace_labels) > trace_idx:
+                    trace_label = config.trace_labels[trace_idx]
+            trace_label = eu.misc.replace_str_from_dict(str(trace_label), {'<trace_idx>': trace_idx})
+            trace_labels.append(trace_label)
+
+            data_points = np.array([])
+
+            if np.ndim(cur_data) == 0:
+                data_points = np.array([cur_data])
+            elif np.ndim(cur_data) == 1:
+                data_points = cur_data
+            else:
+                # collect data over elements
+                for elem_idx, elem_data in enumerate(cur_data):  # data elements
+
+                    # get element data which could be in matrix format or array format
+                    if np.ndim(elem_data) == 0:
+                        cur_elem_data = np.array([elem_data])
+                    elif np.ndim(elem_data) == 1:
+                        cur_elem_data = elem_data
+                    elif np.ndim(elem_data) == 2:
+                        if elem_data.shape[0] == 1:
+                            cur_elem_data = elem_data[0, :]
+                        elif elem_data.shape[1] == 1:
+                            cur_elem_data = elem_data[1, 0]
+                        else:
+                            raise ValueError('Invalid data format!')
+                    else:
+                        raise ValueError('Invalid data format!')
+
+                    data_points = np.hstack((data_points, cur_elem_data))
+
+
+            data_per_trace.append(data_points)
+
+
+        # get all possible combinations of traces without repetition
+        n_traces = len(data_per_trace)
+
+        trace_combinations = []
+        for first_trace_idx in range(n_traces-1):
+            for second_trace_idx in range(first_trace_idx+1, n_traces):
+                trace_combinations.append((first_trace_idx, second_trace_idx))
+
+        # calculate the statistical test of each combination
+        stat_results_per_trace_combination = []
+        for (first_trace_idx, second_trace_idx) in trace_combinations:
+            statistic, pvalue = scipy.stats.mannwhitneyu(
+                data_per_trace[first_trace_idx],
+                data_per_trace[second_trace_idx],
+                alternative='two-sided')
+
+            stat_results_per_trace_combination.append(pvalue)
+
+        # plot the results
+
+        # create empty table
+        table_content = [[''] * (n_traces) for _ in range(n_traces)]
+
+        # set top and side header
+        for trace_idx in range(n_traces):
+            if trace_idx > 0:
+                table_content[0][trace_idx] = trace_labels[trace_idx]
+            if trace_idx < n_traces - 1:
+                table_content[trace_idx + 1][0] = trace_labels[trace_idx]
+
+        # fill table
+        for comb_idx, (first_trace_idx, second_trace_idx) in enumerate(trace_combinations):
+
+            stat_result = stat_results_per_trace_combination[comb_idx]
+            if stat_result < 0.001:
+                stat_result_str = '$<0.001$'
+            else:
+                stat_result_str = '${:.3f}$'.format(stat_results_per_trace_combination[comb_idx])
+
+            table_content[first_trace_idx + 1][second_trace_idx] = stat_result_str
+
+        print(tabulate(table_content, headers='firstrow', tablefmt='latex_raw'))
+
+        display(tabulate(table_content, headers='firstrow', tablefmt='html'))
+
+
+
+
+    # # interate over subplots
+    # for subplot_idx, subplot_data in enumerate(data):
+    #
+    #     subplot_traces = []
+    #
+    #     # create for each experiment a trace
+    #     for trace_idx, cur_data in enumerate(subplot_data):
+    #
+    #         data_points = np.array([])
+    #         elem_labels = []
+    #
+    #         if np.ndim(cur_data) == 0:
+    #             data_points = np.array([cur_data])
+    #             elem_labels = ['']
+    #         elif np.ndim(cur_data) == 1:
+    #             data_points = cur_data
+    #             elem_labels = [''] * len(data_points)
+    #         else:
+    #             # collect data over elements
+    #             for elem_idx, elem_data in enumerate(cur_data):  # data elements
+    #
+    #                 # get element data which could be in matrix format or array format
+    #                 if np.ndim(elem_data) == 0:
+    #                     cur_elem_data = np.array([elem_data])
+    #                 elif np.ndim(elem_data) == 1:
+    #                     cur_elem_data = elem_data
+    #                 elif np.ndim(elem_data) == 2:
+    #                     if elem_data.shape[0] == 1:
+    #                         cur_elem_data = elem_data[0, :]
+    #                     elif elem_data.shape[1] == 1:
+    #                         cur_elem_data = elem_data[1, 0]
+    #                     else:
+    #                         raise ValueError('Invalid data format!')
+    #                 else:
+    #                     raise ValueError('Invalid data format!')
+    #
+    #                 data_points = np.hstack((data_points, cur_elem_data))
+    #
+    #                 # handle trace for mean values
+    #                 group_label = config.default_group_label
+    #                 if len(config.group_labels) > elem_idx:
+    #                     group_label = config.group_labels[elem_idx]
+    #                 group_label = eu.misc.replace_str_from_dict(str(group_label), {'<group_idx>': elem_idx})
+    #
+    #                 elem_labels.extend([group_label] * len(cur_elem_data))
+    #
+    #         # handle trace for mean values
+    #         if config.labels:
+    #             trace_label = config.labels[subplot_idx][1][trace_idx][0]
+    #         else:
+    #             trace_label = config.default_trace_label
+    #             if len(config.trace_labels) > trace_idx:
+    #                 trace_label = config.trace_labels[trace_idx]
+    #         trace_label = eu.misc.replace_str_from_dict(str(trace_label), {'<trace_idx>': trace_idx})
+    #
+    #         trace_params = eu.AttrDict(
+    #             x=elem_labels,
+    #             y=data_points,
+    #             name=trace_label,
+    #             marker_color=config.default_colors[trace_idx % len(config.default_colors)])
+    #
+    #         trace_config = config.default_trace.copy()
+    #         if len(config.default_subplot_traces) > subplot_idx:
+    #             trace_config = eu.combine_dicts(config.default_subplot_traces[subplot_idx], trace_config)
+    #         if len(config.traces) > trace_idx:
+    #             trace_config = eu.combine_dicts(config.traces[trace_idx], trace_config)
+    #
+    #         trace_params = eu.combine_dicts(trace_config, trace_params)
+    #
+    #         # handle legendgroup
+    #         trace_legendgroup = trace_params.legendgroup
+    #         if isinstance(trace_legendgroup, str):
+    #             trace_legendgroup = eu.misc.replace_str_from_dict(trace_legendgroup,
+    #                                                               {'<trace_idx>': trace_idx,
+    #                                                                '<subplot_idx>': subplot_idx})
+    #         trace_params.legendgroup = trace_legendgroup
+    #
+    #         cur_trace = plotly.graph_objs.Box(**trace_params)
+    #         subplot_traces.append(cur_trace)
+    #
+    #     traces.append(subplot_traces)
+
+    # set for the std toggle buttons which traces should be hidden and which ones should be shown
+    # layout = config.layout
+
+    # # set default values for all layouts
+    # def set_axis_properties_by_default(axis_name, fig_layout, config_layout):
+    #     # sets the axis properties to default values
+    #
+    #     def set_single_axis_property_default(cur_axis_name, default_name):
+    #         if cur_axis_name in fig_layout or cur_axis_name in config_layout:
+    #             cur_config = config_layout[cur_axis_name] if cur_axis_name in config_layout else dict()
+    #             config_layout[cur_axis_name] = eu.combine_dicts(cur_config, config_layout[default_name])
+    #
+    #     default_name = 'default_' + axis_name
+    #
+    #     set_single_axis_property_default(axis_name, default_name)
+    #     set_single_axis_property_default(axis_name + '1', default_name)
+    #     axis_idx = 2
+    #     while True:
+    #         cur_axis_name = axis_name + str(axis_idx)
+    #
+    #         if cur_axis_name not in fig_layout and cur_axis_name not in config_layout:
+    #             break
+    #
+    #         set_single_axis_property_default(cur_axis_name, default_name)
+    #         axis_idx += 1
+    #
+    # set_axis_properties_by_default('xaxis', fig['layout'], layout)
+    # set_axis_properties_by_default('yaxis', fig['layout'], layout)
+    #
+    # # remove default fields, because they are not true proerties of the plotly layout
+    # del (layout['default_xaxis'])
+    # del (layout['default_yaxis'])
+    #
+    # cur_row = 1
+    # cur_col = 1
+    # for subplot_idx in range(n_subplots):
+    #     n_traces = len(traces[subplot_idx])
+    #
+    #     fig.add_traces(traces[subplot_idx],
+    #                    rows=[cur_row] * n_traces,
+    #                    cols=[cur_col] * n_traces)
+    #
+    #     if cur_col < config.subplots.cols:
+    #         cur_col += 1
+    #     else:
+    #         cur_col = 1
+    #         cur_row += 1
+    #
+    # fig['layout'].update(layout)
+
+    # return fig
