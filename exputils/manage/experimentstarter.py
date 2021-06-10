@@ -61,28 +61,8 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
     else:
         raise ValueError('Argument \'parallel\' must be either a bool or an integer number!')
 
-
-    # holds tuples of (startscript_path, status)
-    scripts = []
-
-    # find all start scripts
-    files = glob.iglob(os.path.join(directory, '**', start_scripts), recursive=True)
-
-    # find if they have a job status
-    for file in files:
-
-        status_file_path = file + '.status'
-
-        if os.path.isfile(status_file_path):
-            # read status
-            with open(status_file_path, 'r') as f:
-                lines = f.read().splitlines()
-                status = lines[-1]
-        else:
-            status = 'none'
-
-        scripts.append((file, status))
-
+    # get the scripts and their status
+    scripts = get_scripts(directory=directory, start_scripts=start_scripts)
 
     # the processes that are started for each script
     processes = []
@@ -152,3 +132,64 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
     # wait until all processes are finished
     for process in processes:
         process.wait()
+
+
+def get_scripts(directory=None, start_scripts='*.sh'):
+    """
+    Idenitfies all scripts and their status.
+
+     :param directory: Directory in which the start scripts are searched.
+     :param start_scripts: Filename of the start script file. Can include * to search for scripts.
+
+     :return: List of tuples with (script_path, script_status)
+    """
+
+    if directory is None:
+        directory = os.path.join('.', exputils.DEFAULT_EXPERIMENTS_DIRECTORY)
+
+    # holds tuples of (startscript_path, status)
+    scripts = []
+
+    # find all start scripts
+    files = glob.iglob(os.path.join(directory, '**', start_scripts), recursive=True)
+
+    # find if they have a job status
+    for file in files:
+
+        status_file_path = file + '.status'
+
+        if os.path.isfile(status_file_path):
+            # read status
+            with open(status_file_path, 'r') as f:
+                lines = f.read().splitlines()
+                status = lines[-1]
+        else:
+            status = 'none'
+
+        scripts.append((file, status))
+
+    return scripts
+
+
+def get_number_of_scripts_to_execute(directory=None, start_scripts='*.sh'):
+    """
+    Returns the number scripts that have to be executed
+
+    :param directory: Directory in which the start scripts are searched.
+    :param start_scripts: Filename of the start script file. Can include * to search for scripts.
+
+    :return: Number of scripts that have to be executed (int).
+    """
+
+    scripts = get_scripts(directory=directory, start_scripts=start_scripts)
+
+    n = 0
+    for (_, status) in scripts:
+        if status is None or status.lower() == 'none' or status.lower() == 'not started' or status.lower() == 'error' or status.lower() == 'unfinished':
+            n += 1
+
+    return n
+
+
+
+

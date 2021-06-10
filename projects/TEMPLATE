@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# setup the scripts for the transfer rl project
+
+#################
+# GENERAL
+
+# custom python packages that should the transfered to the external devices if code is pushed
+# have to be under the EU_PRJ_LOCAL_CODE_PATH directory
+export EU_PRJ_CUSTOM_PACKAGES=transfer_rl
+
+# default script that are executed to run a repetition
+export EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT="run_repetition.sh"
+
+##################
+# LOCAL
+
+# code directory (parent directory of the transfer_rl and exputil package) at local pc
+export EU_PRJ_LOCAL_CODE_PATH=/scratchlocal/creinke/data/study/perception/code
+
+# experiment directory at local pc
+export EU_PRJ_LOCAL_EXPERIMENTS_PATH=/scratchlocal/creinke/data/study/perception/experiments/sf_transfer_rl_01
+
+# default number of parallel processes
+export EU_PRJ_LOCAL_DEFAULT_NUM_PROCESSES=6
+
+# Singularity image
+export EU_PRJ_LOCAL_SINGULARITY_IMAGE=$EU_PRJ_LOCAL_CODE_PATH/transfer_rl/singularity/reward_meta_rl_pytorch_1.4.sif
+
+##################
+# INRIA Workstations
+
+# code directory (parent directory of the transfer_rl and exputil package) at Inria
+export EU_PRJ_INRIA_CODE_PATH=/scratch/hydra/creinke/data/study/perception/code
+
+# experiment directory at INRIA
+export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/experiments/sf_transfer_rl_01
+
+# default machine at inria site
+export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
+
+# Singularity image
+export EU_PRJ_INRIA_SINGULARITY_IMAGE=$EU_PRJ_INRIA_CODE_PATH/transfer_rl/singularity/reward_meta_rl_pytorch_1.4.sif
+
+
+##################
+# GRICAD Cluster
+
+# code directory (parent directory of the transfer_rl and exputil package) at GRICAD
+export EU_PRJ_GRICAD_CODE_PATH=/bettik/creinke-ext/code
+
+# code directory (parent directory of the transfer_rl and exputil package) at GRICAD
+export EU_PRJ_GRICAD_EXPERIMENTS_PATH=/bettik/creinke-ext/experiments/sf_transfer_rl_01
+
+# default machine to run experiments
+export EU_PRJ_GRICAD_DEFAULT_MACHINE=f-dahu.ciment
+
+# default machine to transfer data
+export EU_PRJ_GRICAD_DEFAULT_DATA_TRANSFER_MACHINE=creinke-ext@cargo.univ-grenoble-alpes.fr
+
+# default number of process, i.e. cores per node
+export EU_PRJ_GRICAD_DEFAULT_NUM_PROCESSES=30
+
+# default walltime: hh:mm:ss
+export EU_PRJ_GRICAD_DEFAULT_WALLTIME=48:00:00
+
+# default project
+export EU_PRJ_GRICAD_DEFAULT_PROJECT=pr-ml3ri
+
+# default conda environment in which the code is executed
+export EU_PRJ_GRICAD_DEFAULT_CONDA_ENV=transfer_rl_full

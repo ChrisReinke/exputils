@@ -1,5 +1,5 @@
 
-Current version: 0.2.8 (08/06/2021)
+Current version: 0.2.9 (10/06/2021)
 
 # Introduction
 
@@ -34,6 +34,8 @@ Needs several additional python packages which will be automatically installed d
 
 ## Installation
 
+__1) Exputils Package__
+
 Clone via Git or download the current version of the exputils library.
 Open the library in the console.  
 
@@ -54,6 +56,28 @@ Install the extensions with these commands:
 
 `pip install jupyter_contrib_nbextensions` \
 `jupyter contrib nbextension install --user`
+
+__2) Commands__
+
+Several commands exist which make it easier to run experiments.
+These commands are located in the *./commands/* directory.
+These commands have to be adjusted for each project to your local machine and possible external machines or clusters.
+Each project has a configuration file in the *./projects/* directory.
+
+Create a copy of the script *TEMPLATE* and name it after your project *<project_name>*.
+Then adjust the environment varibales in this file according to your local settings and external settings.
+ 
+Add the following lines to your *~/.bashrc* to add the commands to the PATH and to load environment varibles of your default project:
+ 
+    # define path to the exputils folder
+    PATH_TO_EXPUTILS="<Path to exputils library, for example /home/user/code/exputils>"
+    if [ -f "$PATH_TO_EXPUTILS/commands/eu_setup.sh" ] ; then
+            . "$PATH_TO_EXPUTILS/commands/eu_setup.sh" "$PATH_TO_EXPUTILS"
+    fi
+    # set default project for exputils commands
+    export EU_DEFAULT_PRJ=<name of your default project>
+    # activate the default project
+    source eu_activate
 
 # <a name="overview"></a>Overview
 

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# executes the given command in the local singularity container for the project
+
+##################
+# PARAMETERS
+
+# directory that should be available to the singularity container
+BIND_DIR_CODE=$EU_PRJ_INRIA_CODE_PATH
+BIND_DIR_EXPERIMENTS=$EU_PRJ_INRIA_EXPERIMENTS_PATH
+
+# location of the singularity image file
+CONTAINER=$EU_PRJ_INRIA_SINGULARITY_IMAGE
+
+# list of custon python packages which will be added to the PYTHONPATH
+CUSTOM_PYTHON_PACKAGES=("$EU_PRJ_INRIA_CODE_PATH/exputils" /
+                        "$EU_PRJ_INRIA_CODE_PATH/$EU_PRJ_CUSTOM_PACKAGES")
+
+#################
+# EXECUTION
+
+# grap the existing pythonpath if it exists and add the paths to the custom packages at the end
+SINGULARITY_PYTHONPATH=$(singularity exec $CONTAINER env | grep PYTHONPATH)
+for CUSTOM_PYTHON_PACKAGE in ${CUSTOM_PYTHON_PACKAGES[*]}; do
+    SINGULARITY_PYTHONPATH=$SINGULARITY_PYTHONPATH:$CUSTOM_PYTHON_PACKAGE
+done
+
+# use the exputils library to generate the experiments and run them
+SINGULARITYENV_PYTHONPATH=$SINGULARITY_PYTHONPATH singularity exec --bind $BIND_DIR_CODE,$BIND_DIR_EXPERIMENTS $CONTAINER \
+  "$@"

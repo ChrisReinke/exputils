@@ -2,13 +2,13 @@
 
 STATUSFILE="${0##*/}".status
 
-echo "Run the experiment ..."
+echo "Run the repetition ..."
 STATE='Running'
 
 date "+%Y/%m/%d %H:%M:%S" >> $STATUSFILE
 echo $STATE >>  $STATUSFILE
 
-python run_experiment.py
+python run_repetition.py
 RETURN_CODE=$?
 
 echo "Write status file ..."

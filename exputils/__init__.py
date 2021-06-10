@@ -10,7 +10,7 @@ from exputils.misc.attrdict import DefaultAttrDict
 from exputils.misc.attrdict import DefaultFactoryAttrDict
 from exputils.misc.attrdict import combine_dicts
 
-__version__ = '0.2.8'
+__version__ = '0.2.9'
 
 DEFAULT_ODS_CONFIGURATION_FILE = 'experiment_configurations.ods'
 DEFAULT_EXPERIMENTS_DIRECTORY = 'experiments'

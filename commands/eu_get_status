@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# idenitify all status files
+files=`find . -name *.status | sort -n`
+
+# go through them
+for file in $files; do
+    # read last line with status
+    status=$( tail -n 1 $file )
+
+    # output status
+    echo $file - $status
+done

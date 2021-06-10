@@ -60,3 +60,19 @@ def test_experimentstarter(tmpdir):
     assert os.path.isfile(os.path.join(directory, 'job01/job01.txt'))
     assert os.path.isfile(os.path.join(directory, 'job02/job02.txt'))
     assert not os.path.isfile(os.path.join(directory, 'job03/job03.txt'))
+
+
+def test_get_number_of_scripts_to_execute(tmpdir):
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    # change working directory to this path
+    os.chdir(dir_path)
+
+    # copy the scripts in the temporary folder
+    directory = os.path.join(tmpdir.strpath, 'test_experimentstarter_01')
+    shutil.copytree('./start_scripts', directory)
+
+    # run scripts
+    n_open_scripts = eu.manage.get_number_of_scripts_to_execute(directory=directory)
+    assert n_open_scripts == 3

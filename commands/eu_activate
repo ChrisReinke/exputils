@@ -1,0 +1,27 @@
+#!/bin/bash
+
+PRJ_DEFINITION=$EU_DEFAULT_PRJ
+
+if [ $# -eq  1 ]; then
+  # only one input --> must be the project name
+  PRJ_DEFINITION=$1
+else
+  # see if a -p option was given that has the project name
+  while getopts ":p:" arg; do
+    case $arg in
+      p) PRJ_DEFINITION=$OPTARG;;
+    esac
+  done
+fi
+
+# load definition
+PATH_TO_PRJ_DEFINITION=$EU_PRJ_DEFINITIONS_PATH/$PRJ_DEFINITION
+
+if [ -f "$PATH_TO_PRJ_DEFINITION" ] ; then
+  source "$PATH_TO_PRJ_DEFINITION"
+  # TODO: using this and activating a project in the bshrc does not work for scp or rsync tools
+  # See https://stackoverflow.com/questions/12440287/scp-doesnt-work-when-echo-in-bashrc for possible solutions
+  #echo "Exputils: Activated project $PRJ_DEFINITION ..."
+else
+  echo "ERROR: Unknown Project. Can not find \"$PATH_TO_PRJ_DEFINITION\"!"
+fi

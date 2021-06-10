@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Resets the status of files that are still "Running" to "error"
+# TODO: add options to select which files should be reset and to which status
+
+# idenitify all status files
+files=`find . -name *.status | sort -n`
+
+data_time=`date +"%Y/%m/%d %T"`
+
+# go through them
+for file in $files; do
+    # read last line with status
+    status=$( tail -n 1 $file )
+
+    if [ $status = 'Running' ]; then
+
+      echo 'Reset ' $file '...'
+
+      # write time
+      echo $data_time >> $file
+
+      # write new status
+      echo 'Error' >> $file
+    fi
+
+done

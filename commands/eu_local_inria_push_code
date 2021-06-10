@@ -1,0 +1,68 @@
+#!/bin/bash
+
+CUSTOM_PACKAGE=$EU_PRJ_CUSTOM_PACKAGES
+# local paths
+LOCAL_EXPERIMENTS_PATH=$EU_PRJ_LOCAL_EXPERIMENTS_PATH
+LOCAL_CODE_PATH=$EU_PRJ_LOCAL_CODE_PATH
+# external paths
+EXTERNAL_EXPERIMENTS_PATH=$EU_PRJ_INRIA_EXPERIMENTS_PATH
+EXTERNAL_CODE_PATH=$EU_PRJ_INRIA_CODE_PATH
+EXTERNAL_MACHINE=$EU_PRJ_INRIA_DEFAULT_MACHINE
+
+# handle arguments
+IS_PUSH_ALL=False
+while getopts ":a" arg; do
+  case $arg in
+    a) IS_PUSH_ALL=True;;
+  esac
+done
+
+# detect if all or only specific files should be loaded
+if [ $IS_PUSH_ALL == False ]; then
+    # replace the path to the experiments on local host with the one at the target host
+    LOCAL_EXPERIMENT_PATH=`pwd`
+    EXTERNAL_EXPERIMENT_PATH=`echo $LOCAL_EXPERIMENT_PATH | sed "s+${LOCAL_EXPERIMENTS_PATH}+${EXTERNAL_EXPERIMENTS_PATH}+g"`
+else
+    LOCAL_EXPERIMENT_PATH=$LOCAL_EXPERIMENTS_PATH
+    EXTERNAL_EXPERIMENT_PATH=$EXTERNAL_EXPERIMENTS_PATH
+fi
+
+
+echo "Send experiments from $LOCAL_EXPERIMENT_PATH ..."
+rsync -aP \
+  --exclude '.*/' \
+  --exclude '*.log' \
+  --exclude '*.sif' \
+  --exclude '*.dill' \
+  --exclude '*.npy' \
+  --exclude '*.npz' \
+  --exclude '*.egg-info' \
+  --exclude '*.ipynb' \
+  --exclude '*.ods#' \
+  --exclude '__pycache__' \
+  --exclude '**/experiments' \
+  $LOCAL_EXPERIMENT_PATH/ $EXTERNAL_MACHINE:$EXTERNAL_EXPERIMENT_PATH
+
+echo "Send $CUSTOM_PACKAGE code ..."
+# current project
+# exclude hidden folders (e.g. git) and some others
+rsync -aP \
+  --exclude '.*/' \
+  --exclude '*.sif' \
+  --exclude '*.dill' \
+  --exclude '*.npy' \
+  --exclude '*.npz' \
+  --exclude '*.egg-info' \
+  --exclude '*.ipynb' \
+  --exclude '__pycache__' \
+  --exclude 'experiments' \
+  $LOCAL_CODE_PATH/$CUSTOM_PACKAGE/ $EXTERNAL_MACHINE:$EXTERNAL_CODE_PATH/$CUSTOM_PACKAGE
+
+echo "Send exputils code ..."
+# copy exputils packages
+# exclude hidden folders (e.g. git) and some others
+rsync -aP \
+  --exclude=".*/" \
+  --exclude '__pycache__' \
+  --exclude '*.egg-info' \
+  $LOCAL_CODE_PATH/exputils/ $EXTERNAL_MACHINE:$EXTERNAL_CODE_PATH/exputils

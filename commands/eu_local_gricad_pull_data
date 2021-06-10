@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# path to experiments on the local host
+LOCAL_EXPERIMENTS_PATH=$EU_PRJ_LOCAL_EXPERIMENTS_PATH
+# path to the experiments directory on the target host
+EXTERNAL_EXPERIMENTS_PATH=$EU_PRJ_GRICAD_EXPERIMENTS_PATH
+
+EXTERNAL_MACHINE=$EU_PRJ_GRICAD_DEFAULT_DATA_TRANSFER_MACHINE
+
+# handle arguments
+IS_PUSH_ALL=False
+while getopts ":a" arg; do
+  case $arg in
+    a) IS_PUSH_ALL=True;;
+  esac
+done
+
+# detect if all or only specific files should be loaded
+if [ $IS_PUSH_ALL == False ]; then
+    # replace the path to the experiments on local host with the one at the target host
+    LOCAL_EXPERIMENT_PATH=`pwd`
+    EXTERNAL_EXPERIMENT_PATH=`echo $LOCAL_EXPERIMENT_PATH | sed "s+${LOCAL_EXPERIMENTS_PATH}+${EXTERNAL_EXPERIMENTS_PATH}+g"`
+else
+    LOCAL_EXPERIMENT_PATH=$LOCAL_EXPERIMENTS_PATH
+    EXTERNAL_EXPERIMENT_PATH=$EXTERNAL_EXPERIMENTS_PATH
+fi
+
+echo "Pull data from $EXTERNAL_EXPERIMENT_PATH ..."
+
+# exclude all "*", and then include only wanted data
+rsync -zarvm \
+  --include="*/" \
+  --include="*.npy" \
+  --include="*.npz" \
+  --include="*.dill" \
+  --include="*.status" \
+  --include="*.log" \
+  --exclude="*" \
+  "$EXTERNAL_MACHINE:$EXTERNAL_EXPERIMENT_PATH/" "$LOCAL_EXPERIMENT_PATH"
