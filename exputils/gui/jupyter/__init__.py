@@ -10,7 +10,8 @@ from exputils.gui.jupyter.base_widget import BaseWidget
 from exputils.gui.jupyter.plotly_meanstd_scatter import plotly_meanstd_scatter
 from exputils.gui.jupyter.plotly_meanstd_bar import plotly_meanstd_bar
 from exputils.gui.jupyter.plotly_box import plotly_box
-from exputils.gui.jupyter.plot_statistical_significance import plot_statistical_significance
+#from exputils.gui.jupyter.tabulate import tabulate
+from exputils.gui.jupyter.tabulate_pairwise import tabulate_pairwise
 
 from exputils.gui.jupyter.misc import create_new_cell
 from exputils.gui.jupyter.misc import save_config

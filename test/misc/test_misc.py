@@ -300,3 +300,9 @@ def test_call_function_from_config():
     assert out == 7
 
 
+    # if it is just a function, then pass arguments to it
+    out = eu.misc.call_function_from_config(my_func, 1,2,3)
+    assert out == 6
+
+
+
