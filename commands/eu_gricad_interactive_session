@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# runs the python command in the default conda environemnt
+
+##########################
+# Parameters
+
+GRICAD_PROJECT=$EU_PRJ_GRICAD_DEFAULT_PROJECT
+
+##########################
+# Execution
+
+oarsub -I -l /core=1,walltime=12:00:00 --project $GRICAD_PROJECT
