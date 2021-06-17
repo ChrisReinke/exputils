@@ -11,12 +11,16 @@ EXTERNAL_EXPERIMENTS_DIR=$EU_PRJ_INRIA_EXPERIMENTS_PATH
 LOCAL_SCRIPT_PATH=`pwd`
 EXTERNAL_SCRIPT_PATH=`echo $LOCAL_SCRIPT_PATH | sed "s+${LOCAL_EXPERIMENTS_DIR}+${EXTERNAL_EXPERIMENTS_DIR}+g"`
 
+# arguments for the external eu_inria_run_experiments call
+ARGUMENTS=""
+
 # handle arguments
-while getopts ":m:" arg; do
+while getopts ":m:r" arg; do
   case $arg in
     m) MACHINE=$OPTARG;;
+    r) ARGUMENTS="$ARGUMENTS -r";;
   esac
 done
 
 # got to the current experiment directory on the target host and start the "run_experiments.sh" script
-ssh $MACHINE "cd ${EXTERNAL_SCRIPT_PATH};  nohup  eu_inria_run_experiments > inria_run_experiments_out.log 2> inria_run_experiments_err.log < /dev/null &"
+ssh $MACHINE "cd ${EXTERNAL_SCRIPT_PATH};  nohup  eu_inria_run_experiments $ARGUMENTS > inria_run_experiments_out.log 2> inria_run_experiments_err.log < /dev/null &"
