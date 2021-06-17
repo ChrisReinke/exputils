@@ -42,6 +42,8 @@ export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
 # Singularity image
 export EU_PRJ_INRIA_SINGULARITY_IMAGE=$EU_PRJ_INRIA_CODE_PATH/transfer_rl/singularity/reward_meta_rl_pytorch_1.4.sif
 
+# default number of parallel processes
+export EU_PRJ_INRIA_DEFAULT_NUM_PROCESSES=15
 
 ##################
 # GRICAD Cluster
