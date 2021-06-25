@@ -19,4 +19,4 @@ while getopts ":m:" arg; do
 done
 
 # got to the current experiment directory on the target host and start the "run_experiments.sh" script
-ssh $MACHINE "cd ${EXTERNAL_SCRIPT_PATH};  eu_inria_generate_experiments"
+ssh $MACHINE "source eu_activate $EU_ACTIVE_PRJ; cd ${EXTERNAL_SCRIPT_PATH};  eu_inria_generate_experiments"

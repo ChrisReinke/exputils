@@ -22,6 +22,7 @@ if [ -f "$PATH_TO_PRJ_DEFINITION" ] ; then
   # TODO: using this and activating a project in the bshrc does not work for scp or rsync tools
   # See https://stackoverflow.com/questions/12440287/scp-doesnt-work-when-echo-in-bashrc for possible solutions
   #echo "Exputils: Activated project $PRJ_DEFINITION ..."
+  export EU_ACTIVE_PRJ=$PRJ_DEFINITION
 else
   echo "ERROR: Unknown Project. Can not find \"$PATH_TO_PRJ_DEFINITION\"!"
 fi

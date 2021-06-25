@@ -15,11 +15,13 @@ WALLTIME=$EU_PRJ_GRICAD_DEFAULT_WALLTIME
 ###############
 # Execution
 
-while getopts ":m:n:w:" arg; do
+ARGUMENTS=
+while getopts ":m:n:w:r" arg; do
   case $arg in
     m) MACHINE=$OPTARG;;
     n) NUM_PROCESSES=$OPTARG;;
     w) WALLTIME=$OPTARG;;
+    r) ARGUMENTS="$ARGUMENTS -r";;
   esac
 done
 
@@ -28,4 +30,4 @@ LOCAL_PATH=`pwd`
 EXTERNAL_PATH=`echo $LOCAL_PATH | sed "s+${LOCAL_EXPERIMENTS_DIR}+${EXTERNAL_EXPERIMENTS_DIR}+g"`
 
 # got to the current experiment directory on the target host and start the "run_experiments.sh" script
-ssh $MACHINE "cd ${EXTERNAL_PATH}; eu_gricad_run_experiments -n $NUM_PROCESSES -w $WALLTIME"
+ssh $MACHINE "source eu_activate $EU_ACTIVE_PRJ; cd ${EXTERNAL_PATH}; eu_gricad_run_experiments -n $NUM_PROCESSES -w $WALLTIME $ARGUMENTS"

@@ -7,7 +7,7 @@ import copy
 # TODO: Featrue - allow to log sub values, for example: agent.epsilon
 
 class Logger:
-    '''
+    """
 
         Configuration:
             numpy_log_mode: String that defines how numpy data is logged.
@@ -17,7 +17,7 @@ class Logger:
 
             numpy_npz_filename: Name of the npz file if numpy data should be saved in a npz or compressed npz.
 
-    '''
+    """
 
     def default_config(self):
         dc = AttrDict(
@@ -65,6 +65,28 @@ class Logger:
         return list(self.numpy_data.items()) + list(self.object_data.items())
 
 
+    def clear(self, name=None):
+        """
+        Clears the data of the whole log or of a specific data element.
+
+        :param name: If none, then the whole log is cleared, otherwise only the data element with the given name.
+                     (default=None)
+        """
+
+        if name is None:
+            self.numpy_data.clear()
+            self.object_data.clear()
+        else:
+            if name not in self:
+                raise ValueError('Unknown data element with name {!r}!'.format(name))
+
+            if name in self.numpy_data:
+                del self.numpy_data[name]
+
+            if name in self.object_data:
+                del self.numpy_data[name]
+
+
     def add_value(self, name, value):
         if name not in self.numpy_data:
             self.numpy_data[name] = []
@@ -73,13 +95,13 @@ class Logger:
 
 
     def add_object(self, name, obj):
-        '''
+        """
         Adds an object ...
 
         :param name:
         :param obj:
         :return:
-        '''
+        """
         if name not in self.object_data:
             self.object_data[name] = []
 
@@ -87,12 +109,23 @@ class Logger:
 
 
     def add_single_object(self, name, obj):
-        '''
+        """
         Adds a single object to the log by directly writing it to a file.
         Overwrites existing object data with the same name.
-        '''
+        """
         file_path = os.path.join(self.directory, name)
         eu.io.save_dill(obj, file_path)
+
+
+    def load_single_object(self, name):
+        """
+        Loads a single object from a file.
+
+        :param name: Name of the object.
+        :return: Loaded object.
+        """
+        file_path = os.path.join(self.directory, name)
+        return eu.io.load_dill(file_path)
 
 
     def save(self, directory=None):
@@ -127,5 +160,14 @@ class Logger:
 
         self.numpy_data = eu.io.load_numpy_files(directory)
 
+        # in the case that all data was logged into a npz file
+        if len(self.numpy_data) == 1 and 'logging' in self.numpy_data:
+            self.numpy_data = self.numpy_data['logging']
+
+        for key, item in self.numpy_data.items():
+            self.numpy_data[key] = item.tolist()
+
         if load_objects:
             self.object_data = eu.io.load_dill_files(directory)
+        else:
+            self.object_data = dict()

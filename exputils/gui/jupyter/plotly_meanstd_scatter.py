@@ -9,15 +9,20 @@ import exputils as eu
 # TODO: Feature - custom x values
 
 def plotly_meanstd_scatter(data=None, config=None, **kwargs):
-    '''
+    """
     Plots a plotly scatter (Scattergl or Scatter) plot.
 
-    Configuration:
+    :param data: Data to plot. Should be in the following forms:
+        - [subplot_idx:list][trace_idx:list][elems_per_trace:numpy.ndarray]
+        - [trace_idx:list][elems_per_trace:numpy.ndarray]
+        - elems_per_trace:numpy.ndarray
 
+    :param config: Dictionary with configuration of plot.
         - moving_average: Display the moving average over the steps per trace-element.
             - n: number of steps over which the average should be computed.
 
-    '''
+    :return: Plotly figure object that can be displayed using display(fig_obj).
+    """
     default_config = eu.AttrDict(
 
         # allows to display the moving average per element over n steps

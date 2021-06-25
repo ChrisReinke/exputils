@@ -16,6 +16,10 @@ def save_dill(obj, file_path):
 
 
 def load_dill(file_path):
+
+    if not file_path.endswith('.' + DILL_FILE_EXTENSION):
+        file_path += '.' + DILL_FILE_EXTENSION
+
     with open(file_path, 'rb') as fh:
         obj = dill.load(fh)
     return obj

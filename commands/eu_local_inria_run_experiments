@@ -23,4 +23,4 @@ while getopts ":m:r" arg; do
 done
 
 # got to the current experiment directory on the target host and start the "run_experiments.sh" script
-ssh $MACHINE "cd ${EXTERNAL_SCRIPT_PATH};  nohup  eu_inria_run_experiments $ARGUMENTS > inria_run_experiments_out.log 2> inria_run_experiments_err.log < /dev/null &"
+ssh $MACHINE "source eu_activate $EU_ACTIVE_PRJ; cd ${EXTERNAL_SCRIPT_PATH};  nohup  eu_inria_run_experiments $ARGUMENTS > inria_run_experiments_out.log 2> inria_run_experiments_err.log < /dev/null &"

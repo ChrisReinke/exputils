@@ -73,6 +73,22 @@ def test_get_number_of_scripts_to_execute(tmpdir):
     directory = os.path.join(tmpdir.strpath, 'test_experimentstarter_01')
     shutil.copytree('./start_scripts', directory)
 
-    # run scripts
+    # check
     n_open_scripts = eu.manage.get_number_of_scripts_to_execute(directory=directory)
     assert n_open_scripts == 3
+
+
+def test_get_number_of_scripts(tmpdir):
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    # change working directory to this path
+    os.chdir(dir_path)
+
+    # copy the scripts in the temporary folder
+    directory = os.path.join(tmpdir.strpath, 'test_experimentstarter_01')
+    shutil.copytree('./start_scripts', directory)
+
+    # check
+    n_scripts = eu.manage.get_number_of_scripts(directory=directory)
+    assert n_scripts == 4

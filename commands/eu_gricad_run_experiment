@@ -6,13 +6,15 @@
 CONDA_ENV=$EU_PRJ_GRICAD_DEFAULT_CONDA_ENV
 NUM_PROCESSES=$EU_PRJ_GRICAD_DEFAULT_NUM_PROCESSES
 RUN_REPETITION_SCRIPT=$EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT
+IS_RERUN=False
 
 ##########################
 # Execution
 
-while getopts ":n:" arg; do
+while getopts ":n:r" arg; do
   case $arg in
     n) NUM_PROCESSES=$OPTARG;;
+    r) IS_RERUN=True;;
   esac
 done
 
@@ -26,6 +28,6 @@ exputils.manage.start_experiments(
   parallel=$NUM_PROCESSES,
   is_chdir=True,
   verbose=False,
-  is_rerun=False)"
+  is_rerun=$IS_RERUN)"
 
 echo "Finished."

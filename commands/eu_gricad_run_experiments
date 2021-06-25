@@ -7,10 +7,12 @@
 NUM_PROCESSES=$EU_PRJ_GRICAD_DEFAULT_NUM_PROCESSES
 WALLTIME=$EU_PRJ_GRICAD_DEFAULT_WALLTIME
 
-while getopts ":n:w:" arg; do
+ARGUMENTS=
+while getopts ":n:w:r" arg; do
   case $arg in
     n) NUM_PROCESSES=$OPTARG;;
     w) WALLTIME=$OPTARG;;
+    r) ARGUMENTS="$ARGUMENTS -r";;
   esac
 done
 
@@ -18,12 +20,13 @@ done
 # just save them as environment variables which are then read by the script
 export EU_PRJ_GRICAD_DEFAULT_NUM_PROCESSES=$NUM_PROCESSES
 export EU_PRJ_GRICAD_DEFAULT_WALLTIME=$WALLTIME
+export EU_PRJ_GRICAD_ADD_JOB_RUN_EXPERIMENT_ARGUMENTS=$ARGUMENTS
 
 echo "Generate experiments ..."
 eu_gricad_python -c "import exputils
 exputils.manage.generate_experiment_files('experiment_configurations.ods', directory='./experiments/')"
 
-echo "Add for each experiment an job ..."
+echo "Add for each experiment a job ..."
 eu_gricad_python -c "import exputils
 exputils.manage.start_experiments(
   start_scripts='gricad_add_job_run_experiment.sh',

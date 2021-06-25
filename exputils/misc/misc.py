@@ -48,43 +48,43 @@ def numpy_vstack_2d_default(array1, array2, default_value=np.nan):
 
 
 def dict_equal(dict1, dict2):
-        '''Checks if two dictionaries are equal. Allows to check numpy arrays as content.'''
+    """Checks if two dictionaries are equal. Allows to check numpy arrays as content."""
 
-        if not isinstance(dict1, dict) and not isinstance(dict2, dict):
-            return dict1 == dict2
+    if not isinstance(dict1, dict) and not isinstance(dict2, dict):
+        return dict1 == dict2
 
-        if isinstance(dict1, dict) and not isinstance(dict2, dict):
-            return False
+    if isinstance(dict1, dict) and not isinstance(dict2, dict):
+        return False
 
-        if not isinstance(dict1, dict) and isinstance(dict2, dict):
-            return False
+    if not isinstance(dict1, dict) and isinstance(dict2, dict):
+        return False
 
-        # compare if set of keys is the same
-        if set(dict1.keys()) != set(dict2.keys()):
-            return False
+    # compare if set of keys is the same
+    if set(dict1.keys()) != set(dict2.keys()):
+        return False
 
-        # compare all values
-        for key in dict1.keys():
+    # compare all values
+    for key in dict1.keys():
 
-            # use special comparison for numpy arrays
-            if isinstance(dict1[key], np.ndarray):
-                if not np.array_equal(dict1[key], dict2[key]):
-                    return False
-            else:
-                if dict1[key] != dict2[key]:
-                    return False
+        # use special comparison for numpy arrays
+        if isinstance(dict1[key], np.ndarray):
+            if not np.array_equal(dict1[key], dict2[key]):
+                return False
+        else:
+            if dict1[key] != dict2[key]:
+                return False
 
-        return True
+    return True
 
 
 def list_equal(list_a, list_b):
-    '''
+    """
     Checks if the content of two lists are equal. Can also handle numpy arrays as content.
 
     :param list_a: List 1.
     :param list_b: List 2.
     :return: True if the content of both lists are equal, otherwise False.
-    '''
+    """
 
     if len(list_a) != len(list_b):
         return False
@@ -110,7 +110,7 @@ def list_equal(list_a, list_b):
 
 
 def replace_str_from_dict(string, dictionary, pattern_format='{}'):
-    '''Replaces string occurances that are given as a dictionary.'''
+    """Replaces string occurances that are given as a dictionary."""
     out_string = string
 
     for key_name, new_str in dictionary.items():
@@ -122,7 +122,7 @@ def replace_str_from_dict(string, dictionary, pattern_format='{}'):
 
 
 def str_to_slices(slices_str):
-    '''
+    """
     Creates a slices for lists and numpy arrays from a string.
 
     >>> out = str_to_slices('[:,-1,0]')
@@ -130,7 +130,7 @@ def str_to_slices(slices_str):
 
     :param slice_str: String that describes the slices.
     :return: List of slices.
-    '''
+    """
 
     # remove all spaces
     slices_str = slices_str.replace(' ', '')
@@ -189,7 +189,7 @@ def str_to_slices(slices_str):
 
 
 def get_dict_variable(base_dict, variable_str):
-    '''
+    """
     Retrieves items from sub-dictionaries in a dictionary using a single string.
 
     >>> d = {'sub_dict_1': {'sub_dict_2': {'item_1': 0}}}
@@ -204,7 +204,7 @@ def get_dict_variable(base_dict, variable_str):
     :param base_dict: Dictionary with sub-dictionaries.
     :param variable_str: Path to item. Uses '.' to split sub dictionary keys and the item key.
     :return: Item value.
-    '''
+    """
 
     # TODO: Feature - allow lists of lists, e.g. 'sub_var.var[:][1]'
 
@@ -241,7 +241,7 @@ def get_dict_variable(base_dict, variable_str):
 
 
 def do_subdict_boolean_filtering(data, filter):
-    '''
+    """
     Filters a list of dictionaries using conditions based on items in the dictionaries.
 
     >>> d = [dict(x=1, y=1), dict(x=2, y=3), dict(x=3, y=9))]
@@ -251,7 +251,7 @@ def do_subdict_boolean_filtering(data, filter):
     :param data: List with dictionaries.
     :param filter: Tuple with filter condition.
     :return: Boolean indices.
-    '''
+    """
 
     if isinstance(filter, tuple):
 
@@ -370,7 +370,7 @@ def moving_average(data, n, mode='fill_start'):
 
 
 def call_function_from_config(config, *args, func_attribute_name='func', **argv):
-    '''Calls a function that is defined as a config dictionary or AttrDict.'''
+    """Calls a function that is defined as a config dictionary or AttrDict."""
 
     if isinstance(config, dict) and func_attribute_name in config:
 
@@ -382,13 +382,20 @@ def call_function_from_config(config, *args, func_attribute_name='func', **argv)
 
         return func_handle(*args, **function_arguments)
 
+    elif callable(config):
+        return config(*args, **argv)
+
     else:
         return config
 
 
+def create_object_from_config(config, *args, **argv):
+    """Creates a class object that is defined as a config dictionary or AttrDict."""
+    return call_function_from_config(config, *args, func_attribute_name='cls', **argv)
+
 
 def seed(seed=None, is_set_random=True, is_set_numpy=True, is_set_torch=True):
-    '''
+    """
     Sets the random seed for random, numpy and pytorch (if it exists as a package).
 
     :param seed: Seed (integer) or configuration dictionary which contains a 'seed' property.
@@ -397,13 +404,13 @@ def seed(seed=None, is_set_random=True, is_set_numpy=True, is_set_torch=True):
     :param is_set_numpy: Should random seed of numpy.random be set. (default=True)
     :param is_set_torch: Should random seed of torch be set. (default=True)
     :return: Seed that was set.
-    '''
+    """
 
     if seed is None:
         if torch:
             seed = torch.seed()
         else:
-            seed = np.randint(10000000000000)
+            seed = np.randint(2**32)
 
     elif isinstance(seed, dict):
         seed = seed.get('seed', None)

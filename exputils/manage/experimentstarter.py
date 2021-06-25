@@ -191,5 +191,19 @@ def get_number_of_scripts_to_execute(directory=None, start_scripts='*.sh'):
     return n
 
 
+def get_number_of_scripts(directory=None, start_scripts='*.sh'):
+    """
+    Returns the number scripts of all scripts regardless of their run status.
+
+    :param directory: Directory in which the start scripts are searched.
+    :param start_scripts: Filename of the start script file. Can include * to search for scripts.
+
+    :return: Number of scripts (int).
+    """
+
+    scripts = get_scripts(directory=directory, start_scripts=start_scripts)
+    return len(scripts)
+
+
 
 

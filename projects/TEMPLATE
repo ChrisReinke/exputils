@@ -36,11 +36,11 @@ export EU_PRJ_INRIA_CODE_PATH=/scratch/hydra/creinke/data/study/perception/code
 # experiment directory at INRIA
 export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/experiments/sf_transfer_rl_01
 
-# default machine at inria site
-export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
-
 # Singularity image
 export EU_PRJ_INRIA_SINGULARITY_IMAGE=$EU_PRJ_INRIA_CODE_PATH/transfer_rl/singularity/reward_meta_rl_pytorch_1.4.sif
+
+# default machine at inria site
+export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
 
 # default number of parallel processes
 export EU_PRJ_INRIA_DEFAULT_NUM_PROCESSES=15

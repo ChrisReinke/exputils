@@ -19,4 +19,4 @@ EXTERNAL_SCRIPT_PATH=`echo $LOCAL_SCRIPT_PATH | sed "s+${LOCAL_EXPERIMENTS_DIR}+
 #done
 
 # got to the current experiment directory on the target host and start the "run_experiments.sh" script
-ssh -tt $MACHINE "cd ${EXTERNAL_SCRIPT_PATH}; eu_gricad_interactive_session"
+ssh -tt $MACHINE "source eu_activate $EU_ACTIVE_PRJ; cd ${EXTERNAL_SCRIPT_PATH}; eu_gricad_interactive_session"
