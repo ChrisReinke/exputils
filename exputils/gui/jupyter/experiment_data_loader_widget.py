@@ -18,8 +18,12 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
     def default_config():
         dc = BaseWidget.default_config()
 
-        dc.load_experiment_descriptions_function = eu.data.load_experiment_descriptions
-        dc.load_experiment_data_function = eu.data.load_experiment_data
+        dc.load_experiment_descriptions_function = eu.AttrDict(
+            func=eu.data.load_experiment_descriptions
+        )
+        dc.load_experiment_data_function = eu.AttrDict(
+            func=eu.data.load_experiment_data
+        )
         dc.experiments_directory = os.path.join('..', eu.DEFAULT_EXPERIMENTS_DIRECTORY)
 
         dc.main_box = eu.AttrDict(
@@ -313,12 +317,12 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
 
     def on_experiment_descriptions_updated(self, handler):
-        '''
+        """
         Register an event handler for the case that the experiment descriptions was changed.
         Please note, that this does not mean that the data was loaded according to the new experiment descriptions.
         Use the on_experiment_data_loaded for this purpose.
         The handler receives a dict with information about the event.
-        '''
+        """
         self._on_experiment_descriptions_updated_event_handlers.append(handler)
 
 
@@ -332,10 +336,10 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
 
     def on_experiment_data_loaded(self, handler):
-        '''
+        """
         Register an event handler for the case new data was loaded.
         The handler receives a dict with information about the event.
-        '''
+        """
         self._on_experiment_data_loaded_event_handlers.append(handler)
 
 
@@ -488,10 +492,10 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
                                 new_order)
                             self.experiment_descriptions[block_item_exp_id]['order'] = new_order
 
-                        #resort the experiments in the grid according to the order field
+                        # resort the experiments in the grid according to the order field
                         self.sort_grid_by_order()
 
-                        # reslect the old elements
+                        # reselect the old elements
                         if is_select_changed_items:
                             self.qgrid_widget.change_selection(selected_items.index)
 
@@ -503,9 +507,9 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
 
     def resort_experiments_by_id(self):
-        '''
+        """
         Resets the order of the experiments according to their IDs.
-        '''
+        """
         try:
             # don't allow to change the qgrid during the operation
             self._handle_qgrid_cell_edited_is_active = False
@@ -530,10 +534,12 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
 
     def update_experiment_descriptions(self, is_reset=False):
-        '''Updates the experiment descriptions by adding new experiments and removing old experiments.'''
+        """Updates the experiment descriptions by adding new experiments and removing old experiments."""
 
         # load experiment descriptions
-        new_exp_descr = self.config.load_experiment_descriptions_function(self.config.experiments_directory)
+        new_exp_descr = eu.misc.call_function_from_config(
+            self.config.load_experiment_descriptions_function,
+            self.config.experiments_directory)
 
         if not self.experiment_descriptions or is_reset:
             self.experiment_descriptions = new_exp_descr
@@ -589,7 +595,9 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             for key in keys:
                 del self.experiment_data[key]
 
-        experiment_data = self.config.load_experiment_data_function(self.experiment_descriptions)
+        experiment_data = eu.misc.call_function_from_config(
+            self.config.load_experiment_data_function,
+            self.experiment_descriptions)
 
         # some data loader functions give as extra argument the experiment descriptions
         if isinstance(experiment_data, tuple):

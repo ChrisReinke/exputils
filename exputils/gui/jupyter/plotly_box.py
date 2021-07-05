@@ -6,8 +6,7 @@ import plotly.subplots
 #       in one subfigure
 
 def plotly_box(data=None, config=None, **kwargs):
-    '''
-    '''
+
     default_config = eu.AttrDict(
         subplots=eu.AttrDict(
             rows=None,

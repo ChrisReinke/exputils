@@ -4,9 +4,9 @@ import plotly.subplots
 
 
 def plotly_meanstd_bar(data=None, config=None, **kwargs):
-    '''
+    """
     param repetition_ids: Either scalar int with single id, list with several that are used for each experiment, or a dict with repetition ids per experiment.
-    '''
+    """
     default_config = eu.AttrDict(
         subplots=eu.AttrDict(
             rows=None,

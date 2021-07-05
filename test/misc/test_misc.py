@@ -299,10 +299,37 @@ def test_call_function_from_config():
     out = eu.misc.call_function_from_config(config, func_attribute_name='cls', z=4)
     assert out == 7
 
-
     # if it is just a function, then pass arguments to it
     out = eu.misc.call_function_from_config(my_func, 1,2,3)
     assert out == 6
 
+
+def test_is_allowed():
+
+    # no lists
+    assert eu.misc.is_allowed('1') is True
+    assert eu.misc.is_allowed('2') is True
+    assert eu.misc.is_allowed(1) is True
+    assert eu.misc.is_allowed(2) is True
+
+    # allowed list
+    assert eu.misc.is_allowed('1', allowed_list=['1', '2']) is True
+    assert eu.misc.is_allowed('2', allowed_list=['1', '2']) is True
+    assert eu.misc.is_allowed('3', allowed_list=['1', '2']) is False
+    assert eu.misc.is_allowed('4', allowed_list=['1', '2']) is False
+    assert eu.misc.is_allowed(1, allowed_list=[1, 2]) is True
+    assert eu.misc.is_allowed(2, allowed_list=[1, 2]) is True
+    assert eu.misc.is_allowed(3, allowed_list=[1, 2]) is False
+    assert eu.misc.is_allowed(4, allowed_list=[1, 2]) is False
+
+    # denied list
+    assert eu.misc.is_allowed('1', denied_list=['1', '2']) is False
+    assert eu.misc.is_allowed('2', denied_list=['1', '2']) is False
+    assert eu.misc.is_allowed('3', denied_list=['1', '2']) is True
+    assert eu.misc.is_allowed('4', denied_list=['1', '2']) is True
+    assert eu.misc.is_allowed(1, denied_list=[1, 2]) is False
+    assert eu.misc.is_allowed(2, denied_list=[1, 2]) is False
+    assert eu.misc.is_allowed(3, denied_list=[1, 2]) is True
+    assert eu.misc.is_allowed(4, denied_list=[1, 2]) is True
 
 

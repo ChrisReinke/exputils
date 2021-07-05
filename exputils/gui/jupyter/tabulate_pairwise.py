@@ -217,22 +217,10 @@ def tabulate_pairwise(data=None, config=None, **kwargs):
 
                     table_content[first_trace_idx + row_shift][second_trace_idx + col_shift] = cell_data
 
-            # stat_result = stat_results_per_trace_combination[comb_idx]
-            # if stat_result < 0.001:
-            #     stat_result_str = '$<0.001$'
-            # else:
-            #     stat_result_str = '${:.3f}$'.format(stat_results_per_trace_combination[comb_idx])
-            #
-            # table_content[first_trace_idx + 1][second_trace_idx] = stat_result_str
-
         table = original_tabulate(
             table_content,
             headers='firstrow',
             **config.tabulate)
-
-        # IPython.display.display(
-        #     table
-        # )
 
         return table
 

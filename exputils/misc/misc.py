@@ -426,3 +426,41 @@ def seed(seed=None, is_set_random=True, is_set_numpy=True, is_set_torch=True):
             torch.manual_seed(seed)
 
     return seed
+
+
+def is_allowed(name, allowed_list=None, denied_list=None):
+    """
+    Checks if an entity (string name) is allowed based on either a list of allowed entities or denied entities.
+    Only accepts either a list if allowed entities, or a list if denied entities, but not both.
+    If neither list is provided then all entities are allowed.
+    If the allowed entities list is provided, then only entities on this list are allowed.
+    If the denied entities list is provided, then only entities that are not on this list are allowed.
+
+    :param name: Name of entity (string)
+    :param allowed_list: List of strings with allowed entities. If None then it is ignored. (default=None)
+    :param denied_list: List of strings with denied entities. If None then it is ignored. (default=None)
+    :return: True if allowed, otherwise False.
+    """
+
+    # standard case: all are filtered
+    if allowed_list is None and denied_list is None:
+        return True
+
+    if allowed_list is not None and denied_list is not None:
+        raise ValueError('in_data_filter and out_data_filter can not both be set, only one or none!')
+
+    if allowed_list is not None:
+        if not isinstance(allowed_list, list):
+            allowed_list = [allowed_list]
+
+        if name in allowed_list:
+            return True
+
+    if denied_list is not None:
+        if not isinstance(denied_list, list):
+            denied_list = [denied_list]
+
+        if name not in denied_list:
+            return True
+
+    return False
