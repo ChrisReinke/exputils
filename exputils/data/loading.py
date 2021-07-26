@@ -117,7 +117,10 @@ def load_experiment_data(experiment_descriptions=None, experiments_directory=Non
 
             except FileNotFoundError:
                 if not exp_descr.repetition_ids or not is_load_repetition_data:
-                    warnings.warn('Could not load statistics for experiment {!r} ({!r}). Skipped ...'.format(exp_id, exp_descr['directory']))
+                    warnings.warn('Could find data for experiment {!r} ({!r}). Skipped ...'.format(exp_id, exp_descr['directory']))
+
+            except Exception as e:
+                raise Exception('Exception during loading of data for experiment {!r} ({!r})!'.format(exp_id, exp_descr['directory'])) from e
 
             # load data of each repetition
             if is_load_repetition_data:
@@ -140,7 +143,10 @@ def load_experiment_data(experiment_descriptions=None, experiments_directory=Non
                             _filter_data(cur_rep_statistics_dict[rep_id], post_allowed_data_filter, post_denied_data_filter)
 
                         except FileNotFoundError:
-                            warnings.warn('Could not load data for repetition {} of experiment {!r} ({!r}). Skipped ...'.format(rep_id, exp_id, exp_descr['directory']))
+                            warnings.warn('Could not find data for repetition {} of experiment {!r} ({!r}). Skipped ...'.format(rep_id, exp_id, exp_descr['directory']))
+
+                        except Exception as e:
+                            raise Exception('Exception during loading of data for repetition {} of experiment {!r} ({!r})!'.format(rep_id, exp_id, exp_descr['directory'])) from e
 
                     if cur_rep_statistics_dict:
                         # in case no experimental level data exists
