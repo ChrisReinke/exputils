@@ -92,14 +92,31 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             button_style='',  # 'success', 'info', 'warning', 'danger' or ''
             tooltip='Resorts the experiments according to their ID.')
 
+        dc.data_buttons_box = eu.AttrDict(
+            layout=eu.AttrDict(
+                width='100%',
+                display='flex',
+                flex_flow='row',
+                align_items='stretch'))
+
         dc.load_data_button = eu.AttrDict(
             layout=eu.AttrDict(
-                width = 'auto',
+                width = '75%',
                 height = 'auto'),
             description = 'Load Data',
             disabled = False,
             button_style = '',  # 'success', 'info', 'warning', 'danger' or ''
             tooltip = 'Load experimental data.')
+
+        dc.empty_data_button = eu.AttrDict(
+            layout=eu.AttrDict(
+                width = '25%',
+                height = 'auto'),
+            description = 'Empty Data',
+            disabled = False,
+            button_style = '',  # 'success', 'info', 'warning', 'danger' or ''
+            tooltip = 'Empties the loaded experimental data to free memory.')
+
 
         # naming of columns in the dataframe (key: name in experiment_description dict, value: name in dataframe)
         dc.dataframe_column_names = {'id': 'experiment id',
@@ -161,9 +178,14 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             **self.config.move_buttons_box)
 
         self.load_data_btn = ipywidgets.Button(**self.config.load_data_button)
+        self.empty_data_btn = ipywidgets.Button(**self.config.empty_data_button)
+        self.data_buttons_box = ipywidgets.Box(
+            children=[self.load_data_btn, self.empty_data_btn],
+            **self.config.data_buttons_box)
+
         eu.gui.jupyter.add_children_to_widget(
             self,
-            [self.top_button_box, self.qgrid_widget, self.move_buttons_box, self.load_data_btn])
+            [self.top_button_box, self.qgrid_widget, self.move_buttons_box, self.data_buttons_box])
 
         # create an output widget
         self._output_widget = None
@@ -174,6 +196,7 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         self.load_descr_btn.on_click(self._handle_load_descr_button_on_click)
         self.reset_descr_btn.on_click(self._handle_reset_descr_button_on_click)
         self.load_data_btn.on_click(self._handle_load_data_button_on_click)
+        self.empty_data_btn.on_click(self._handle_empty_data_button_on_click)
         self.move_up_btn.on_click(self._handle_move_up_button_on_click)
         self.move_down_btn.on_click(self._handle_move_down_button_on_click)
         self.sort_by_id_button.on_click(self._handle_sort_by_id_button_on_click)
@@ -214,6 +237,15 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
             self.load_data()
             self.backup_state()
             print('Data successfully loaded.')
+
+
+    def _handle_empty_data_button_on_click(self, btn):
+        # errors are plotted in output widget and it will be cleaned after next button press
+        with self._prepare_output_widget():
+            # empty data and save widget state
+            self.empty_data()
+            self.backup_state()
+            print('Emptied data.')
 
 
     def _handle_move_up_button_on_click(self, btn):
@@ -586,14 +618,17 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         if 'experiment_descriptions' in state: self.experiment_descriptions  = state.experiment_descriptions
         return super().set_widget_state(state)
 
-
-    def load_data(self):
-
-        # delete old data to free memory
+    def empty_data(self):
+        """Delete experiment_data to free memory."""
         if self.experiment_data:
             keys = list(self.experiment_data.keys())
             for key in keys:
                 del self.experiment_data[key]
+
+    def load_data(self):
+
+        # delete old data to free memory
+        self.empty_data()
 
         experiment_data = eu.misc.call_function_from_config(
             self.config.load_experiment_data_function,
