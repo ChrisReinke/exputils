@@ -39,6 +39,17 @@ DEFAULT_PLOTLY_MEANSTD_BAR_CONFIG = """layout = dict(
     ),
     default_group_label = 'rep <group_idx>'"""
 
+DEFAULT_TABULATE_MEANSTD_CONFIG = """primary_content_function = np.nanmean,
+secondary_content_function = np.nanstd,
+flip_rows_and_cols = False,
+tabulate=eu.AttrDict(
+            tablefmt='html', #
+            numalign='right',
+        ),
+cell_format = '{:.3f} ({:.3f})',
+top_left_cell_content = ''"""
+
+
 CODE_TEMPLATE_MULTILINE = """# Plotting of <datasources> 
 import exputils as eu
 <import_statements>
@@ -88,7 +99,7 @@ def config_obj_to_dict(config_obj):
     else:
         try:
             _locals = {}
-            exec('tmp_dict = dict({})'.format(config_obj), {}, _locals)
+            exec('import numpy as np;import exputils as eu;tmp_dict = dict({})'.format(config_obj), {}, _locals)
             config = _locals['tmp_dict']
         except Exception as err:
             config = err
@@ -107,12 +118,16 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
         # dictionary with possible plotting function
         dc.plot_functions = {'plotly_meanstd_scatter': eu.gui.jupyter.plotly_meanstd_scatter,
                              'plotly_box': eu.gui.jupyter.plotly_box,
-                             'plotly_meanstd_bar': eu.gui.jupyter.plotly_meanstd_bar}
+                             'plotly_meanstd_bar': eu.gui.jupyter.plotly_meanstd_bar,
+                             'tabulate_meanstd': eu.gui.jupyter.tabulate_meanstd
+        }
 
         # dictionary with plot_function_configs for each
         dc.plot_function_configs = {'plotly_meanstd_scatter': DEFAULT_PLOTLY_MEANSTD_SCATTER_CONFIG,
                                     'plotly_box': DEFAULT_PLOTLY_BOX_CONFIG,
-                                    'plotly_meanstd_bar': DEFAULT_PLOTLY_MEANSTD_BAR_CONFIG}
+                                    'plotly_meanstd_bar': DEFAULT_PLOTLY_MEANSTD_BAR_CONFIG,
+                                    'tabulate_meanstd': DEFAULT_TABULATE_MEANSTD_CONFIG
+        }
 
         dc.is_plot_function_selection = True
         dc.plot_function = list(dc.plot_functions.keys())[0]
