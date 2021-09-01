@@ -332,4 +332,37 @@ def test_is_allowed():
     assert eu.misc.is_allowed(3, denied_list=[1, 2]) is True
     assert eu.misc.is_allowed(4, denied_list=[1, 2]) is True
 
+def test_str_to_list():
 
+    def check_if_lists_are_equal(list1, list2):
+        assert len(list1) == len(list2)
+        for idx in range(len(list1)):
+            assert list1[idx] == list2[idx]
+
+    str = ''
+    lst = eu.misc.str_to_list(str)
+    check_if_lists_are_equal(lst, [])
+
+    str = ' '
+    lst = eu.misc.str_to_list(str)
+    check_if_lists_are_equal(lst, [])
+
+    str = 'hallo'
+    lst = eu.misc.str_to_list(str)
+    check_if_lists_are_equal(lst, ['hallo'])
+
+    str = 'hallo, hello'
+    lst = eu.misc.str_to_list(str)
+    check_if_lists_are_equal(lst, ['hallo', 'hello'])
+
+    str = ' hallo, hello '
+    lst = eu.misc.str_to_list(str)
+    check_if_lists_are_equal(lst, ['hallo', 'hello'])
+
+    str = ' hallo[3, 4], hello '
+    lst = eu.misc.str_to_list(str)
+    check_if_lists_are_equal(lst, ['hallo[3, 4]', 'hello'])
+
+    str = ' hallo[3, 4], hello , dd '
+    lst = eu.misc.str_to_list(str)
+    check_if_lists_are_equal(lst, ['hallo[3, 4]', 'hello', 'dd'])

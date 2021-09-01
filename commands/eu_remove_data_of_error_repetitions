@@ -1,0 +1,20 @@
+#!/bin/bash
+
+DATA_FOLDER_NAME="data"
+
+# idenitify all status files
+files=`find . -name *.status | sort -n`
+
+# go through them
+for file in $files; do
+    # read last line with status
+    STATUS=$( tail -n 1 $file )
+
+    if [ "$STATUS" == "Error" ]; then
+        REP_PATH="$(dirname "${file}")"
+        DATA_PATH="$REP_PATH/$DATA_FOLDER_NAME"
+
+        echo "Remove $DATA_PATH ..."
+        rm -r "$DATA_PATH"
+    fi
+done

@@ -46,7 +46,12 @@ def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=Non
         stat_name = os.path.splitext(os.path.basename(file))[0]
 
         if eu.misc.is_allowed(stat_name, allowed_list=allowed_data_filter, denied_list=denied_data_filter):
-            stat_val = np.load(file)
+            try:
+                stat_val = np.load(file)
+            except FileNotFoundError:
+                raise
+            except Exception as e:
+                raise Exception('Exception during loading of file {!r}!'.format(file)) from e
 
             if len(stat_val.shape) == 0:
                 stat_val = stat_val.dtype.type(stat_val)
@@ -56,7 +61,12 @@ def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=Non
     for file in glob(os.path.join(directory, '*.npz')):
         stat_name = os.path.splitext(os.path.basename(file))[0]
         if eu.misc.is_allowed(stat_name, allowed_list=allowed_data_filter, denied_list=denied_data_filter):
-            stat_vals = eu.AttrDict(np.load(file))
+            try:
+                stat_vals = eu.AttrDict(np.load(file))
+            except FileNotFoundError:
+                raise
+            except Exception as e:
+                raise Exception('Exception during loading of file {!r}!'.format(file)) from e
 
             # remove data that should not be loaded
             keys = [k for k, v in stat_vals.items() if not eu.misc.is_allowed(k, allowed_list=allowed_data_filter, denied_list=denied_data_filter)]

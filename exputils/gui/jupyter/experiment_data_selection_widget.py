@@ -6,6 +6,7 @@ from exputils.gui.jupyter.experiment_ids_selection_widget import ExperimentIDsSe
 from exputils.gui.jupyter.repetition_ids_selection_widget import RepetitionIDsSelectionWidget
 from exputils.gui.jupyter.code_producer_widget import CodeProducerWidget
 
+# TODO: Bug - giving several datasources seems not not work, as they are combined to a single string
 # TODO: Feature - add selection of label_templates for data sources, experiments, and repetitions
 # TODO: Feature - add data source selection helper
 # TODO: Feature - allow that changes of names in the experiment_data_loader are directly taken as updates here
@@ -32,33 +33,6 @@ display(selection_widget)"""
 
 CODE_TEMPLATE_SINGLELINE = """selection_widget = ExperimentDataSelectionWidget(experiment_data, experiment_descriptions, datasources=<datasources>, experiment_ids=<experiment_ids>, repetition_ids=<repetition_ids>, output_format=<output_format>, data_filter=<data_filter>, state_backup_name=<state_backup_name>, is_datasources_selection=False, is_output_format_selection=False, is_data_filter_selection=False, is_code_producer=False)
 display(selection_widget)"""
-
-
-def datasources_string_to_list(datasources_string):
-    '''
-    Splits a string with datasources into a list of datasources:
-    Example: 'ds1.var1, ds2.var2[:,-1]' -->  ['ds1.var1', 'ds2.var2[:,-1]']
-    '''
-
-    datasources = []
-
-    cur_datasource_str = ''
-    is_inner_idx_list = False
-    for c in datasources_string:
-        if c == ',' and not is_inner_idx_list:
-            datasources.append(cur_datasource_str)
-            cur_datasource_str = ''
-        elif c == '[':
-            is_inner_idx_list = True
-            cur_datasource_str += c
-        elif c == ']':
-            is_inner_idx_list = False
-            cur_datasource_str += c
-        elif is_inner_idx_list or c != ' ':
-            cur_datasource_str += c
-    datasources.append(cur_datasource_str)
-
-    return datasources
 
 
 class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
@@ -290,16 +264,16 @@ class ExperimentDataSelectionWidget(BaseWidget, ipywidgets.VBox):
     @property
     def datasources(self):
         if not self.config.is_datasources_selection:
-            return datasources_string_to_list(self.config.datasources)
+            return eu.misc.str_to_list(self.config.datasources)
         else:
-            return datasources_string_to_list(self.datasources_selection_text_widget.value)
+            return eu.misc.str_to_list(self.datasources_selection_text_widget.value)
 
 
     @datasources.setter
     def datasources(self, datasources):
 
         if isinstance(datasources, str):
-            datasources = datasources_string_to_list(datasources)
+            datasources = eu.misc.str_to_list(datasources)
 
         if not self.config.is_datasources_selection:
             self.config.datasources = datasources

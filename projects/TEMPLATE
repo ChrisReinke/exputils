@@ -7,10 +7,11 @@
 
 # custom python packages that should the transfered to the external devices if code is pushed
 # have to be under the EU_PRJ_LOCAL_CODE_PATH directory
-export EU_PRJ_CUSTOM_PACKAGES=transfer_rl
+export EU_PRJ_CUSTOM_PACKAGES=rlexp
 
 # default script that are executed to run a repetition
 export EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT="run_repetition.sh"
+
 
 ##################
 # LOCAL
@@ -19,13 +20,15 @@ export EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT="run_repetition.sh"
 export EU_PRJ_LOCAL_CODE_PATH=/scratchlocal/creinke/data/study/perception/code
 
 # experiment directory at local pc
-export EU_PRJ_LOCAL_EXPERIMENTS_PATH=/scratchlocal/creinke/data/study/perception/experiments/sf_transfer_rl_01
+export EU_PRJ_LOCAL_EXPERIMENTS_PATH=/scratchlocal/creinke/data/study/perception/experiments/sf_transfer_rl_02
+#export EU_PRJ_LOCAL_EXPERIMENTS_PATH=/scratchlocal/creinke/data/study/perception/code/rlexp/examples
 
 # default number of parallel processes
 export EU_PRJ_LOCAL_DEFAULT_NUM_PROCESSES=6
 
 # Singularity image
-export EU_PRJ_LOCAL_SINGULARITY_IMAGE=$EU_PRJ_LOCAL_CODE_PATH/transfer_rl/singularity/reward_meta_rl_pytorch_1.4.sif
+export EU_PRJ_LOCAL_SINGULARITY_IMAGE=/scratchlocal/creinke/data/study/perception/singularity/sf_transfer_rl_02.sif
+
 
 ##################
 # INRIA Workstations
@@ -34,10 +37,11 @@ export EU_PRJ_LOCAL_SINGULARITY_IMAGE=$EU_PRJ_LOCAL_CODE_PATH/transfer_rl/singul
 export EU_PRJ_INRIA_CODE_PATH=/scratch/hydra/creinke/data/study/perception/code
 
 # experiment directory at INRIA
-export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/experiments/sf_transfer_rl_01
+export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/experiments/sf_transfer_rl_02
+#export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/code/rlexp/examples
 
 # Singularity image
-export EU_PRJ_INRIA_SINGULARITY_IMAGE=$EU_PRJ_INRIA_CODE_PATH/transfer_rl/singularity/reward_meta_rl_pytorch_1.4.sif
+export EU_PRJ_INRIA_SINGULARITY_IMAGE=/scratch/hydra/creinke/data/study/perception/singularity/sf_transfer_rl_02.sif
 
 # default machine at inria site
 export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
@@ -45,14 +49,16 @@ export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
 # default number of parallel processes
 export EU_PRJ_INRIA_DEFAULT_NUM_PROCESSES=15
 
+
 ##################
-# GRICAD Cluster
+# GRICAD Dahu Cluster
 
 # code directory (parent directory of the transfer_rl and exputil package) at GRICAD
 export EU_PRJ_GRICAD_CODE_PATH=/bettik/creinke-ext/code
 
 # code directory (parent directory of the transfer_rl and exputil package) at GRICAD
-export EU_PRJ_GRICAD_EXPERIMENTS_PATH=/bettik/creinke-ext/experiments/sf_transfer_rl_01
+export EU_PRJ_GRICAD_EXPERIMENTS_PATH=/bettik/creinke-ext/experiments/sf_transfer_rl_02
+#export EU_PRJ_GRICAD_EXPERIMENTS_PATH=/bettik/creinke-ext/code/rlexp/examples
 
 # default machine to run experiments
 export EU_PRJ_GRICAD_DEFAULT_MACHINE=f-dahu.ciment
@@ -70,4 +76,4 @@ export EU_PRJ_GRICAD_DEFAULT_WALLTIME=48:00:00
 export EU_PRJ_GRICAD_DEFAULT_PROJECT=pr-ml3ri
 
 # default conda environment in which the code is executed
-export EU_PRJ_GRICAD_DEFAULT_CONDA_ENV=transfer_rl_full
+export EU_PRJ_GRICAD_DEFAULT_CONDA_ENV=sf_transfer_rl_02

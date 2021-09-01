@@ -18,8 +18,15 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         - elems_per_trace:numpy.ndarray
 
     :param config: Dictionary with configuration of plot.
-        - moving_average: Display the moving average over the steps per trace-element.
-            - n: number of steps over which the average should be computed.
+        moving_average: Display the moving average over the steps per trace-element.
+            n: number of steps over which the average should be computed.
+
+        data_filter:
+            every_nth_step: Either a integer with the number of steps or a dictionary.
+                            In case of a dictionary:
+                step: Number of steps between taken values. (default=None)
+                include_final_step: Should the final step (the final value) also be included even if outside the stepping. (default=False)
+
 
     :return: Plotly figure object that can be displayed using display(fig_obj).
     """
@@ -32,7 +39,9 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
         ),
 
         data_filter=eu.AttrDict(
-            every_nth_step=None,
+            every_nth_step=eu.AttrDict(
+                step=None,
+                include_final_step=False),
         ),
 
         subplots=eu.AttrDict(  # paramters for the 'plotly.subplots.make_subplots' function
@@ -204,8 +213,25 @@ def plotly_meanstd_scatter(data=None, config=None, **kwargs):
 
                 # filter the data if requested
                 if config.data_filter.every_nth_step is not None:
-                    cur_data = cur_data[:, ::config.data_filter.every_nth_step]
-                    x_values = x_values[::config.data_filter.every_nth_step]
+
+                    if isinstance(config.data_filter.every_nth_step, dict):
+                        step = config.data_filter.every_nth_step.step
+                        is_include_final_step = config.data_filter.every_nth_step.include_final_step
+                    else:
+                        step = config.data_filter.every_nth_step
+                        is_include_final_step = False
+
+                    # detect if the final step was not in the selection
+                    if is_include_final_step and cur_data.shape[1] % step == 0:
+                        inds = np.zeros(cur_data.shape[1], dtype=bool)
+                        inds[::step] = True
+                        inds[-1] = True
+
+                        cur_data = cur_data[:, inds]
+                        x_values = x_values[::step] + [x_values[-1]]
+                    else:
+                        cur_data = cur_data[:, ::step]
+                        x_values = x_values[::step]
 
                 mean_data = np.nanmean(cur_data, axis=0)
 

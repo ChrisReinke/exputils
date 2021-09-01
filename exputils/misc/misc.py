@@ -464,3 +464,46 @@ def is_allowed(name, allowed_list=None, denied_list=None):
             return True
 
     return False
+
+
+
+def str_to_list(str, delimiter=','):
+    """
+    Converts a string of elements into a list.
+    Example: 'ds1.var1, ds2.var2[:,-1]' -->  ['ds1.var1', 'ds2.var2[:,-1]']
+
+    :param str: Input string.
+    :param delimiter: Delimiter character used to split the string. (default=',')
+    :return List with splitted string elements.
+    """
+
+    # do nothing if already a list is given
+    if isinstance(str, list):
+        return str
+
+    elem_list = []
+
+    # remove outer bracket if one exists
+    str = str.strip()
+    if str:
+        if str[0] == '[' and str[-1] == ']':
+            str = str[1:-1]
+
+        bracket_level = 0
+
+        cur_str = ''
+        for c in str:
+            if c == delimiter and bracket_level <= 0:
+                elem_list.append(cur_str.strip())
+                cur_str = ''
+            elif c == '[':
+                bracket_level += 1
+                cur_str += c
+            elif c == ']':
+                bracket_level -= 1
+                cur_str += c
+            else:
+                cur_str += c
+        elem_list.append(cur_str.strip())
+
+    return elem_list
