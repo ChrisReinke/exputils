@@ -5,6 +5,7 @@ import re
 import numpy as np
 import warnings
 import collections
+import importlib.util
 
 # TODO: Feature - allow to load data from several campaigns
 # TODO: allow to load single experiments by just providing the id
@@ -187,3 +188,117 @@ def _filter_data(data, allowed_data_list, denied_data_list):
     for delete_key in delete_keys:
         del data[delete_key]
 
+
+def load_experiment_python_module(module_path, experiment_id=None, repetition_id=None, experiments_directory=None, exec_module=True,
+                                  experiment_directory_template=None, repetition_directory_template=None):
+    """
+    Loads a python module that is under a certain repetition of an experiment. Can be used to load for example the configuration of a repetition.
+
+    Example:
+        module = load_experiment_python_module('repetition_config.py', experiment_id=100, repetition_id=3)
+
+    :param module_path: Name of the python module (including the '.py' ending).
+    :param experiment_id: ID of the experiment. If not provided, then the module is assumed to be under the experiments directory.
+    :param repetition_id: ID of the repetition. If not provided, then the module is assumed to be under the experiment directory.
+    :param experiments_directory: Path to the experiments directory. (Default = '../experiments')
+    :param exec_module: True if the module should be executed. (Default = True)
+    :param experiment_directory_template: Alternative template string for experiment directories. (Default = 'experiment_{}')
+    :param repetition_directory_template: Alternative template string for repetition directories. (Default = 'repetition_{}')
+    :return: Loaded module.
+    """
+
+    if experiments_directory is None:
+        experiments_directory = os.path.join('..', eu.DEFAULT_EXPERIMENTS_DIRECTORY)
+
+    full_module_path = experiments_directory
+
+    # only add experiment subfolder if needed
+    if experiment_id is not None:
+
+        if experiment_directory_template is None:
+            experiment_directory_template = eu.EXPERIMENT_DIRECTORY_TEMPLATE
+
+        experiment_directory = experiment_directory_template.format(experiment_id)
+
+        full_module_path = os.path.join(full_module_path, experiment_directory)
+
+        # only add repetition subfolder if needed
+        if repetition_id is not None:
+
+            if repetition_directory_template is None:
+                repetition_directory_template = eu.REPETITION_DIRECTORY_TEMPLATE
+
+            repetition_directory = repetition_directory_template.format(repetition_id)
+
+            full_module_path = os.path.join(full_module_path, repetition_directory)
+
+    # construct the full path to the module
+    full_module_path = os.path.join(full_module_path, module_path)
+
+    filename = os.path.basename(module_path)
+    module_name = filename.replace('.py', '')
+
+    spec = importlib.util.spec_from_file_location(module_name, full_module_path)
+
+    # creates a new module based on spec
+    module = importlib.util.module_from_spec(spec)
+
+    if exec_module:
+        spec.loader.exec_module(module)
+
+    return module
+
+
+def load_experiment_data_single_object(name, experiment_id=None, repetition_id=None, experiments_directory=None, data_directory=None,
+                                       experiment_directory_template=None, repetition_directory_template=None):
+    """
+    Loads a object (a dill file) that is saved in the data directory of an experiment or repetition. Such objects are saved using the
+    log.add_single_object() function.geht es
+
+    Example:
+        log.add_single_object('my_object', obj)
+        obj = load_experiment_data_single_object('my_object', experiment_id=100, repetition_id=3)
+
+    :param name: Name of the object or the dill file (including the '.dill' ending is optional).
+    :param experiment_id: ID of the experiment. If not provided, then the object is assumed to be under the experiments data directory.
+    :param repetition_id: ID of the repetition. If not provided, then the object is assumed to be under the experiment data directory.
+    :param experiments_directory: Path to the experiments directory. (Default = '../experiments')
+    :param data_directory: Name of the data directory. (Default = 'data')
+    :param experiment_directory_template: Alternative template string for experiment directories. (Default = 'experiment_{}')
+    :param repetition_directory_template: Alternative template string for repetition directories. (Default = 'repetition_{}')
+    :return: Loaded objected.
+    """
+
+
+    if experiments_directory is None:
+        experiments_directory = os.path.join('..', eu.DEFAULT_EXPERIMENTS_DIRECTORY)
+
+    full_dill_path = experiments_directory
+
+    # only add experiment subfolder if needed
+    if experiment_id is not None:
+
+        if experiment_directory_template is None:
+            experiment_directory_template = eu.EXPERIMENT_DIRECTORY_TEMPLATE
+
+        experiment_directory = experiment_directory_template.format(experiment_id)
+
+        full_dill_path = os.path.join(full_dill_path, experiment_directory)
+
+        # only add repetition subfolder if needed
+        if repetition_id is not None:
+
+            if repetition_directory_template is None:
+                repetition_directory_template = eu.REPETITION_DIRECTORY_TEMPLATE
+
+            repetition_directory = repetition_directory_template.format(repetition_id)
+
+            full_dill_path = os.path.join(full_dill_path, repetition_directory)
+
+    if data_directory is None:
+        data_directory = eu.DEFAULT_DATA_DIRECTORY
+
+    # construct the full path to the module
+    full_dill_path = os.path.join(full_dill_path, data_directory, name)
+
+    return eu.io.dill.load_dill(full_dill_path)

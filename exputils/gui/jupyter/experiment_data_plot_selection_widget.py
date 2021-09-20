@@ -11,10 +11,17 @@ DEFAULT_PLOTLY_MEANSTD_SCATTER_CONFIG = """layout = dict(
     yaxis = dict(
         title = '', 
         range = [None, None]),
+),
+moving_average = dict(
+    n = 1
+),
+data_filter = dict(
+    every_nth_step = dict(
+        step = 1,
+        include_final_step = False
     ),
-    moving_average = dict(
-        n=1),
-    default_group_label = 'rep <group_idx>'"""
+),        
+default_group_label = 'rep <group_idx>'"""
 
 DEFAULT_PLOTLY_BOX_CONFIG = """layout = dict(
     xaxis = dict(

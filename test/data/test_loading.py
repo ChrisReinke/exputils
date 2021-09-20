@@ -15,6 +15,7 @@ def create_test_data(target_directory_path):
     os.makedirs(rep_00_path, exist_ok=True)
     os.makedirs(rep_01_path, exist_ok=True)
 
+    ########################
     # make experiment data
     log.clear()
     log.set_directory(os.path.join(experiment_path, eu.DEFAULT_DATA_DIRECTORY))
@@ -32,6 +33,13 @@ def create_test_data(target_directory_path):
     log.set_config(numpy_log_mode='npz')
     log.save()
 
+    # add a single object, a dill file per repetition
+    log.clear()
+    log.set_directory(os.path.join(experiment_path, eu.DEFAULT_DATA_DIRECTORY))
+    log.add_single_object('single_object', dict(info='exp'))
+    log.save()
+
+    ########################
     # make repetition 0 data
     log.clear()
     log.set_directory(os.path.join(rep_00_path, eu.DEFAULT_DATA_DIRECTORY))
@@ -49,6 +57,13 @@ def create_test_data(target_directory_path):
     log.set_config(numpy_log_mode='npz')
     log.save()
 
+    # add a single object, a dill file per repetition
+    log.clear()
+    log.set_directory(os.path.join(rep_00_path, eu.DEFAULT_DATA_DIRECTORY))
+    log.add_single_object('single_object',dict(info='rep_00'))
+    log.save()
+
+    ########################
     # make repetition 1 data
     log.clear()
     log.set_directory(os.path.join(rep_01_path, eu.DEFAULT_DATA_DIRECTORY))
@@ -65,6 +80,24 @@ def create_test_data(target_directory_path):
         log.add_value('rep_data_04', np.random.rand())
     log.set_config(numpy_log_mode='npz')
     log.save()
+
+    # add a single object, a dill file per repetition
+    log.clear()
+    log.set_directory(os.path.join(rep_01_path, eu.DEFAULT_DATA_DIRECTORY))
+    log.add_single_object('single_object', dict(info='rep_01'))
+    log.save()
+
+    ########################
+    # add a configuration python module for each repetition
+    f = open(os.path.join(rep_00_path, 'config.py'), 'w')
+    f.write('config = \'rep_0_config\'')
+    f.close()
+
+    f = open(os.path.join(rep_01_path, 'config.py'), 'w')
+    f.write('config = \'rep_1_config\'')
+    f.close()
+
+
 
 
 def test_loading(tmpdir):
@@ -289,3 +322,47 @@ def test_loading_on_repetition_data_loaded(tmpdir):
     assert 'rep_data_01' not in data['000000'].repetition_data[1]
     assert 'rep_data_02' not in data['000000'].repetition_data[1]
     assert 'mean_rep_data_01' in data['000000'].repetition_data[1]
+
+
+def test_loading_python_module(tmpdir):
+    create_test_data(tmpdir.strpath)
+
+    config_module = eu.data.loading.load_experiment_python_module(
+        experiment_id=0,
+        repetition_id=0,
+        module_path='config.py',
+        experiments_directory=tmpdir.strpath)
+
+    assert config_module.config == 'rep_0_config'
+
+    config_module = eu.data.loading.load_experiment_python_module(
+        experiment_id=0,
+        repetition_id=1,
+        module_path='config.py',
+        experiments_directory=tmpdir.strpath)
+
+    assert config_module.config == 'rep_1_config'
+
+
+def test_loading_single_object(tmpdir):
+    create_test_data(tmpdir.strpath)
+
+    obj = eu.data.loading.load_experiment_data_single_object(
+        'single_object',
+        experiment_id=0,
+        repetition_id=0,
+        experiments_directory=tmpdir.strpath)
+    assert obj['info'] == 'rep_00'
+
+    obj = eu.data.loading.load_experiment_data_single_object(
+        'single_object',
+        experiment_id=0,
+        repetition_id=1,
+        experiments_directory=tmpdir.strpath)
+    assert obj['info'] == 'rep_01'
+
+    obj = eu.data.loading.load_experiment_data_single_object(
+        'single_object',
+        experiment_id=0,
+        experiments_directory=tmpdir.strpath)
+    assert obj['info'] == 'exp'
