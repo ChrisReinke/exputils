@@ -25,7 +25,7 @@ echo "Generate experiments ..."
 eu_gricad_python -c "import exputils
 exputils.manage.generate_experiment_files('experiment_configurations.ods', directory='./experiments/')"
 
-echo "Add for each experiment a job ..."
+echo "Add for each repetition a job ..."
 eu_gricad_python -c "import exputils
 exputils.manage.start_experiments(
   start_scripts='gricad_add_job_run_repetition.sh',
