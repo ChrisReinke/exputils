@@ -28,7 +28,7 @@ def start_torque_experiments(directory=None, start_scripts='*.torque', is_parall
 
 
 def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', parallel=True, is_chdir=False, verbose=False, post_start_wait_time=0, is_rerun=False):
-    '''
+    """
 
     :param directory: Directory in which the start scripts are searched.
     :param start_scripts: Filename of the start script file. Can include * to search for scripts.
@@ -40,7 +40,7 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
     :param post_start_wait_time:
     :param is_rerun: Should finished scripts be rerun. (default: False)
     :return:
-    '''
+    """
 
     # TODO: do not restart experiments that have been added as jobs but have not been started yet
 
@@ -162,7 +162,10 @@ def get_scripts(directory=None, start_scripts='*.sh'):
             # read status
             with open(status_file_path, 'r') as f:
                 lines = f.read().splitlines()
-                status = lines[-1]
+                if len(lines) > 0:
+                    status = lines[-1]
+                else:
+                    status = 'none'
         else:
             status = 'none'
 
