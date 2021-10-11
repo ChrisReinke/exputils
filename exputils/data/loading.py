@@ -1,4 +1,5 @@
 import os
+import sys
 import exputils as eu
 from glob import glob
 import re
@@ -250,7 +251,8 @@ def load_experiment_python_module(module_path, experiment_id=None, repetition_id
 
 
 def load_experiment_data_single_object(name, experiment_id=None, repetition_id=None, experiments_directory=None, data_directory=None,
-                                       experiment_directory_template=None, repetition_directory_template=None):
+                                       experiment_directory_template=None, repetition_directory_template=None,
+                                       add_execution_directory_to_sys_path=True):
     """
     Loads a object (a dill file) that is saved in the data directory of an experiment or repetition. Such objects are saved using the
     log.add_single_object() function.geht es
@@ -266,6 +268,9 @@ def load_experiment_data_single_object(name, experiment_id=None, repetition_id=N
     :param data_directory: Name of the data directory. (Default = 'data')
     :param experiment_directory_template: Alternative template string for experiment directories. (Default = 'experiment_{}')
     :param repetition_directory_template: Alternative template string for repetition directories. (Default = 'repetition_{}')
+    :param add_execution_directory_to_sys_path: Should the directory in which the code was executed (experiment or repetition) be temporaily added
+                                                to the python system path. This might be necessary if the loaded object has references to it.
+                                                (Default = True)
     :return: Loaded objected.
     """
 
@@ -273,7 +278,7 @@ def load_experiment_data_single_object(name, experiment_id=None, repetition_id=N
     if experiments_directory is None:
         experiments_directory = os.path.join('..', eu.DEFAULT_EXPERIMENTS_DIRECTORY)
 
-    full_dill_path = experiments_directory
+    full_execution_dir_path = experiments_directory
 
     # only add experiment subfolder if needed
     if experiment_id is not None:
@@ -283,7 +288,7 @@ def load_experiment_data_single_object(name, experiment_id=None, repetition_id=N
 
         experiment_directory = experiment_directory_template.format(experiment_id)
 
-        full_dill_path = os.path.join(full_dill_path, experiment_directory)
+        full_execution_dir_path = os.path.join(full_execution_dir_path, experiment_directory)
 
         # only add repetition subfolder if needed
         if repetition_id is not None:
@@ -293,12 +298,19 @@ def load_experiment_data_single_object(name, experiment_id=None, repetition_id=N
 
             repetition_directory = repetition_directory_template.format(repetition_id)
 
-            full_dill_path = os.path.join(full_dill_path, repetition_directory)
+            full_execution_dir_path = os.path.join(full_execution_dir_path, repetition_directory)
 
     if data_directory is None:
         data_directory = eu.DEFAULT_DATA_DIRECTORY
 
     # construct the full path to the module
-    full_dill_path = os.path.join(full_dill_path, data_directory, name)
+    full_dill_path = os.path.join(full_execution_dir_path, data_directory, name)
+
+    # add the directory in which the code was executed to system path
+    if add_execution_directory_to_sys_path:
+        sys.path.append(full_execution_dir_path)
 
     return eu.io.dill.load_dill(full_dill_path)
+
+    if add_execution_directory_to_sys_path:
+        sys.path.pop()
