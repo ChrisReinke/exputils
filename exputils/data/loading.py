@@ -191,7 +191,8 @@ def _filter_data(data, allowed_data_list, denied_data_list):
 
 
 def load_experiment_python_module(module_path, experiment_id=None, repetition_id=None, experiments_directory=None, exec_module=True,
-                                  experiment_directory_template=None, repetition_directory_template=None):
+                                  experiment_directory_template=None, repetition_directory_template=None,
+                                  add_execution_directory_to_sys_path=True):
     """
     Loads a python module that is under a certain repetition of an experiment. Can be used to load for example the configuration of a repetition.
 
@@ -205,6 +206,9 @@ def load_experiment_python_module(module_path, experiment_id=None, repetition_id
     :param exec_module: True if the module should be executed. (Default = True)
     :param experiment_directory_template: Alternative template string for experiment directories. (Default = 'experiment_{}')
     :param repetition_directory_template: Alternative template string for repetition directories. (Default = 'repetition_{}')
+    :param add_execution_directory_to_sys_path: Should the directory in which the code was executed (experiment or repetition) be temporaily added
+                                                to the python system path. This might be necessary if the loaded object has references to it.
+                                                (Default = True)
     :return: Loaded module.
     """
 
@@ -245,7 +249,14 @@ def load_experiment_python_module(module_path, experiment_id=None, repetition_id
     module = importlib.util.module_from_spec(spec)
 
     if exec_module:
+        # add the directory in which the code was executed to system path
+        if add_execution_directory_to_sys_path:
+            sys.path.append(os.path.dirname(full_module_path))
+
         spec.loader.exec_module(module)
+
+        if add_execution_directory_to_sys_path:
+            sys.path.pop()
 
     return module
 

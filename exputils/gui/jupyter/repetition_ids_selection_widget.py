@@ -3,9 +3,9 @@ import exputils as eu
 import numpy as np
 
 class RepetitionIDsSelectionWidget(MultiSelectionWidget):
-    '''
+    """
     MultiSelectionWidget to select experiment ids in a experiment_data dict.
-    '''
+    """
 
     @staticmethod
     def default_config():
