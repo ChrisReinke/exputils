@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CUSTOM_PACKAGE=$EU_PRJ_CUSTOM_PACKAGES
+CUSTOM_PACKAGES=$EU_PRJ_CUSTOM_PACKAGES
 # local paths
 LOCAL_EXPERIMENTS_PATH=$EU_PRJ_LOCAL_EXPERIMENTS_PATH
 LOCAL_CODE_PATH=$EU_PRJ_LOCAL_CODE_PATH
@@ -43,20 +43,24 @@ rsync -aP \
   --exclude '**/experiments' \
   $LOCAL_EXPERIMENT_PATH/ $EXTERNAL_MACHINE:$EXTERNAL_EXPERIMENT_PATH
 
-echo "Send $CUSTOM_PACKAGE code ..."
-# current project
-# exclude hidden folders (e.g. git) and some others
-rsync -aP \
-  --exclude '.*/' \
-  --exclude '*.sif' \
-  --exclude '*.dill' \
-  --exclude '*.npy' \
-  --exclude '*.npz' \
-  --exclude '*.egg-info' \
-  --exclude '*.ipynb' \
-  --exclude '__pycache__' \
-  --exclude 'experiments' \
-  $LOCAL_CODE_PATH/$CUSTOM_PACKAGE/ $EXTERNAL_MACHINE:$EXTERNAL_CODE_PATH/$CUSTOM_PACKAGE
+
+IFS=: read -raCUSTOM_PACKAGES_ARRAY<<< "$CUSTOM_PACKAGES"
+for CUSTOM_PACKAGE in "${CUSTOM_PACKAGES_ARRAY[@]}"; do
+  echo "Send $CUSTOM_PACKAGE code ..."
+  # current project
+  # exclude hidden folders (e.g. git) and some others
+  rsync -aP \
+    --exclude '.*/' \
+    --exclude '*.sif' \
+    --exclude '*.dill' \
+    --exclude '*.npy' \
+    --exclude '*.npz' \
+    --exclude '*.egg-info' \
+    --exclude '*.ipynb' \
+    --exclude '__pycache__' \
+    --exclude 'experiments' \
+    $LOCAL_CODE_PATH/$CUSTOM_PACKAGE/ $EXTERNAL_MACHINE:$EXTERNAL_CODE_PATH/$CUSTOM_PACKAGE
+done
 
 echo "Send exputils code ..."
 # copy exputils packages
