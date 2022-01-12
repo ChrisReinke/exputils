@@ -82,12 +82,12 @@ def get_objects(name):
     """
     return log[name]
 
-def add_single_object(name, obj):
+def add_single_object(name, obj, directory=None):
     """
     Adds a single object to the log which is directly written to the hard drive and not stored in memory.
     The objects is saved via dill.
     """
-    log.add_single_object(name, obj)
+    log.add_single_object(name, obj, directory=directory)
 
 def items():
     """

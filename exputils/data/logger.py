@@ -108,12 +108,15 @@ class Logger:
         self.object_data[name].append(copy.deepcopy(obj))
 
 
-    def add_single_object(self, name, obj):
+    def add_single_object(self, name, obj, directory=None):
         """
         Adds a single object to the log by directly writing it to a file.
         Overwrites existing object data with the same name.
         """
-        file_path = os.path.join(self.directory, name)
+        if directory is None:
+            directory = self.directory
+
+        file_path = os.path.join(directory, name)
         eu.io.save_dill(obj, file_path)
 
 

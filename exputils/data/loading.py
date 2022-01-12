@@ -160,7 +160,7 @@ def load_experiment_data(experiment_descriptions=None, experiments_directory=Non
     return data, experiment_descriptions
 
 
-def load_single_experiment_data(experiment_directory, data_directory=None, allowed_data_filter=None, denied_data_filter=None):
+def load_single_experiment_data(experiment_directory, data_directory=None, allowed_data_filter=None, denied_data_filter=None, allow_pickle=True):
     """Loads the data from a single experiment."""
 
     if data_directory is None:
@@ -173,7 +173,8 @@ def load_single_experiment_data(experiment_directory, data_directory=None, allow
     statistics = eu.io.load_numpy_files(
         os.path.join(experiment_directory, data_directory),
         allowed_data_filter=allowed_data_filter,
-        denied_data_filter=denied_data_filter)
+        denied_data_filter=denied_data_filter,
+        allow_pickle=allow_pickle)
 
     # TODO: Refactor - make loading of npz files without the 'logging' sub-directory as a general cases
     if 'logging' in statistics:

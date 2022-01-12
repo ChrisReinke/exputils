@@ -31,7 +31,7 @@ def save_dict_to_numpy_files(data, path='.', mode = 'npy'):
         raise ValueError('Unknown numpy logging mode {!r}!'.format(mode))
 
 
-def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=None):
+def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=None, allow_pickle=True):
     """Loads data from all npy and npz files in a given directory."""
 
     if allowed_data_filter is not None and denied_data_filter is not None:
@@ -47,7 +47,7 @@ def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=Non
 
         if eu.misc.is_allowed(stat_name, allowed_list=allowed_data_filter, denied_list=denied_data_filter):
             try:
-                stat_val = np.load(file)
+                stat_val = np.load(file, allow_pickle=allow_pickle)
             except FileNotFoundError:
                 raise
             except Exception as e:
@@ -62,7 +62,7 @@ def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=Non
         stat_name = os.path.splitext(os.path.basename(file))[0]
         if eu.misc.is_allowed(stat_name, allowed_list=allowed_data_filter, denied_list=denied_data_filter):
             try:
-                stat_vals = eu.AttrDict(np.load(file))
+                stat_vals = eu.AttrDict(np.load(file, allow_pickle=allow_pickle))
             except FileNotFoundError:
                 raise
             except Exception as e:
