@@ -4,10 +4,10 @@ import exputils.data.logging as log
 import numpy as np
 
 
-def create_test_data(target_directory_path):
+def create_test_data(target_directory_path, experiment_id = '000000'):
 
     # make experiment folders and repetition folders
-    experiment_path = os.path.join(target_directory_path, 'experiment_000000')
+    experiment_path = os.path.join(target_directory_path, 'experiment_' + experiment_id)
     rep_00_path = os.path.join(experiment_path, 'repetition_000000')
     rep_01_path = os.path.join(experiment_path, 'repetition_000001')
 
@@ -136,6 +136,88 @@ def test_loading(tmpdir):
     assert 'rep_data_02' in data['000000'].repetition_data[1]
 
     # TODO: test experiment descriptions
+
+
+def test_loading_single_experiment(tmpdir):
+
+    create_test_data(tmpdir.strpath, '000000')
+    create_test_data(tmpdir.strpath, '000001')
+
+    #####################################
+    # load all
+    data, exp_descr = eu.data.loading.load_experiment_data(
+        experiments_directory=tmpdir.strpath,
+        #allowed_experiments_id_list=[]
+    )
+
+    assert '000000' in data
+    assert 'exp_data_01' in data['000000']
+    assert 'exp_data_02' in data['000000']
+
+    assert 0 in data['000000'].repetition_data
+    assert 'rep_data_01' in data['000000'].repetition_data[0]
+    assert 'rep_data_02' in data['000000'].repetition_data[0]
+
+    assert 1 in data['000000'].repetition_data
+    assert 'rep_data_01' in data['000000'].repetition_data[1]
+    assert 'rep_data_02' in data['000000'].repetition_data[1]
+
+
+    assert '000001' in data
+    assert 'exp_data_01' in data['000001']
+    assert 'exp_data_02' in data['000001']
+
+    assert 0 in data['000001'].repetition_data
+    assert 'rep_data_01' in data['000001'].repetition_data[0]
+    assert 'rep_data_02' in data['000001'].repetition_data[0]
+
+    assert 1 in data['000001'].repetition_data
+    assert 'rep_data_01' in data['000001'].repetition_data[1]
+    assert 'rep_data_02' in data['000001'].repetition_data[1]
+
+    #####################################
+    # only load exp 000001
+    data, exp_descr = eu.data.loading.load_experiment_data(
+        experiments_directory=tmpdir.strpath,
+        allowed_experiments_id_list=['000001']
+    )
+
+    assert '000000' not in data
+
+    assert '000001' in data
+    assert 'exp_data_01' in data['000001']
+    assert 'exp_data_02' in data['000001']
+
+    assert 0 in data['000001'].repetition_data
+    assert 'rep_data_01' in data['000001'].repetition_data[0]
+    assert 'rep_data_02' in data['000001'].repetition_data[0]
+
+    assert 1 in data['000001'].repetition_data
+    assert 'rep_data_01' in data['000001'].repetition_data[1]
+    assert 'rep_data_02' in data['000001'].repetition_data[1]
+
+
+    #####################################
+    # do not load exp 000001
+    data, exp_descr = eu.data.loading.load_experiment_data(
+        experiments_directory=tmpdir.strpath,
+        denied_experiments_id_list=['000001']
+    )
+
+    assert '000000' in data
+    assert 'exp_data_01' in data['000000']
+    assert 'exp_data_02' in data['000000']
+
+    assert 0 in data['000000'].repetition_data
+    assert 'rep_data_01' in data['000000'].repetition_data[0]
+    assert 'rep_data_02' in data['000000'].repetition_data[0]
+
+    assert 1 in data['000000'].repetition_data
+    assert 'rep_data_01' in data['000000'].repetition_data[1]
+    assert 'rep_data_02' in data['000000'].repetition_data[1]
+
+
+    assert '000001' not in data
 
 
 def test_loading_pre_allowed_data_filter(tmpdir):

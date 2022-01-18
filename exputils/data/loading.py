@@ -9,14 +9,18 @@ import collections
 import importlib.util
 
 # TODO: Feature - allow to load data from several campaigns
-# TODO: allow to load single experiments by just providing the id
 
 def load_experiment_descriptions(experiments_directory=None,
+                                 allowed_experiments_id_list=None,
+                                 denied_experiments_id_list=None,
                                  experiment_directory_template=None,
                                  repetition_directory_template=None):
 
     if experiments_directory is None:
         experiments_directory = os.path.join('..', eu.DEFAULT_EXPERIMENTS_DIRECTORY)
+
+    if allowed_experiments_id_list is not None and denied_experiments_id_list is not None:
+        raise ValueError('allowed_experiments_id_list and denied_experiments_id_list can not be set at the same time!')
 
     if experiment_directory_template is None: experiment_directory_template = eu.EXPERIMENT_DIRECTORY_TEMPLATE
     experiment_directory_template = re.sub('\{.*\}', '*', experiment_directory_template)
@@ -29,37 +33,50 @@ def load_experiment_descriptions(experiments_directory=None,
     exp_directories = glob(os.path.join(experiments_directory, experiment_directory_template))
     for order, exp_directory in enumerate(np.sort(exp_directories)):
 
-        exp_id = re.findall(r'\d+', os.path.basename(exp_directory))[0]
+        try:
+            exp_id = re.findall(r'\d+', os.path.basename(exp_directory))[0]
+        except IndexError as err:
+            raise ValueError('The experiments_directory (\'{}\') seems not to have experiment folders!'.format(experiments_directory)) from err
 
-        experiment_descr = eu.AttrDict()
-        experiment_descr.id = exp_id
-        experiment_descr.name = 'exp {}'.format(exp_id)
-        experiment_descr.order = order
-        experiment_descr.is_load_data = True
-        experiment_descr.directory = exp_directory
-        experiment_descr.short_name = 'e{}'.format(exp_id)
-        experiment_descr.description = ''
+        is_add_experiment_descr = True
+        if allowed_experiments_id_list is not None and exp_id not in allowed_experiments_id_list:
+            is_add_experiment_descr = False
+        elif denied_experiments_id_list is not None and exp_id in denied_experiments_id_list:
+            is_add_experiment_descr = False
 
-        # find repetition ids
-        experiment_descr.repetition_ids = []
-        repetition_directories = glob(os.path.join(exp_directory, repetition_directory_template))
-        for rep_directory in np.sort(repetition_directories):
-            rep_id = re.findall(r'\d+', os.path.basename(rep_directory))[0]
-            experiment_descr.repetition_ids.append(int(rep_id))
-        experiment_descr.repetition_ids.sort()
+        if is_add_experiment_descr:
+            experiment_descr = eu.AttrDict()
+            experiment_descr.id = exp_id
+            experiment_descr.name = 'exp {}'.format(exp_id)
+            experiment_descr.order = order
+            experiment_descr.is_load_data = True
+            experiment_descr.directory = exp_directory
+            experiment_descr.short_name = 'e{}'.format(exp_id)
+            experiment_descr.description = ''
 
-        experiment_descriptions[exp_id] = experiment_descr
+            # find repetition ids
+            experiment_descr.repetition_ids = []
+            repetition_directories = glob(os.path.join(exp_directory, repetition_directory_template))
+            for rep_directory in np.sort(repetition_directories):
+                rep_id = re.findall(r'\d+', os.path.basename(rep_directory))[0]
+                experiment_descr.repetition_ids.append(int(rep_id))
+            experiment_descr.repetition_ids.sort()
+
+            experiment_descriptions[exp_id] = experiment_descr
 
     return experiment_descriptions
 
 
-def load_experiment_data(experiment_descriptions=None, experiments_directory=None, data_directory = None, is_load_repetition_data = True,
+def load_experiment_data(experiment_descriptions=None, experiments_directory=None, allowed_experiments_id_list=None, denied_experiments_id_list=None,
+                         data_directory=None, is_load_repetition_data=True,
                          pre_allowed_data_filter=None, pre_denied_data_filter=None, post_allowed_data_filter=None, post_denied_data_filter=None,
                          on_experiment_data_loaded=None, on_repetition_data_loaded=None):
     """
     Loads experimental data from experiments and their repetitions.
 
     :param experiments_directory:  Path to the directory that contains the experiments. (default = './experiments')
+    :param allowed_experiments_id_list: List of experiment ids that are only allowed to be loaded, not other will be loaded. (default = None)
+    :param denied_experiments_id_list: List of experiment ids that will not be loaded, all other will. (default = None)
     :param experiment_descriptions: Descriptions about the experiments that should be loaded. If it contains a is_load_data property, then this
                                     is checked if the experiment should be loaded or not. (default = None)
     :param data_directory: Relative path of the data directories under the experiments and repetitions. (default = '/data')
@@ -80,14 +97,21 @@ def load_experiment_data(experiment_descriptions=None, experiments_directory=Non
 
     """
 
-    # TODO: add denied_experiments_list and allowed_experiments_list to allow to filter which experiments are loaded besides the possibility of
-    #       defining this in the experiment_descriptions
-
     if experiments_directory is not None and experiment_descriptions is not None:
         raise ValueError('Can not set experiment_directory and experiment_descriptions at the same time!')
 
+    if experiment_descriptions is not None and (allowed_experiments_id_list is not None or denied_experiments_id_list is not None):
+        raise ValueError('experiment_descriptions and (allowed_experiments_id_list or denied_experiments_id_list) can not be set at the same time!')
+
+    if allowed_experiments_id_list is not None and denied_experiments_id_list is not None:
+        raise ValueError('allowed_experiments_id_list and denied_experiments_id_list can not be set at the same time!')
+
     if experiment_descriptions is None:
-        experiment_descriptions = load_experiment_descriptions(experiments_directory=experiments_directory)
+        experiment_descriptions = load_experiment_descriptions(
+                experiments_directory=experiments_directory,
+            allowed_experiments_id_list=allowed_experiments_id_list,
+            denied_experiments_id_list=denied_experiments_id_list
+        )
     else:
         experiment_descriptions = experiment_descriptions
 
