@@ -5,7 +5,7 @@ import copy
 
 # TODO: Feature - tensorbord output
 # TODO: Featrue - allow to log sub values, for example: agent.epsilon
-
+# TODO: an error occurs during saving if variable names have slashes in the name '/', replace them with underscore and give a warning
 class Logger:
     """
 
