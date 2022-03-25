@@ -89,11 +89,13 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
             else:
                 process = subprocess.Popen(start_command.format(script_path).split(), cwd=script_directory)
 
+            processes.append(process)
+
             # if not parallel, then wait until current process is finished
             if n_parallel == 1:
                 process.wait()
             else:
-                # parallel is a number that tell how many process can be open at the same time
+                # parallel is a number with how many process can be open at the same time
 
                 is_wait = True
                 while is_wait:
@@ -105,6 +107,7 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                             n_active_proceeses += 1
 
                     # wait if the maximum number of processes are currently running
+                    # because we started already the processes
                     is_wait = n_active_proceeses >= parallel
 
                     if is_wait:
@@ -112,8 +115,6 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
 
             if post_start_wait_time > 0:
                 time.sleep(post_start_wait_time)
-
-            processes.append(process)
 
             if is_chdir:
                 os.chdir(cwd)

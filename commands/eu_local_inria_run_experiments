@@ -15,9 +15,10 @@ EXTERNAL_SCRIPT_PATH=`echo $LOCAL_SCRIPT_PATH | sed "s+${LOCAL_EXPERIMENTS_DIR}+
 ARGUMENTS=""
 
 # handle arguments
-while getopts ":m:r" arg; do
+while getopts ":m:n:r" arg; do
   case $arg in
     m) MACHINE=$OPTARG;;
+    n) ARGUMENTS="$ARGUMENTS -n $OPTARG";;
     r) ARGUMENTS="$ARGUMENTS -r";;
   esac
 done
