@@ -21,15 +21,16 @@ Developed and tested for Python 3.6, and the Linux OS (developed under Ubuntu 18
 
 Needs several additional python packages which will be automatically installed during the installation:
 * numpy >= 1.19.5
-* six >= 1.15.0
-* ipywidgets >= 7.5.1
-* qgrid >= 1.3.1
-* plotly >= 4.13.0
-* cloudpickle >= 1.6.0
-* dill >= 0.3.3
-* odfpy >= 1.4.1
-* tabulate >= 0.8.9
-* scipy >= 1.5.4
+*  six >= 1.15.0
+*  ipywidgets >= 7.5.1
+*  qgrid >= 1.3.1
+*  plotly >= 4.13.0
+*  cloudpickle >= 1.6.0
+*  dill >= 0.3.3
+*  odfpy >= 1.4.1
+*  tabulate >= 0.8.9
+*  scipy >= 1.5.4
+*  tensorboard >= 1.15.0
 
 ## Installation
 
