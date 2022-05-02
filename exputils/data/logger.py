@@ -1,11 +1,20 @@
 from exputils.misc.attrdict import AttrDict, combine_dicts
 import exputils as eu
+import numpy as np
 import os
 import copy
+import warnings
+from datetime import datetime
+import re
 
-# TODO: Feature - tensorbord output
+# try to import tensorboard
+try:
+    import torch.utils.tensorboard
+    is_exist_tensorboard_module = True
+except ImportError:
+    is_exist_tensorboard_module = False
+
 # TODO: Featrue - allow to log sub values, for example: agent.epsilon
-# TODO: an error occurs during saving if variable names have slashes in the name '/', replace them with underscore and give a warning
 class Logger:
     """
 
@@ -23,7 +32,15 @@ class Logger:
         dc = AttrDict(
             directory = None,
             numpy_log_mode = 'npy',
-            numpy_npz_filename = 'logging.npz'
+            numpy_npz_filename = 'logging.npz',
+
+            tensorboard = AttrDict(
+                log_dir = None,
+                filename_suffix = '.tblog',
+                purge_step=None,
+                max_queue=10,
+                flush_secs=120,
+            )
         )
         return dc
 
@@ -33,6 +50,9 @@ class Logger:
 
         self.numpy_data = dict()
         self.object_data = dict()
+
+        self._tensorboard_writer = None
+        self._is_tensorboard_active = False
 
 
     @property
@@ -49,6 +69,8 @@ class Logger:
 
 
     def __getitem__(self, key):
+        key = key.replace('/', '_')
+
         if key in self.numpy_data:
             return self.numpy_data[key]
         elif key in self.object_data:
@@ -58,6 +80,8 @@ class Logger:
 
 
     def __contains__(self, item):
+        item = item.replace('/', '_')
+
         return (item in self.numpy_data) or (item in self.object_data)
 
 
@@ -72,6 +96,8 @@ class Logger:
         :param name: If none, then the whole log is cleared, otherwise only the data element with the given name.
                      (default=None)
         """
+        if name is not None:
+            name = name.replace('/', '_')
 
         if name is None:
             self.numpy_data.clear()
@@ -87,11 +113,32 @@ class Logger:
                 del self.numpy_data[name]
 
 
-    def add_value(self, name, value):
-        if name not in self.numpy_data:
-            self.numpy_data[name] = []
+    def add_value(self, name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=None):
 
-        self.numpy_data[name].append(value)
+        safe_name = name.replace('/', '_')
+
+        if safe_name not in self.numpy_data:
+            self.numpy_data[safe_name] = []
+
+        self.numpy_data[safe_name].append(scalar)
+
+        if log_to_tb is True or (self._is_tensorboard_active and log_to_tb is not False):
+            # identify if the value is a scalar, if yes, then add it to tensorboard
+            if not isinstance(scalar, (list, tuple, np.ndarray)):
+                self.tensorboard.add_scalar(name, scalar, tb_global_step, tb_walltime)
+
+
+    def add_scalar(self, name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+
+        safe_name = name.replace('/', '_')
+
+        if safe_name not in self.numpy_data:
+            self.numpy_data[safe_name] = []
+
+        self.numpy_data[safe_name].append(value)
+
+        if log_to_tb is True or (self._is_tensorboard_active and log_to_tb is not False):
+            self.tensorboard.add_scalar(name, value, tb_global_step, tb_walltime)
 
 
     def add_object(self, name, obj):
@@ -102,6 +149,8 @@ class Logger:
         :param obj:
         :return:
         """
+        name = name.replace('/', '_')
+
         if name not in self.object_data:
             self.object_data[name] = []
 
@@ -116,6 +165,8 @@ class Logger:
         if directory is None:
             directory = self.directory
 
+        name = name.replace('/', '_')
+
         file_path = os.path.join(directory, name)
         eu.io.save_dill(obj, file_path)
 
@@ -127,6 +178,8 @@ class Logger:
         :param name: Name of the object.
         :return: Loaded object.
         """
+        name = name.replace('/', '_')
+
         file_path = os.path.join(self.directory, name)
         return eu.io.load_dill(file_path)
 
@@ -154,6 +207,10 @@ class Logger:
             file_path = os.path.join(directory, obj_name)
             eu.io.save_dill(obj, file_path)
 
+        # save also tensorboard if one exists
+        if self._tensorboard_writer is not None:
+            self._tensorboard_writer.flush()
+
 
     def load(self, directory=None, load_objects=False):
         directory = self.directory if directory is None else directory
@@ -174,3 +231,85 @@ class Logger:
             self.object_data = eu.io.load_dill_files(directory)
         else:
             self.object_data = dict()
+
+
+    @property
+    def is_tensorboard(self):
+        """Return True if a tensorboard is active and can be used, otherwise False."""
+        return self._is_tensorboard
+
+
+    @property
+    def tensorboard(self):
+        """Tensorboard SummaryWriter"""
+
+        if self._tensorboard_writer is None:
+            self.create_tensorboard()
+
+        return self._tensorboard_writer
+
+
+    def create_tensorboard(self, config=None, **kwargs):
+        """Creates a tensorboard"""
+
+        self.config.tensorboard = eu.combine_dicts(kwargs, config, self.config.tensorboard)
+
+        # identify which experiment and repetition we are in, to set the tensorboard folder
+        experiment_name = eu.misc.get_experiment_name()
+        repetition_name = eu.misc.get_repetition_name()
+
+        if self.config.tensorboard.log_dir is None:
+            # create the logs in the experiment folder which is located on top of the repetition and experiment folder if they exist
+
+            log_dir = ''
+
+            if experiment_name is not None:
+                log_dir = os.path.join(log_dir, '..')
+
+            if repetition_name is not None:
+                log_dir = os.path.join(log_dir, '..')
+
+            log_dir = os.path.join(log_dir, 'tensorboard_logs')
+
+            self.config.tensorboard.log_dir = log_dir
+
+        # add the experiment and repetition name to the log path, to create sub logs for them
+        if experiment_name is not None:
+            experiment_name = re.sub('_0{1,5}', '_', experiment_name)
+            experiment_name = experiment_name.replace('experiment', 'exp')
+            self.config.tensorboard.log_dir = os.path.join(self.config.tensorboard.log_dir, experiment_name)
+        if repetition_name is not None:
+            repetition_name = re.sub('_0{1,5}', '_', repetition_name)
+            repetition_name = repetition_name.replace('experiment', 'exp')
+            self.config.tensorboard.log_dir = os.path.join(self.config.tensorboard.log_dir, repetition_name.replace('repetition', 'rep'))
+
+        dt = datetime.now()
+        self.config.tensorboard.log_dir = os.path.join(self.config.tensorboard.log_dir, dt.strftime('%y.%m.%d_%H.%M'))
+
+        if self._tensorboard_writer is not None:
+            self._tensorboard_writer.flush()
+            warnings.warn('Tensorboard SummaryWriter existed already. Creating a new one ...')
+
+        if is_exist_tensorboard_module:
+            self._tensorboard_writer = torch.utils.tensorboard.SummaryWriter(**self.config.tensorboard)
+        else:
+            raise ImportError('Tensorboard module \'torch.utils.tensorboard\' does not exist!')
+
+        return self.tensorboard
+
+
+    def activate_tensorboard(self, config=None, **kwargs):
+        """Activates the tensorboard to automatically also log values that are given to the log.
+        If not tensorboard exists, one is created."""
+
+        if self._tensorboard_writer is None:
+            self.create_tensorboard(config=config, **kwargs)
+
+        self._is_tensorboard_active = True
+
+        return self._tensorboard_writer
+
+
+    def deactivate_tensorboard(self):
+        """Deactivates the tensorboard to automatically also log values that are given to the log."""
+        self._is_tensorboard_active = False

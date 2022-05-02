@@ -58,11 +58,26 @@ def get_item(name):
     """
     return log[name]
 
-def add_value(name, value):
+def add_value(name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None):
     """
     Adds a new value to the log. Values are stored in numpy arrays.
+
+    :param log_to_tb: Should the value be logged to tensorboard if scalar?
+    :param tb_global_step: Globale step for tensorboard.
+    :param tb_walltime: Walltime for tensorboard.
     """
-    log.add_value(name, value)
+    log.add_value(name, value, log_to_tb, tb_global_step, tb_walltime)
+
+
+def add_scalar(name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+    """
+    Adds a new value to the log. Values are stored in numpy arrays.
+
+    :param log_to_tb: Should the value be logged to tensorboard?
+    :param tb_global_step: Globale step for tensorboard.
+    :param tb_walltime: Walltime for tensorboard.
+    """
+    log.add_scalar(name, scalar, log_to_tb, tb_global_step, tb_walltime)
 
 def get_values(name):
     """
@@ -130,3 +145,44 @@ def set_config(config=None, **kwargs):
     :param kwargs: Arguments list of config parameters.
     """
     log.config = eu.combine_dicts(kwargs, config, log.config)
+
+
+def create_tensorboard(config=None, **kwargs):
+    """
+    Creates a tensorboard that can be used for logging.
+
+
+    :param config: Tensorboard config. See torch.utils.tensorboard.SummaryWriter documentation.
+    :param kwargs: Tensorboard config. See torch.utils.tensorboard.SummaryWriter documentation.
+    :return: SummaryWriter
+    """
+
+    return log.create_tensorboard(config=config, **kwargs)
+
+
+def activate_tensorboard(config=None, **kwargs):
+    """
+    Activates a tensorboard that can be used for logging.
+    If it is activated, then when the function add_value is used and a scalar is given, the tensorboard automatically logs it too.
+    Creates a tensorboard if non existed so far.
+
+    :param config: Tensorboard config. See torch.utils.tensorboard.SummaryWriter documentation.
+    :param kwargs: Tensorboard config. See torch.utils.tensorboard.SummaryWriter documentation.
+    :return: SummaryWriter
+    """
+
+    return log.activate_tensorboard(config=config, **kwargs)
+
+
+def deactivate_tensorboard():
+    """
+    Deactivates a tensorboard that can be used for logging.
+    """
+
+    return log.deactivate_tensorboard()
+
+
+def tensorboard():
+    """The tensorboard SummaryWriter that can be used to log data to the tensorboard."""
+
+    return log.tensorboard

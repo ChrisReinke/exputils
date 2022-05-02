@@ -11,3 +11,5 @@ from exputils.misc.misc import create_object_from_config
 from exputils.misc.misc import seed
 from exputils.misc.misc import is_allowed
 from exputils.misc.misc import str_to_list
+from exputils.misc.misc import get_experiment_name
+from exputils.misc.misc import get_repetition_name

@@ -87,6 +87,7 @@ for i in ${!EXTERNAL_PATHS[@]}; do
       --include="*.dill" \
       --include="*.status" \
       --include="*.log" \
+      --include="*.tblog" \
       --exclude="*" \
       "$EXTERNAL_MACHINE:${EXTERNAL_PATHS[$i]}/" "${LOCAL_PATHS[$i]}"
 done

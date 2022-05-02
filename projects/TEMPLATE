@@ -22,7 +22,6 @@ export EU_PRJ_LOCAL_CODE_PATH=/scratchlocal/creinke/data/study/perception/code
 
 # experiment directory at local pc
 export EU_PRJ_LOCAL_EXPERIMENTS_PATH=/scratchlocal/creinke/data/study/perception/experiments/sf_transfer_rl_02
-#export EU_PRJ_LOCAL_EXPERIMENTS_PATH=/scratchlocal/creinke/data/study/perception/code/rlexp/examples
 
 # default number of parallel processes
 export EU_PRJ_LOCAL_DEFAULT_NUM_PROCESSES=6
@@ -32,23 +31,38 @@ export EU_PRJ_LOCAL_SINGULARITY_IMAGE=/scratchlocal/creinke/data/study/perceptio
 
 
 ##################
-# INRIA Workstations
+# INRIA
 
 # code directory (parent directory of the transfer_rl and exputil package) at Inria
 export EU_PRJ_INRIA_CODE_PATH=/scratch/hydra/creinke/data/study/perception/code
 
 # experiment directory at INRIA
 export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/experiments/sf_transfer_rl_02
-#export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/code/rlexp/examples
 
 # Singularity image
 export EU_PRJ_INRIA_SINGULARITY_IMAGE=/scratch/hydra/creinke/data/study/perception/singularity/sf_transfer_rl_02.sif
+
+#########
+# INRIA Workstations
 
 # default machine at inria site
 export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
 
 # default number of parallel processes
 export EU_PRJ_INRIA_DEFAULT_NUM_PROCESSES=15
+
+
+#########
+# INRIA Cluster
+
+# default machine at inria site
+export EU_PRJ_INRIA_CLUSTER_ACCESS_MACHINE=access2-cp
+
+# default machine at inria site
+export EU_PRJ_INRIA_CLUSTER_DEFAULT_CLUSTER=perception
+
+# default walltime: hh:mm:ss
+export EU_PRJ_INRIA_CLUSTER_DEFAULT_WALLTIME=72:00:00
 
 
 ##################
@@ -59,7 +73,6 @@ export EU_PRJ_GRICAD_CODE_PATH=/bettik/creinke-ext/code
 
 # code directory (parent directory of the transfer_rl and exputil package) at GRICAD
 export EU_PRJ_GRICAD_EXPERIMENTS_PATH=/bettik/creinke-ext/experiments/sf_transfer_rl_02
-#export EU_PRJ_GRICAD_EXPERIMENTS_PATH=/bettik/creinke-ext/code/rlexp/examples
 
 # default machine to run experiments
 export EU_PRJ_GRICAD_DEFAULT_MACHINE=f-dahu.ciment

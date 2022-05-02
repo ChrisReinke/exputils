@@ -1,4 +1,7 @@
 import numpy as np
+import exputils as eu
+import re
+import os
 import copy
 import random
 from exputils.misc.attrdict import combine_dicts
@@ -507,3 +510,43 @@ def str_to_list(str, delimiter=','):
         elem_list.append(cur_str.strip())
 
     return elem_list
+
+
+def get_experiment_name():
+    """Returns the name of the current experiment. Is determined based on the current working directory."""
+
+    experiment_name = None
+
+    # get current path
+    pathstr = os.getcwd()
+
+    # remove part in template that defines the number, for example: {:6d}
+    experiment_substr = re.sub('{.*}', '', eu.EXPERIMENT_DIRECTORY_TEMPLATE)
+
+    # search for the repetition sub_directory
+    re_match = re.search('/(' + experiment_substr + '\d*)', pathstr)
+
+    if re_match is not None:
+        experiment_name = re_match.group(1)
+
+    return experiment_name
+
+
+def get_repetition_name():
+    """Returns the name of the current repetition. Is determined based on the current working directory."""
+
+    repetition_name = None
+
+    # get current path
+    pathstr = os.getcwd()
+
+    # remove part in template that defines the number, for example: {:6d}
+    repetition_substr = re.sub('{.*}', '', eu.REPETITION_DIRECTORY_TEMPLATE)
+
+    # search for the repetition sub_directory
+    re_match = re.search('/(' + repetition_substr + '\d*)', pathstr)
+
+    if re_match is not None:
+        repetition_name = re_match.group(1)
+
+    return repetition_name
