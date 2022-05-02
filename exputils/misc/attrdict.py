@@ -2,6 +2,7 @@ import exputils
 import numpy as np
 import collections
 from collections import defaultdict
+from collections.abc import Mapping
 from six import iteritems, iterkeys  # pylint: disable=unused-import
 from copy import deepcopy
 try:
@@ -542,12 +543,15 @@ def combine_dicts(*args, is_recursive=True, copy_mode='deepcopy'):
 
             if not def_key in dicts[dict_idx-1]:
                 # add default item if not found target
-                dicts[dict_idx-1][def_key] = def_item
-            elif is_recursive and isinstance(def_item, collections.Mapping) and isinstance(dicts[dict_idx-1][def_key], collections.Mapping):
-                # if the value is a dictionary in the default and the target, then also set default values for it
-                dicts[dict_idx-1][def_key] = combine_dicts(dicts[dict_idx - 1][def_key],
-                                                           def_item,
-                                                           is_recursive=is_recursive,
-                                                           copy_mode=copy_mode)
+                dicts[dict_idx - 1][def_key] = def_item
+            elif (is_recursive
+                  and isinstance(def_item, Mapping)
+                  and isinstance(dicts[dict_idx - 1][def_key], Mapping)):
+                # If the value is a dictionary in the default and the target, then also set default
+                # values for it.
+                dicts[dict_idx - 1][def_key] = combine_dicts(dicts[dict_idx - 1][def_key],
+                                                             def_item,
+                                                             is_recursive=is_recursive,
+                                                             copy_mode=copy_mode)
 
     return dicts[0]
