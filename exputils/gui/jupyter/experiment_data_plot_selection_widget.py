@@ -56,6 +56,15 @@ tabulate=eu.AttrDict(
 cell_format = '{:.3f} ({:.3f})',
 top_left_cell_content = ''"""
 
+DEFAULT_TABULATE_PAIRWISE_CONFIG = """pairwise_function = mannwhitneyu_pvalue,
+pairwise_mode = 'full', # which pairs are compared? 'full', 'full_not_identity', 'upper_triangle', 'upper_triangle_not_identiy', 'lower_triangle', 'lower_triangle_not_identiy'
+tabulate=eu.AttrDict(
+            tablefmt='html', # 'html' or 'latex'
+            numalign='right',
+        ),
+cell_format = '{}',
+top_left_cell_content = '',
+labels=[]"""
 
 CODE_TEMPLATE_MULTILINE = """# Plotting of <datasources> 
 import exputils as eu
@@ -126,14 +135,17 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
         dc.plot_functions = {'plotly_meanstd_scatter': eu.gui.jupyter.plotly_meanstd_scatter,
                              'plotly_box': eu.gui.jupyter.plotly_box,
                              'plotly_meanstd_bar': eu.gui.jupyter.plotly_meanstd_bar,
-                             'tabulate_meanstd': eu.gui.jupyter.tabulate_meanstd
+                             'tabulate_meanstd': eu.gui.jupyter.tabulate_meanstd,
+                             'tabulate_pairwise': eu.gui.jupyter.tabulate_pairwise,
+
         }
 
         # dictionary with plot_function_configs for each
         dc.plot_function_configs = {'plotly_meanstd_scatter': DEFAULT_PLOTLY_MEANSTD_SCATTER_CONFIG,
                                     'plotly_box': DEFAULT_PLOTLY_BOX_CONFIG,
                                     'plotly_meanstd_bar': DEFAULT_PLOTLY_MEANSTD_BAR_CONFIG,
-                                    'tabulate_meanstd': DEFAULT_TABULATE_MEANSTD_CONFIG
+                                    'tabulate_meanstd': DEFAULT_TABULATE_MEANSTD_CONFIG,
+                                    'tabulate_pairwise': DEFAULT_TABULATE_PAIRWISE_CONFIG,
         }
 
         dc.is_plot_function_selection = True
