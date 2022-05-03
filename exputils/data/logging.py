@@ -4,12 +4,14 @@ from exputils.data.logger import Logger
 # holds the global logger object
 log = Logger()
 
+
 def reset():
     """
     Resets the log to an empty exputils.data.Logger.
     """
     global log
     log = Logger()
+
 
 def get_log():
     """
@@ -18,6 +20,7 @@ def get_log():
     global log
     return log
 
+
 def set_log(new_log):
     """
     Sets the given logger to be the global log
@@ -25,11 +28,13 @@ def set_log(new_log):
     global log
     log = new_log
 
+
 def set_directory(directory):
     """
     Sets the directory path for the log.
     """
     log.directory = directory
+
 
 def get_directory():
     """
@@ -37,11 +42,13 @@ def get_directory():
     """
     return log.directory
 
+
 def contains(name):
     """
     Returns True if items for the the given name exists in the log. Otherwise False.
     """
     return (name in log)
+
 
 def clear(name=None):
     """
@@ -52,32 +59,41 @@ def clear(name=None):
     """
     log.clear(name=name)
 
+
 def get_item(name):
     """
     Returns the item from the log with the given name.
     """
     return log[name]
 
+
 def add_value(name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None):
     """
-    Adds a new value to the log. Values are stored in numpy arrays.
+    Adds a new value to the log. Values are stored in numpy arrays. Allows to log in parallel to tensorboard if the value is a scalar.
 
-    :param log_to_tb: Should the value be logged to tensorboard if scalar?
-    :param tb_global_step: Globale step for tensorboard.
-    :param tb_walltime: Walltime for tensorboard.
+    :param: name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
+    :param: scalar: Value to save.
+    :param log_to_tb (bool): True if the value should be logged to tensorboard. False if not.
+        If None, then it gets logged if the tensorboard is active. (default = None)
+    :param tb_global_step (int): Tensorboards global step value to record. (default = None)
+    :param tb_walltime (float): Optional tensorboard override of default walltime (time.time()) with seconds after epoch of event. (default = None)
     """
     log.add_value(name, value, log_to_tb, tb_global_step, tb_walltime)
 
 
 def add_scalar(name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=None):
     """
-    Adds a new value to the log. Values are stored in numpy arrays.
+    Adds a new scalar to the log. Scalars are stored in numpy arrays. Allows to log in parallel to tensorboard.
 
-    :param log_to_tb: Should the value be logged to tensorboard?
-    :param tb_global_step: Globale step for tensorboard.
-    :param tb_walltime: Walltime for tensorboard.
+    :param: name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
+    :param: scalar: Value to save.
+    :param log_to_tb (bool): True if the value should be logged to tensorboard. False if not.
+        If None, then it gets logged if the tensorboard is active. (default = None)
+    :param tb_global_step (int): Tensorboards global step value to record. (default = None)
+    :param tb_walltime (float): Optional tensorboard override of default walltime (time.time()) with seconds after epoch of event. (default = None)
     """
     log.add_scalar(name, scalar, log_to_tb, tb_global_step, tb_walltime)
+
 
 def get_values(name):
     """
@@ -85,17 +101,20 @@ def get_values(name):
     """
     return log[name]
 
+
 def add_object(name, obj):
     """
     Adds a new object to the log. Objects are stored in a list and saved as files using dill.
     """
     log.add_object(name, obj)
 
+
 def get_objects(name):
     """
     Returns the objects for the given name. Objects are stored in a list.
     """
     return log[name]
+
 
 def add_single_object(name, obj, directory=None):
     """
@@ -104,11 +123,13 @@ def add_single_object(name, obj, directory=None):
     """
     log.add_single_object(name, obj, directory=directory)
 
+
 def items():
     """
     Returns the items in the log as a list of tuples with the name and values of the items.
     """
     return log.items()
+
 
 def save(directory=None):
     """
@@ -117,6 +138,7 @@ def save(directory=None):
     :param directory: Optional path to the directory.
     """
     log.save(directory=directory)
+
 
 def load(directory=None, load_objects=False):
     """
@@ -147,14 +169,35 @@ def set_config(config=None, **kwargs):
     log.config = eu.combine_dicts(kwargs, config, log.config)
 
 
+####################################################
+# TENSORBOARD
+
+def tensorboard():
+    """The tensorboard SummaryWriter that can be used to log data to the tensorboard.
+
+    The logged data will only be stored in the tensorboard logs!
+
+    Example:
+
+    log.
+
+    """
+    return log.tensorboard
+
+
 def create_tensorboard(config=None, **kwargs):
     """
     Creates a tensorboard that can be used for logging.
 
+    :param config (dict): Dictionary with the configuration of the tensorboard. Has the same entries as the parameters below. (default = None)
+    :param log_dir (string): Save directory location. Default is experiments/tensorboard_logs/exp_<experiment_id>/rep_<repetition_id>/<date>_<time>.
+    :param purge_step (int): When logging crashes at step T+XT+XT+X and restarts at step TTT, any events whose global_step larger or equal to TTT
+        will be purged and hidden from TensorBoard. Note that crashed and resumed experiments should have the same log_dir.
+    :param: max_queue (int): Size of the queue for pending events and summaries before one of the ‘add’ calls forces a flush to disk. (default = 10)
+    :param flush_secs (int): How often, in seconds, to flush the pending events and summaries to disk. (default = 120)
+    :param filename_suffix (string): Suffix added to all event filenames in the log_dir directory. (default = '.tblog')
 
-    :param config: Tensorboard config. See torch.utils.tensorboard.SummaryWriter documentation.
-    :param kwargs: Tensorboard config. See torch.utils.tensorboard.SummaryWriter documentation.
-    :return: SummaryWriter
+    :return: SummaryWriter of the tensorboard (See https://pytorch.org/docs/stable/tensorboard.html).
     """
 
     return log.create_tensorboard(config=config, **kwargs)
@@ -163,12 +206,18 @@ def create_tensorboard(config=None, **kwargs):
 def activate_tensorboard(config=None, **kwargs):
     """
     Activates a tensorboard that can be used for logging.
-    If it is activated, then when the function add_value is used and a scalar is given, the tensorboard automatically logs it too.
+    If it is activated, then when the function add_value/add_scalar is used and a scalar is given, the tensorboard automatically logs it too.
     Creates a tensorboard if non existed so far.
 
-    :param config: Tensorboard config. See torch.utils.tensorboard.SummaryWriter documentation.
-    :param kwargs: Tensorboard config. See torch.utils.tensorboard.SummaryWriter documentation.
-    :return: SummaryWriter
+    :param config (dict): Dictionary with the configuration of the tensorboard. Has the same entries as the parameters below. (default = None)
+    :param log_dir (string): Save directory location. Default is experiments/tensorboard_logs/exp_<experiment_id>/rep_<repetition_id>/<date>_<time>.
+    :param purge_step (int): When logging crashes at step T+XT+XT+X and restarts at step TTT, any events whose global_step larger or equal to TTT
+        will be purged and hidden from TensorBoard. Note that crashed and resumed experiments should have the same log_dir.
+    :param: max_queue (int): Size of the queue for pending events and summaries before one of the ‘add’ calls forces a flush to disk. (default = 10)
+    :param flush_secs (int): How often, in seconds, to flush the pending events and summaries to disk. (default = 120)
+    :param filename_suffix (string): Suffix added to all event filenames in the log_dir directory. (default = '.tblog')
+
+    :return: SummaryWriter of the tensorboard (See https://pytorch.org/docs/stable/tensorboard.html).
     """
 
     return log.activate_tensorboard(config=config, **kwargs)
@@ -176,13 +225,14 @@ def activate_tensorboard(config=None, **kwargs):
 
 def deactivate_tensorboard():
     """
-    Deactivates a tensorboard that can be used for logging.
+    Deactivates a tensorboard. Afterwards, values will not be automatically logged via the add_value / add_scalar function to the tensorboard.
     """
-
     return log.deactivate_tensorboard()
 
 
-def tensorboard():
-    """The tensorboard SummaryWriter that can be used to log data to the tensorboard."""
+def is_tensorboard_active():
+    """Returns true, if the tensorboard is active."""
+    return log.is_tensorboard_active
 
-    return log.tensorboard
+
+

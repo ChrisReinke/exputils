@@ -14,10 +14,10 @@ try:
 except ImportError:
     is_exist_tensorboard_module = False
 
-# TODO: Featrue - allow to log sub values, for example: agent.epsilon
+
+# TODO: Featrue - allow to log sub values, for example: agent/epsilon
 class Logger:
     """
-
         Configuration:
             numpy_log_mode: String that defines how numpy data is logged.
                 'npy': each property is loggend in an individual npy file
@@ -25,7 +25,6 @@ class Logger:
                 'cnpz': all properties are combined in a compressed npz file
 
             numpy_npz_filename: Name of the npz file if numpy data should be saved in a npz or compressed npz.
-
     """
 
     def default_config(self):
@@ -234,14 +233,14 @@ class Logger:
 
 
     @property
-    def is_tensorboard(self):
+    def is_tensorboard_active(self):
         """Return True if a tensorboard is active and can be used, otherwise False."""
-        return self._is_tensorboard
+        return self._is_tensorboard_active
 
 
     @property
     def tensorboard(self):
-        """Tensorboard SummaryWriter"""
+        """Tensorboard SummaryWriter."""
 
         if self._tensorboard_writer is None:
             self.create_tensorboard()
@@ -251,6 +250,9 @@ class Logger:
 
     def create_tensorboard(self, config=None, **kwargs):
         """Creates a tensorboard"""
+
+        if not is_exist_tensorboard_module:
+            raise ImportError('Tensorboard module torch.utils.tensorboard does not exist!')
 
         self.config.tensorboard = eu.combine_dicts(kwargs, config, self.config.tensorboard)
 
@@ -290,12 +292,9 @@ class Logger:
             self._tensorboard_writer.flush()
             warnings.warn('Tensorboard SummaryWriter existed already. Creating a new one ...')
 
-        if is_exist_tensorboard_module:
-            self._tensorboard_writer = torch.utils.tensorboard.SummaryWriter(**self.config.tensorboard)
-        else:
-            raise ImportError('Tensorboard module \'torch.utils.tensorboard\' does not exist!')
+        self._tensorboard_writer = torch.utils.tensorboard.SummaryWriter(**self.config.tensorboard)
 
-        return self.tensorboard
+        return self._tensorboard_writer
 
 
     def activate_tensorboard(self, config=None, **kwargs):
@@ -312,4 +311,6 @@ class Logger:
 
     def deactivate_tensorboard(self):
         """Deactivates the tensorboard to automatically also log values that are given to the log."""
-        self._is_tensorboard_active = False
+        if self._is_tensorboard_active:
+            self._is_tensorboard_active = False
+            self._tensorboard_writer.flush()
