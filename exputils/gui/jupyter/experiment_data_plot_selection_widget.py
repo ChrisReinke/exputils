@@ -56,14 +56,14 @@ tabulate=eu.AttrDict(
 cell_format = '{:.3f} ({:.3f})',
 top_left_cell_content = ''"""
 
-DEFAULT_TABULATE_PAIRWISE_CONFIG = """pairwise_function = mannwhitneyu_pvalue,
-pairwise_mode = 'full', # which pairs are compared? 'full', 'full_not_identity', 'upper_triangle', 'upper_triangle_not_identiy', 'lower_triangle', 'lower_triangle_not_identiy'
+DEFAULT_TABULATE_PAIRWISE_CONFIG = """pairwise_function = eu.misc.mannwhitneyu_pvalue,
+pairwise_mode = 'upper_triangle', # which pairs are compared? 'full', 'full_not_identity', 'upper_triangle', 'upper_triangle_not_identity', 'lower_triangle', 'lower_triangle_not_identity'
 tabulate=eu.AttrDict(
             tablefmt='html', # 'html' or 'latex'
             numalign='right',
         ),
 cell_format = '{}',
-top_left_cell_content = '',
+top_left_cell_content = 'p-value',
 labels=[]"""
 
 CODE_TEMPLATE_MULTILINE = """# Plotting of <datasources> 

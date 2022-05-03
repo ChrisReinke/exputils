@@ -4,17 +4,6 @@ import scipy.stats
 from tabulate import tabulate as original_tabulate
 import IPython
 
-def mannwhitneyu_pvalue(data_1, data_2):
-
-    if np.array_equal(data_1, data_2):
-        return 1.0
-
-    _, pvalue = scipy.stats.mannwhitneyu(
-        data_1,
-        data_2,
-        alternative='two-sided')
-    return pvalue
-
 
 def is_needed_pairwise_combination(idx1, idx2, pairwise_mode):
     is_needed = True
@@ -49,7 +38,7 @@ def tabulate_pairwise(data=None, config=None, **kwargs):
 
     default_config = eu.AttrDict(
 
-        pairwise_function = mannwhitneyu_pvalue,
+        pairwise_function = eu.misc.mannwhitneyu_pvalue,
 
         pairwise_mode = 'full',    # which pairs are compared? 'full', 'full_not_identity', 'upper_triangle', 'upper_triangle_not_identiy', 'lower_triangle', 'lower_triangle_not_identiy'
 

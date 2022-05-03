@@ -4,6 +4,7 @@ import re
 import os
 import copy
 import random
+import scipy.stats
 from exputils.misc.attrdict import combine_dicts
 # try to import torch, so that its seed can be set by the seed() - function
 try:
@@ -550,3 +551,15 @@ def get_repetition_name():
         repetition_name = re_match.group(1)
 
     return repetition_name
+
+
+def mannwhitneyu_pvalue(data_1, data_2):
+
+    if np.array_equal(data_1, data_2):
+        return 1.0
+
+    _, pvalue = scipy.stats.mannwhitneyu(
+        data_1,
+        data_2,
+        alternative='two-sided')
+    return pvalue
