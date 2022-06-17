@@ -35,8 +35,10 @@ eu_local_inria_generate_experiments
 
 EU_MACHINE=$MACHINE
 EU_CLUSTER=$CLUSTER
+EU_WALLTIME=$WALLTIME
 export EU_MACHINE
 export EU_CLUSTER
+export EU_WALLTIME
 
 echo "Add for each repetition a job ..."
 python -c "import exputils
