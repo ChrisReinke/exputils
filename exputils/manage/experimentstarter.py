@@ -108,7 +108,7 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
 
                     # wait if the maximum number of processes are currently running
                     # because we started already the processes
-                    is_wait = n_active_proceeses >= parallel
+                    is_wait = n_active_proceeses >= n_parallel
 
                     if is_wait:
                         time.sleep(0.5) # sleep half a second before checking again
