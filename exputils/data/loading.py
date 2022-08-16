@@ -54,9 +54,13 @@ def load_experiment_descriptions(experiments_directory=None,
             experiment_descr.short_name = 'e{}'.format(exp_id)
             experiment_descr.description = ''
 
-            # find repetition ids
-            experiment_descr.repetition_ids = []
+            # find repetition directories and ids
             repetition_directories = glob(os.path.join(exp_directory, repetition_directory_template))
+            experiment_descr.repetition_directories = repetition_directories
+            if experiment_descr.repetition_directories:
+                experiment_descr.repetition_directories.sort()
+
+            experiment_descr.repetition_ids = []
             for rep_directory in np.sort(repetition_directories):
                 rep_id = re.findall(r'\d+', os.path.basename(rep_directory))[0]
                 experiment_descr.repetition_ids.append(int(rep_id))
@@ -346,7 +350,9 @@ def load_experiment_data_single_object(name, experiment_id=None, repetition_id=N
     if add_execution_directory_to_sys_path:
         sys.path.append(full_execution_dir_path)
 
-    return eu.io.dill.load_dill(full_dill_path)
+    obj = eu.io.dill.load_dill(full_dill_path)
 
     if add_execution_directory_to_sys_path:
         sys.path.pop()
+
+    return obj

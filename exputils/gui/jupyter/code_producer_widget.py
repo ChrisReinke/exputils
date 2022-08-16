@@ -1,6 +1,7 @@
 import ipywidgets
 import exputils as eu
 
+# TODO: when creating a new code cell, also save directly the selection of experiments and repetitions for it
 
 class CodeProducerWidget(ipywidgets.Box):
 
