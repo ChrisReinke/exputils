@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 MACHINE=$EU_PRJ_GRICAD_DEFAULT_MACHINE
 

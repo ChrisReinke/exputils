@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # registers the current repetition as a job to the OAR scheduler
 

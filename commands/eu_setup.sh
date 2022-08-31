@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # check if path to commands is already on the path or not
 # only add if it is not

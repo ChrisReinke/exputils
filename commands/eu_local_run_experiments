@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 NUM_PROCESSES=$EU_PRJ_LOCAL_DEFAULT_NUM_PROCESSES
 IS_RERUN=False

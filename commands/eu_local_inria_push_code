@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 CUSTOM_PACKAGES=$EU_PRJ_CUSTOM_PACKAGES
 # local paths

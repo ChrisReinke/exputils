@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # set default paths for GRICAD cluster
 EXTERNAL_EXPERIMENTS_PATH=$EU_PRJ_GRICAD_EXPERIMENTS_PATH

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # path to experiments on the local host
 LOCAL_EXPERIMENTS_PATH=$EU_PRJ_LOCAL_EXPERIMENTS_PATH
