@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Resets the status of files that are still "Running" to "error"
 # TODO: add options to select which files should be reset and to which status

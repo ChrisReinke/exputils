@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # uses the exputils to run the gricad_run_experiment.sh script that each experiment has
 # this is then registering OARJOBS to run the eu_gricad_run_experiment

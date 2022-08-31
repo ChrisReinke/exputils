@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # set defaults for INRIA workstations
 EXTERNAL_EXPERIMENTS_PATH=$EU_PRJ_INRIA_EXPERIMENTS_PATH

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # uses the exputils to run the gricad_run_repetition.sh script that each repetition has
 # this is then registering OARJOBS to run the repetition script
