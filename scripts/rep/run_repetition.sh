@@ -2,7 +2,12 @@
 
 STATUSFILE="${0##*/}".status
 
-echo "Run the repetition ..."
+CURRENT_DIR=$(pwd)
+REP=${CURRENT_DIR##*/}
+EXP=${CURRENT_DIR%/*}
+EXP=${EXP##*/}
+
+echo "Run repetition (${EXP} - ${REP}) ..."
 STATE='Running'
 
 date "+%Y/%m/%d %H:%M:%S" >> $STATUSFILE
@@ -12,7 +17,7 @@ python run_repetition.py
 RETURN_CODE=$?
 
 echo "Write status file ..."
-if [ $RETURN_CODE == 0 ] 
+if [ $RETURN_CODE == 0 ]
 then
 	STATE='Finished'
 else
@@ -22,4 +27,4 @@ fi
 date "+%Y/%m/%d %H:%M:%S" >> $STATUSFILE
 echo $STATE >> $STATUSFILE
 
-echo "Finished."
+echo "Finished repetition (${EXP} - ${REP})."

@@ -131,6 +131,11 @@ def load_configuration_data_from_ods(ods_filepath):
             if sheet_data[row_idx][col_idx] is not None and (sheet_data[row_idx][col_idx].lower() == 'files' or sheet_data[row_idx][col_idx].lower() == 'repetition files'):
                 repetition_source_file_locations_col_idx = col_idx
                 break
+        # if no src directory for repetitions is given, then see if src/rep exists
+        default_repetition_source_folder = None
+        if not repetition_source_file_locations_col_idx:
+            if os.path.isdir('./src/rep'):
+                default_repetition_source_folder = './src/rep'
 
         # find column with sources for experiments
         experiment_source_file_locations_col_idx = None
@@ -138,6 +143,11 @@ def load_configuration_data_from_ods(ods_filepath):
             if sheet_data[row_idx][col_idx] is not None and sheet_data[row_idx][col_idx].lower() == 'experiment files':
                 experiment_source_file_locations_col_idx = col_idx
                 break
+        # if no src directory for repetitions is given, then see if src/rep exists
+        default_experiment_source_folder = None
+        if not experiment_source_file_locations_col_idx:
+            if os.path.isdir('./src/exp'):
+                default_experiment_source_folder = './src/exp'
 
         # find variable names
         for file_idx in range(len(file_config)):
@@ -185,11 +195,15 @@ def load_configuration_data_from_ods(ods_filepath):
 
                 if repetition_source_file_locations_col_idx is not None and sheet_data[row_idx][repetition_source_file_locations_col_idx] is not None:
                     experiments_data['experiments'][experiment_id]['repetition_source_file_locations'] = [i.strip() for i in sheet_data[row_idx][repetition_source_file_locations_col_idx].split(',')]
+                elif default_repetition_source_folder:
+                    experiments_data['experiments'][experiment_id]['repetition_source_file_locations'] = [default_repetition_source_folder]
                 else:
                     experiments_data['experiments'][experiment_id]['repetition_source_file_locations'] = None
 
                 if experiment_source_file_locations_col_idx is not None and sheet_data[row_idx][experiment_source_file_locations_col_idx] is not None:
                     experiments_data['experiments'][experiment_id]['experiment_source_file_locations'] = [i.strip() for i in sheet_data[row_idx][experiment_source_file_locations_col_idx].split(',')]
+                elif default_experiment_source_folder:
+                    experiments_data['experiments'][experiment_id]['experiment_source_file_locations'] = [default_experiment_source_folder]
                 else:
                     experiments_data['experiments'][experiment_id]['experiment_source_file_locations'] = None
 
