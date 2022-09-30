@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# setup the scripts for the transfer rl project
-
 #################
 # GENERAL
 
@@ -42,11 +40,12 @@ export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perceptio
 # Singularity image
 export EU_PRJ_INRIA_SINGULARITY_IMAGE=/scratch/hydra/creinke/data/study/perception/singularity/sf_transfer_rl_02.sif
 
-#########
-# INRIA Workstations
-
 # default machine at inria site
 export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
+
+
+#########
+# INRIA Workstations
 
 # default number of parallel processes
 export EU_PRJ_INRIA_DEFAULT_NUM_PROCESSES=15
@@ -55,10 +54,13 @@ export EU_PRJ_INRIA_DEFAULT_NUM_PROCESSES=15
 #########
 # INRIA Cluster
 
-# default machine at inria site
+# default number of processes run in parallel on the inria gpu cluster
+export EU_PRJ_INRIA_CLUSTER_DEFAULT_NUM_PROCESSES=1
+
+# default machine at inria site for accessing the gpu cluster
 export EU_PRJ_INRIA_CLUSTER_ACCESS_MACHINE=access2-cp
 
-# default machine at inria site
+# default cluster at inria
 export EU_PRJ_INRIA_CLUSTER_DEFAULT_CLUSTER=perception
 
 # default walltime: hh:mm:ss
