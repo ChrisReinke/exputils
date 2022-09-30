@@ -73,7 +73,10 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
         cwd = os.getcwd()
 
     # start every found script
-    for [script_path, status] in scripts:
+    for [script_path, _] in scripts:
+
+        # check again the status of the script, in case another experiment starter ran it already
+        status = get_script_status(script_path)
 
         if is_rerun or (status is None or status.lower() == 'none' or status.lower() == 'not started' or status.lower() == 'error' or status.lower() == 'unfinished'):
             # start the script
@@ -156,23 +159,35 @@ def get_scripts(directory=None, start_scripts='*.sh'):
 
     # find if they have a job status
     for file in files:
-
-        status_file_path = file + '.status'
-
-        if os.path.isfile(status_file_path):
-            # read status
-            with open(status_file_path, 'r') as f:
-                lines = f.read().splitlines()
-                if len(lines) > 0:
-                    status = lines[-1]
-                else:
-                    status = 'none'
-        else:
-            status = 'none'
-
+        status = get_script_status(file)
         scripts.append((file, status))
 
     return scripts
+
+
+def get_script_status(script_file):
+    """
+    Returns the status of the given script file.
+
+    :param script_file: Path to the script file.
+
+    :return: Status as a string. ('none', 'error', 'running', 'finished')
+    """
+
+    status_file_path = script_file + '.status'
+
+    if os.path.isfile(status_file_path):
+        # read status
+        with open(status_file_path, 'r') as f:
+            lines = f.read().splitlines()
+            if len(lines) > 0:
+                status = lines[-1]
+            else:
+                status = 'none'
+    else:
+        status = 'none'
+
+    return status
 
 
 def get_number_of_scripts_to_execute(directory=None, start_scripts='*.sh'):
