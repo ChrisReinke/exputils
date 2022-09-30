@@ -24,6 +24,12 @@ while getopts ":n:r:m:w:c" arg; do
   esac
 done
 
+# if machine is given, then create string 'AND <machine>' to add to the oar command
+ADDMACHINE=
+if [ -n "$MACHINE" ]; then
+    ADDMACHINE="AND host='$MACHINE'"
+fi
+
 echo "Generate experiments ..."
 eu_inria_singularity python -c "
 import exputils
