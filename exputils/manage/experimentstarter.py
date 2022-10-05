@@ -46,6 +46,8 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
     :return:
     """
 
+    # TODO: remove the is_rerun argument, as it is not used anymore. This makes also changes in the commands necessary!
+
     if directory is None:
         directory = os.path.join('.', exputils.DEFAULT_EXPERIMENTS_DIRECTORY)
 
