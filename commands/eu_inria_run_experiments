@@ -1,27 +1,157 @@
 #!/usr/bin/env bash
 
-NUM_PROCESSES=$EU_PRJ_INRIA_DEFAULT_NUM_PROCESSES
-IS_RERUN=False
-RUN_REPETITION_SCRIPT=$EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT
+function usage {
+  echo "Usage: $(basename $0) [-h] [-c CONFIG_NAME] [-n NUM_OF_PROC] [-a IC_ACCESS] [-w WALLTIME] [-s SCRIPT] [MACHINE [NUM_OF_PROC] ...]" 2>&1
+  echo "Starts experiments to run on Inria machines."
+  echo "  Takes a list of machines [MACHINE [NUM_OF_PROC]] as argument that defines where the experiments should run."
+  echo "  MACHINE is the name of the machine as defined in the configuration of the exputils project file."
+  echo "  The optimal argument NUM_OF_PROC is the number of parallel processes that should run on the machine."
+  echo "  Options:"
+  echo "   -h             Shows this message."
+  echo "   -c CONFIG_NAME Name of the default config that should be used. Configurations are defined in the exputils project file. (Default=$EU_PRJ_INRIA_TARGET_MACHINE_DEFAULT_CONFIG)"
+  echo "   -n NUM_OF_PROC Number of parallel processes."
+  echo "   -a IC_ACCESS   Name of the access machine for the cluster where oarjobs can be submitted. (Default=$EU_PRJ_INRIA_CLUSTER_ACCESS_MACHINE)"
+  echo "   -s SCRIPT      Scripts that should be executed. (Default=$EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT)"
+  echo "   -w WALLTIME    Walltime for cluster jobs. Format: HH:MM:SS. (Default=$EU_PRJ_INRIA_CLUSTER_DEFAULT_WALLTIME)"
+}
 
-while getopts ":n:r" arg; do
+##################################
+# parameters
+run_repetition_script=$EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT
+config_name=$EU_PRJ_INRIA_TARGET_MACHINE_DEFAULT_CONFIG
+walltime=$EU_PRJ_INRIA_CLUSTER_DEFAULT_WALLTIME
+ic_access_machine=$EU_PRJ_INRIA_CLUSTER_ACCESS_MACHINE
+number_of_proc_from_main_argument=
+
+# handle arguments
+while getopts ":ha:c:w:n:s:" arg; do
   case $arg in
-    n) NUM_PROCESSES=$OPTARG;;
-    r) IS_RERUN=True;;
+    h) usage ; exit 1 ;;
+    a) ic_access_machine=$OPTARG;;
+    c) config_name=$OPTARG;;
+    w) walltime=$OPTARG;;
+    n) number_of_proc_from_main_argument=$OPTARG;;
+    s) run_repetition_script=$OPTARG;;
+    ?) echo "Invalid option: -${OPTARG}."; usage ; exit 2 ;;
   esac
 done
+# get all arguments are given after the options handled by getopts
+shift $(expr $OPTIND - 1 )
+arguments=($@)
 
+
+##################################
 echo "Generate experiments ..."
 eu_inria_singularity python -c "import exputils
 exputils.manage.generate_experiment_files('experiment_configurations.ods', directory='./experiments/')"
 
+
+##################################
 echo "Start experiments ..."
-eu_inria_singularity python -c "import exputils
+
+# create a directory for logs if not existing
+mkdir -p logs
+cur_time=`date "+%Y.%m.%d_%H.%M.%S"`
+log_name_prefix="./logs/${cur_time}_inria_run_experiments"
+
+# if no arguments are given, then run the experiments on the current machine
+# add the machine name as an argument and use the default method that parses arguments to start the experiments
+if [ ${#arguments[@]} -le 0 ]; then
+  arguments+=(`hostname`)
+fi
+
+# iterate over the arguments which are names of machines (and optionally how many processes are to execute)
+i=0
+while [ $i -lt ${#arguments[@]} ]
+do
+  machine_config_name=${arguments[$i]}
+
+  # is next variable a number --> use it as the number of processes and jump over it
+  next_i=`expr $i + 1`
+  cur_number_of_proc=
+  if [[ "${arguments[next_i]}" =~ ^[0-9]+$ ]] ; then
+    # yes, it is a number
+    cur_number_of_proc="${arguments[next_i]}"
+    ((i++))
+  fi
+
+  machine_config=(`eu_get_inria_target_machine_config $config_name $machine_config_name`)
+
+  # does a config exist?
+  if [[ -z "$machine_config" ]]; then
+    # no
+    echo "Can not find a \"$config_name\" config for machine \"$machine_config_name\"! Please check if it exists in your exputils project file. Will be ignored ..."
+  else
+    machine_type=${machine_config[0]}
+    num_of_default_proc=${machine_config[1]}
+
+    # get number of parallel processes
+    # priorities: 1) additional arg given after machine name, 2) argument -n given to command, 3) default config argument
+    if ! [[ -z "$cur_number_of_proc" ]]; then
+      num_of_proc=$cur_number_of_proc
+    else
+      if ! [[ -z "$number_of_proc_from_main_argument" ]]; then
+        num_of_proc=$number_of_proc_from_main_argument
+      else
+        num_of_proc=$num_of_default_proc
+      fi
+    fi
+
+    echo "  on $machine_config_name with $num_of_proc parallel processes ..."
+
+    if [[ $machine_type == "ws" ]]; then
+
+      machine_name=${machine_config[2]}
+
+      # got to the current experiment directory on the target host and start the "run_experiments.sh" script
+      ssh $machine_name "
+        source eu_activate $EU_ACTIVE_PRJ;
+        cd `pwd`;
+        nohup  eu_inria_singularity python -c \"import exputils
 exputils.manage.start_experiments(
-  start_scripts='$RUN_REPETITION_SCRIPT',
-  parallel=$NUM_PROCESSES,
+  start_scripts='$run_repetition_script',
+  parallel=$num_of_proc,
   is_chdir=True,
-  verbose=False,
-  is_rerun=$IS_RERUN)"
+  verbose=False)\" > ${log_name_prefix}_${machine_config_name}_${i}_out.log 2> ${log_name_prefix}_${machine_config_name}_${i}_err.log < /dev/null &"
+
+    elif [[ $machine_type == "c" ]] || [[ $machine_type == "cn" ]]; then
+
+      host_definition=
+      if [[ $machine_type == "c" ]]; then
+        cluster=${machine_config[2]}
+      else
+        cluster_node=${machine_config[2]}
+        cluster=${machine_config[3]}
+
+        host_definition="AND host='$cluster_node'"
+      fi
+
+       # create script to run the experiments
+       start_script="oar_job_run_experiments_$(date +%s.%N).sh"
+
+      # the sleep command is to generate different starting times of machines, otherwise they might start the same repetition twice
+      echo -e "eu_inria_singularity python -c \"import exputils \n\
+exputils.manage.start_experiments(\n\
+  start_scripts='$run_repetition_script',\n\
+  parallel=$num_of_proc,\n\
+  is_chdir=True,\n\
+  verbose=False)\"
+rm $start_script" > $start_script
+    chmod +x $start_script
+
+    # add job to OAR, using the IC access machine (for example access2-cp)
+    ssh $ic_access_machine "
+      source eu_activate $EU_ACTIVE_PRJ;
+      cd `pwd`;
+      oarsub -l /host=1/gpudevice=1,walltime=$walltime -p \"cluster='$cluster' $host_definition\" -t besteffort --stdout ${log_name_prefix}_${machine_config_name}_${i}_out.log --stderr ${log_name_prefix}_${machine_config_name}_${i}_err.log ./$start_script"
+
+    else
+      echo "Unknown machine type \"$machine_type\" for machine \"$machine_config_name\"! Please check your exputils project file. Will be ignored ... "
+    fi
+
+  fi
+
+  ((i++))
+done
 
 echo "Finished"

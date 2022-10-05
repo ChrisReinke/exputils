@@ -9,7 +9,7 @@
 export EU_PRJ_CUSTOM_PACKAGES=rlexp
 
 # default script that are executed to run a repetition
-export EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT="run_repetition.sh"
+export EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT="run_repetition.py"
 
 
 ##################
@@ -19,7 +19,7 @@ export EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT="run_repetition.sh"
 export EU_PRJ_LOCAL_CODE_PATH=/scratchlocal/creinke/data/study/perception/code
 
 # experiment directory at local pc
-export EU_PRJ_LOCAL_EXPERIMENTS_PATH=/scratchlocal/creinke/data/study/perception/experiments/sf_transfer_rl_02
+export EU_PRJ_LOCAL_EXPERIMENTS_PATH=/scratchlocal/creinke/data/study/perception/experiments
 
 # default number of parallel processes
 export EU_PRJ_LOCAL_DEFAULT_NUM_PROCESSES=6
@@ -31,40 +31,60 @@ export EU_PRJ_LOCAL_SINGULARITY_IMAGE=/scratchlocal/creinke/data/study/perceptio
 ##################
 # INRIA
 
+# default machine at inria site
+export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
+
 # code directory (parent directory of the transfer_rl and exputil package) at Inria
 export EU_PRJ_INRIA_CODE_PATH=/scratch/hydra/creinke/data/study/perception/code
 
 # experiment directory at INRIA
-export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/experiments/sf_transfer_rl_02
+export EU_PRJ_INRIA_EXPERIMENTS_PATH=/scratch/hydra/creinke/data/study/perception/experiments
 
 # Singularity image
 export EU_PRJ_INRIA_SINGULARITY_IMAGE=/scratch/hydra/creinke/data/study/perception/singularity/sf_transfer_rl_02.sif
 
-# default machine at inria site
-export EU_PRJ_INRIA_DEFAULT_MACHINE=hydra
-
-
-#########
-# INRIA Workstations
-
-# default number of parallel processes
-export EU_PRJ_INRIA_DEFAULT_NUM_PROCESSES=15
-
-
-#########
-# INRIA Cluster
-
-# default number of processes run in parallel on the inria gpu cluster
-export EU_PRJ_INRIA_CLUSTER_DEFAULT_NUM_PROCESSES=1
-
 # default machine at inria site for accessing the gpu cluster
 export EU_PRJ_INRIA_CLUSTER_ACCESS_MACHINE=access2-cp
 
-# default cluster at inria
-export EU_PRJ_INRIA_CLUSTER_DEFAULT_CLUSTER=perception
-
 # default walltime: hh:mm:ss
 export EU_PRJ_INRIA_CLUSTER_DEFAULT_WALLTIME=72:00:00
+
+# default machine config
+export EU_PRJ_INRIA_TARGET_MACHINE_DEFAULT_CONFIG=GPU
+
+# Configurations for Inria machines
+# Several configurations can be defined. Each must have a different name (<name>) which is added at the end of the parameter: EU_PRJ_INRIA_TARGET_MACHINE_DEFAULTS_<name>
+# The configuration is a string, that contains a list of machines. Each machine config is seperated by a ';'.
+# Each machine configuration contains: <name_of_config> <machine_type> <default_num_of_parallel_proceses> <machine type specific configuration>
+# Three machine types exist with a different configuration:
+#   ws: Workstation. Configuration: <machine_name>
+#   c:  Cluster. Configuration: <cluster_name>
+#   cn: Cluster node. Configuration: <node_name> <cluster_name>
+
+# config for gpu computations
+export EU_PRJ_INRIA_TARGET_MACHINE_DEFAULTS_GPU="
+  hydra ws 1 hydra;
+  ursa ws 1 ursa;
+  pictor ws 1 pictor;
+  chamaeleon ws 1 chamaeleon;
+  andromeda ws 1 andromeda;
+  perception c 1 perception;
+  gpu1 cn 1 gpu1-perception.inrialpes.fr perception;
+  gpu2 cn 1 gpu2-perception.inrialpes.fr perception;
+  gpu3 cn 1 gpu3-perception.inrialpes.fr perception;
+  gpu4 cn 1 gpu4-perception.inrialpes.fr perception;
+  gpu5 cn 1 gpu5-perception.inrialpes.fr perception;
+  gpu6 cn 1 gpu6-perception.inrialpes.fr perception;
+  gpu7 cn 1 gpu7-perception.inrialpes.fr perception;
+  gpu8 cn 1 gpu8-perception.inrialpes.fr perception"
+
+# config for cpu computations
+export EU_PRJ_INRIA_TARGET_MACHINE_DEFAULTS_CPU="
+  hydra ws 15 hydra;
+  ursa ws 15 ursa;
+  pictor ws 15 pictor;
+  chamaeleon ws 15 chamaeleon;
+  andromeda ws 15 andromeda"
 
 
 ##################
@@ -74,7 +94,7 @@ export EU_PRJ_INRIA_CLUSTER_DEFAULT_WALLTIME=72:00:00
 export EU_PRJ_GRICAD_CODE_PATH=/bettik/creinke-ext/code
 
 # code directory (parent directory of the transfer_rl and exputil package) at GRICAD
-export EU_PRJ_GRICAD_EXPERIMENTS_PATH=/bettik/creinke-ext/experiments/sf_transfer_rl_02
+export EU_PRJ_GRICAD_EXPERIMENTS_PATH=/bettik/creinke-ext/experiments
 
 # default machine to run experiments
 export EU_PRJ_GRICAD_DEFAULT_MACHINE=f-dahu.ciment
