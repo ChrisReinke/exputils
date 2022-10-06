@@ -68,6 +68,7 @@ export EU_PRJ_INRIA_TARGET_MACHINE_DEFAULTS_GPU="
   pictor ws 1 pictor;
   chamaeleon ws 1 chamaeleon;
   andromeda ws 1 andromeda;
+  bootes ws 1 bootes;
   perception c 1 perception;
   gpu1 cn 1 gpu1-perception.inrialpes.fr perception;
   gpu2 cn 1 gpu2-perception.inrialpes.fr perception;
@@ -84,7 +85,8 @@ export EU_PRJ_INRIA_TARGET_MACHINE_DEFAULTS_CPU="
   ursa ws 15 ursa;
   pictor ws 15 pictor;
   chamaeleon ws 15 chamaeleon;
-  andromeda ws 15 andromeda"
+  andromeda ws 15 andromeda;
+  bootes ws 8 bootes"
 
 
 ##################
