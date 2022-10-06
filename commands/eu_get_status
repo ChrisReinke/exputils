@@ -49,5 +49,5 @@ for file in $files; do
 done
 
 # print statistics
-echo "total: ${n_files} | todo: ${statistics[todo]} | running: ${statistics[running]} | finished: ${statistics[finished]} | error: ${statistics[error]}"
+echo "total: ${n_files} | todo: ${statistics[todo]} | running: ${statistics[running]} | error: ${statistics[error]} | finished: ${statistics[finished]} "
 

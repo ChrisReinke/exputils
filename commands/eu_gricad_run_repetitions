@@ -5,14 +5,12 @@
 
 NUM_PROCESSES=$EU_PRJ_GRICAD_DEFAULT_NUM_PROCESSES
 WALLTIME=$EU_PRJ_GRICAD_DEFAULT_WALLTIME
-IS_RERUN=False
 
 ARGUMENTS=
-while getopts ":n:w:r" arg; do
+while getopts ":n:w:" arg; do
   case $arg in
     n) NUM_PROCESSES=$OPTARG;;
     w) WALLTIME=$OPTARG;;
-    r) IS_RERUN=True;;
   esac
 done
 
@@ -29,9 +27,6 @@ echo "Add for each repetition a job ..."
 eu_gricad_python -c "import exputils
 exputils.manage.start_experiments(
   start_scripts='gricad_add_job_run_repetition.sh',
-  parallel=False,
-  is_chdir=True,
-  verbose=False,
-  is_rerun=$IS_RERUN)"
+  parallel=False)"
 
 echo "Finished registering all repetitions at OAR."

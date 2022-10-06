@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 
 NUM_PROCESSES=$EU_PRJ_LOCAL_DEFAULT_NUM_PROCESSES
-IS_RERUN=False
 RUN_REPETITION_SCRIPT=$EU_PRJ_DEFAULT_RUN_REPETITION_SCRIPT
 
-while getopts ":n:r" arg; do
+while getopts ":n:" arg; do
   case $arg in
     n) NUM_PROCESSES=$OPTARG;;
-    r) IS_RERUN=True;;
   esac
 done
 
@@ -18,9 +16,6 @@ exputils.manage.generate_experiment_files('experiment_configurations.ods', direc
 
 exputils.manage.start_experiments(
   start_scripts='$RUN_REPETITION_SCRIPT',
-  parallel=$NUM_PROCESSES,
-  is_chdir=True,
-  verbose=False,
-  is_rerun=$IS_RERUN)"
+  parallel=$NUM_PROCESSES)"
 
 echo "Finished"

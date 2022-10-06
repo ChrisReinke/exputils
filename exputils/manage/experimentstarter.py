@@ -31,7 +31,7 @@ def start_torque_experiments(directory=None, start_scripts='*.torque', is_parall
                              post_start_wait_time=post_start_wait_time)
 
 
-def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', parallel=True, is_chdir=False, verbose=False, post_start_wait_time=0, is_rerun=False):
+def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', parallel=True, is_chdir=True, verbose=False, post_start_wait_time=0):
     """
 
     :param directory: Directory in which the start scripts are searched.
@@ -39,10 +39,9 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
     :param start_command:
     :param parallel: True if processes are started and executed in parallel. False if they are executed one after the other.
                      A integer number defines how many processes can run in parallel.
-    :param is_chdir:
+    :param is_chdir: Before starting a script, should the main process change to its working directory. (Default: True)
     :param verbose:
     :param post_start_wait_time:
-    :param is_rerun: Should finished scripts be rerun. (default: False)
     :return:
     """
 

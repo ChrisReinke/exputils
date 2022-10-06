@@ -110,9 +110,7 @@ do
         nohup  eu_inria_singularity python -c \"import exputils
 exputils.manage.start_experiments(
   start_scripts='$run_repetition_script',
-  parallel=$num_of_proc,
-  is_chdir=True,
-  verbose=False)\" > ${log_name_prefix}_${machine_config_name}_${i}_out.log 2> ${log_name_prefix}_${machine_config_name}_${i}_err.log < /dev/null &"
+  parallel=$num_of_proc)\" > ${log_name_prefix}_${machine_config_name}_${i}_out.log 2> ${log_name_prefix}_${machine_config_name}_${i}_err.log < /dev/null &"
 
     elif [[ $machine_type == "c" ]] || [[ $machine_type == "cn" ]]; then
 
@@ -129,13 +127,11 @@ exputils.manage.start_experiments(
        # create script to run the experiments
        start_script="oar_job_run_experiments_$(date +%s.%N).sh"
 
-      # the sleep command is to generate different starting times of machines, otherwise they might start the same repetition twice
+      # create a script that is used for the oarjob to run. At the end of the script it deletes itself.
       echo -e "eu_inria_singularity python -c \"import exputils \n\
 exputils.manage.start_experiments(\n\
   start_scripts='$run_repetition_script',\n\
-  parallel=$num_of_proc,\n\
-  is_chdir=True,\n\
-  verbose=False)\"
+  parallel=$num_of_proc)\"
 rm $start_script" > $start_script
     chmod +x $start_script
 

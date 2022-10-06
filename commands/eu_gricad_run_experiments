@@ -8,11 +8,10 @@ NUM_PROCESSES=$EU_PRJ_GRICAD_DEFAULT_NUM_PROCESSES
 WALLTIME=$EU_PRJ_GRICAD_DEFAULT_WALLTIME
 
 ARGUMENTS=
-while getopts ":n:w:r" arg; do
+while getopts ":n:w:" arg; do
   case $arg in
     n) NUM_PROCESSES=$OPTARG;;
     w) WALLTIME=$OPTARG;;
-    r) ARGUMENTS="$ARGUMENTS -r";;
   esac
 done
 
@@ -27,12 +26,11 @@ eu_gricad_python -c "import exputils
 exputils.manage.generate_experiment_files('experiment_configurations.ods', directory='./experiments/')"
 
 echo "Add for each experiment a job ..."
+# remove the old status files, so that we resubmit the jobs, in case there are new repetitions
+find . -name gricad_add_job_run_experiment.sh.status -delete
 eu_gricad_python -c "import exputils
 exputils.manage.start_experiments(
   start_scripts='gricad_add_job_run_experiment.sh',
-  parallel=False,
-  is_chdir=True,
-  verbose=False,
-  is_rerun=True)"
+  parallel=False)"
 
 echo "Finished All Experiments."
