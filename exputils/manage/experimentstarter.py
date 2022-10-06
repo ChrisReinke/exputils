@@ -15,7 +15,6 @@ def start_slurm_experiments(directory=None, start_scripts='*.slurm', is_parallel
                              start_scripts=start_scripts,
                              start_command='sbatch {}',
                              parallel=is_parallel,
-                             is_chdir = True,  # added, otherwise the sbatch does not work
                              verbose=verbose,
                              post_start_wait_time=post_start_wait_time)
 
@@ -26,13 +25,13 @@ def start_torque_experiments(directory=None, start_scripts='*.torque', is_parall
                              start_scripts=start_scripts,
                              start_command='qsub {}',
                              parallel=is_parallel,
-                             is_chdir = True,  # added, otherwise the sbatch does not work
                              verbose=verbose,
                              post_start_wait_time=post_start_wait_time)
 
 
 def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', parallel=True, is_chdir=True, verbose=False, post_start_wait_time=0):
     """
+    Starts experiments and repetitions in a parallel.
 
     :param directory: Directory in which the start scripts are searched.
     :param start_scripts: Filename of the start script file. Can include * to search for scripts.
@@ -119,21 +118,27 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
 
                     # check the script status, only start if needed
                     status = get_script_status(script)
-                    if status is None or status.lower() == 'none' or status.lower() == 'todo' or status.lower() == 'error' or status.lower() == 'unfinished':
+                    if is_to_start_status(status):
 
                         update_script_status(script, 'running')
 
                         # start
                         script_directory = os.path.dirname(script)
+                        script_path_in_its_working_directory = os.path.join('.', os.path.basename(script))
 
                         print('{} start {!r} (previous status: {}) ...'.format(datetime.now().strftime("%H:%M:%S"), script, status))
 
+                        process_environ = {
+                            **os.environ,
+                            "EU_STATUS_FILE": script_path_in_its_working_directory + STATUS_FILE_EXTENSION,
+                        }
+
                         if is_chdir:
                             os.chdir(script_directory)
-                            process = subprocess.Popen(start_command.format(os.path.join('.', os.path.basename(script))).split())
+                            process = subprocess.Popen(start_command.format(script_path_in_its_working_directory).split(), env=process_environ)
                             os.chdir(cwd)
                         else:
-                            process = subprocess.Popen(start_command.format(script).split(), cwd=script_directory)
+                            process = subprocess.Popen(start_command.format(script).split(), cwd=script_directory, env=process_environ)
 
                         started_processes.append(process)
                         started_scripts.append(script)
@@ -173,7 +178,13 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                 print('\t- {!r} (status: {})'.format(script_path, status))
 
 
+def is_to_start_status(status):
+    """Returns true if the given status means that the script should be started, otherwise false."""
+    return status is None or status.lower().startswith('todo') or status.lower().startswith('none') or status.lower().startswith('error') or status.lower().startswith('unfinished')
+
+
 def get_script_lock(script):
+    """Create a lock for the given script that can be used to have exclusive access to write its status."""
     return fasteners.InterProcessLock(script + '.lock')
 
 
@@ -251,7 +262,7 @@ def get_number_of_scripts_to_execute(directory=None, start_scripts='*.sh'):
     n = 0
     for script in scripts:
         status = get_script_status(script)
-        if status is None or status.lower() == 'todo' or status.lower() == 'none' or status.lower() == 'not started' or status.lower() == 'error' or status.lower() == 'unfinished':
+        if is_to_start_status(status):
             n += 1
 
     return n

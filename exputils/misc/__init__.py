@@ -14,3 +14,4 @@ from exputils.misc.misc import str_to_list
 from exputils.misc.misc import get_experiment_name
 from exputils.misc.misc import get_repetition_name
 from exputils.misc.misc import mannwhitneyu_pvalue
+from exputils.misc.misc import update_status

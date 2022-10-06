@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
 
 function usage {
-  echo "Usage: $(basename $0) [-h]" 2>&1
+  echo "Usage: $(basename $0) [-ht] [-i interval]" 2>&1
   echo "Prints the status of all experiments and repetitions that are below the current directory."
   echo "  Options:"
-  echo "   -h Shows this message."
+  echo "   -h           Shows this message."
+  echo "   -t           Query the status every i seconds until you force the command the quit using Ctrl+C."
+  echo "   -i interval  If using the -t options, this is the interval in seconds between status updates. (Default: 5)"
 }
 
+interval=5
+is_trail=False
+
 # handle arguments
-while getopts ":h" arg; do
+while getopts ":hti:" arg; do
   case $arg in
     h) usage ; exit 1 ;;
+    t) is_trail=True;;
+    i) interval=$OPTARG;;
     ?) echo "Invalid option: -${OPTARG}."; usage ; exit 2 ;;
   esac
 done
@@ -20,34 +27,47 @@ arguments=($@)
 
 ############################################
 
-# save statistics about how many scripts have a certain status
-declare -A statistics
-statistics[todo]=0
-statistics[running]=0
-statistics[finished]=0
-statistics[error]=0
+do_get_status=True
+while [ $do_get_status = True ]; do
 
-# identify all status files
-files=`find . -name *.status | sort -n`
+    if [ $is_trail = True ]; then
+        clear
+    fi
 
-# go through them
-n_files=0
-for file in $files; do
-    # read last line with status
-    status=$( tail -n 1 $file )
+    # save statistics about how many scripts have a certain status
+    declare -A statistics
+    statistics[todo]=0
+    statistics[running]=0
+    statistics[finished]=0
+    statistics[error]=0
 
-    # create array, which can be used to split a string based on ' '
-    # use only the first term as status
-    status=($status)
-    status=${status[0]}
+    # identify all status files
+    files=`find . -name *.status | sort -n`
 
-    # output status
-    echo "$file - $status"
+    # go through them
+    n_files=0
+    for file in $files; do
+        # read last line with status
+        status=$( tail -n 1 $file )
 
-    ((n_files++))
-    statistics[$status]=$((statistics[$status] + 1))
+        # output status
+        echo "$file - $status"
+
+        # create array, which can be used to split a string based on ' '
+        # use only the first term as status for statistics
+        status=($status)
+        status=${status[0]}
+        statistics[$status]=$((statistics[${status[0]}] + 1))
+
+        ((n_files++))
+    done
+
+    # print statistics
+    echo "total: ${n_files} | todo: ${statistics[todo]} | running: ${statistics[running]} | error: ${statistics[error]} | finished: ${statistics[finished]} "
+
+    if [ $is_trail = False ]; then
+        do_get_status=False
+    else
+        sleep $interval
+    fi
 done
-
-# print statistics
-echo "total: ${n_files} | todo: ${statistics[todo]} | running: ${statistics[running]} | error: ${statistics[error]} | finished: ${statistics[finished]} "
-

@@ -27,7 +27,6 @@ def test_experimentstarter(tmpdir):
     assert os.path.isfile(os.path.join(directory, 'job02/job02.txt'))
     assert not os.path.isfile(os.path.join(directory, 'job03/job03.txt'))
 
-
     ############################################################################
     ## test 02 - parallel
 
@@ -75,7 +74,7 @@ def test_get_number_of_scripts_to_execute(tmpdir):
 
     # check
     n_open_scripts = eu.manage.get_number_of_scripts_to_execute(directory=directory)
-    assert n_open_scripts == 3
+    assert n_open_scripts == 4
 
 
 def test_get_number_of_scripts(tmpdir):
@@ -91,4 +90,51 @@ def test_get_number_of_scripts(tmpdir):
 
     # check
     n_scripts = eu.manage.get_number_of_scripts(directory=directory)
-    assert n_scripts == 4
+    assert n_scripts == 5
+
+
+def test_is_to_start_status():
+
+    assert eu.manage.experimentstarter.is_to_start_status('todo')
+    assert eu.manage.experimentstarter.is_to_start_status('error')
+    assert eu.manage.experimentstarter.is_to_start_status('none')
+    assert eu.manage.experimentstarter.is_to_start_status(None)
+    assert eu.manage.experimentstarter.is_to_start_status('unfinished')
+
+    assert eu.manage.experimentstarter.is_to_start_status('running') == False
+    assert eu.manage.experimentstarter.is_to_start_status('running 50%') == False
+    assert eu.manage.experimentstarter.is_to_start_status('dwdw') == False
+
+
+def test_update_status_file(tmpdir):
+
+    # job4 of the scripts is writing a message into the status file, check it
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    # change working directory to this path
+    os.chdir(dir_path)
+
+
+    # copy the scripts in the temporary folder
+    directory = os.path.join(tmpdir.strpath, 'test_update_status_file')
+    shutil.copytree('./start_scripts', directory)
+
+    # run scripts
+    eu.manage.start_experiments(directory=directory, parallel=False)
+
+    # exists a status file?
+    status_file_path = os.path.join(directory, 'job04/start.sh.status')
+
+    assert os.path.isfile(status_file_path)
+
+    # read file and see if the message was written
+    n_messages = 0
+
+    f = open(status_file_path, 'r')
+    lines = f.readlines()
+    for line in lines:
+        if line == 'running hello\n':
+            n_messages += 1
+
+    assert n_messages == 1
+

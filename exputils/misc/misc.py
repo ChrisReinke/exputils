@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 import exputils as eu
 import re
@@ -5,6 +6,7 @@ import os
 import copy
 import random
 import scipy.stats
+from datetime import datetime
 from exputils.misc.attrdict import combine_dicts
 # try to import torch, so that its seed can be set by the seed() - function
 try:
@@ -563,3 +565,24 @@ def mannwhitneyu_pvalue(data_1, data_2):
         data_2,
         alternative='two-sided')
     return pvalue
+
+
+def update_status(status, status_file=None):
+    """
+    Updates the status of the running experiment/repetition which can be queried via the eu_get_status commands.
+
+    :param status: String with status.
+    :param status_file: Optional status file. (Default: None)
+    """
+
+
+    if status_file is None:
+        status_file = os.environ.get('EU_STATUS_FILE', default=None)
+
+    if status_file is None or status_file == '':
+        warnings.warn('Can not find status file location to update its status.')
+    else:
+        time_str = datetime.now().strftime("%H:%M:%S")
+        with open(status_file, 'a+') as file:
+            file.write(time_str + "\n" + "running " + status + "\n")
+
