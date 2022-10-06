@@ -219,8 +219,8 @@ def get_scripts(directory=None, start_scripts='*.sh'):
 
     # find all start scripts
     scripts = glob.iglob(os.path.join(directory, '**', start_scripts), recursive=True)
-
     scripts = list(scripts)
+    scripts.sort()
 
     return scripts
 
