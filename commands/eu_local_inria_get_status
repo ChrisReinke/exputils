@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 function usage {
-  echo "Usage: $(basename $0) [-ht] [-i interval] [-m machine]" 2>&1
+  echo "Usage: $(basename $0) [-hut] [-i interval] [-m machine]" 2>&1
   echo "Prints the status of all experiments and repetitions that are below the current directory at INRIA."
   echo "  Options:"
   echo "   -h           Shows this message."
+  echo "   -u           Only show the status of unfinished experiments to have a shorter output. Does not affect the final statistics line."
   echo "   -t           Query the status every i seconds until you force the command the quit using Ctrl+C."
   echo "   -i interval  If using the -t options, this is the interval in seconds between status updates. (Default: 5)"
   echo "   -m machine   Name of the machine at Inria which is used to query the status. (Default: $EU_PRJ_INRIA_DEFAULT_MACHINE)"
@@ -14,10 +15,11 @@ ssh_machine=$EU_PRJ_INRIA_DEFAULT_MACHINE
 
 # handle arguments
 arguments=
-while getopts ":hm:ti:" arg; do
+while getopts ":hum:ti:" arg; do
   case $arg in
     h) usage ; exit 1 ;;
     m) ssh_machine=${OPTARG};;
+    u) arguments="$arguments -u";;
     t) arguments="$arguments -t";;
     i) arguments="$arguments -i $OPTARG";;
     ?) echo "Invalid option: -${OPTARG}."; usage ; exit 2 ;;

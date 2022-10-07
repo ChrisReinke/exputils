@@ -126,7 +126,7 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                         script_directory = os.path.dirname(script)
                         script_path_in_its_working_directory = os.path.join('.', os.path.basename(script))
 
-                        print('{} start {!r} (previous status: {}) ...'.format(datetime.now().strftime("%H:%M:%S"), script, status))
+                        print('{} start {!r} (previous status: {}) ...'.format(datetime.now().strftime("%Y/%m/%d %H:%M:%S"), script, status))
 
                         process_environ = {
                             **os.environ,
@@ -166,7 +166,7 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                         status = 'error'
                     update_script_status(started_scripts[p_idx], status)
 
-                    print('{} finished {!r} (status: {})'.format(datetime.now().strftime("%H:%M:%S"), started_scripts[p_idx], status))
+                    print('{} finished {!r} (status: {})'.format(datetime.now().strftime("%Y/%m/%d %H:%M:%S"), started_scripts[p_idx], status))
 
         if n_active_processes > 0:
             time.sleep(0.5) # sleep half a second before checking again
@@ -198,7 +198,7 @@ def update_script_status(script, status):
 
     status_file_path = script + STATUS_FILE_EXTENSION
 
-    time_str = datetime.now().strftime("%H:%M:%S")
+    time_str = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
     with open(status_file_path, 'a+') as file:
         file.write( time_str + "\n" + status + "\n")

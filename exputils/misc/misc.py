@@ -582,7 +582,7 @@ def update_status(status, status_file=None):
     if status_file is None or status_file == '':
         warnings.warn('Can not find status file location to update its status.')
     else:
-        time_str = datetime.now().strftime("%H:%M:%S")
+        time_str = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         with open(status_file, 'a+') as file:
             file.write(time_str + "\n" + "running " + status + "\n")
 

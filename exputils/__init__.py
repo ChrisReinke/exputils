@@ -12,7 +12,7 @@ from exputils.misc.attrdict import combine_dicts
 
 from exputils.misc import update_status
 
-__version__ = '0.2.26'
+__version__ = '0.2.27'
 
 DEFAULT_ODS_CONFIGURATION_FILE = 'experiment_configurations.ods'
 DEFAULT_EXPERIMENTS_DIRECTORY = 'experiments'
