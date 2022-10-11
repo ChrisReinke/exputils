@@ -3,22 +3,20 @@ config_name=$1
 target_machine=$2
 
 # get the config for the given mode
-declare -n config="EU_PRJ_INRIA_TARGET_MACHINE_DEFAULTS_${config_name}"
+config_name="EU_PRJ_INRIA_TARGET_MACHINE_DEFAULTS_$config_name"
+config="${!config_name}"
 
 # replace " " with ^ as " " will otherwise separate the array elements
 config=${config// /^}
-#echo $mode_config
 
 # replace all ; with ' ' and then create an array
 config=(${config//;/ })
-#echo ${mode_config[@]}
 
 # search in the config for the target mode the target machine
 for machine_config in "${config[@]}"
 do
     # replace ^ again with ' ' and then create an array for this config
     machine_config=(${machine_config//^/ })
-    #echo ${machine_config[0]}
 
     if [ "${machine_config[0]}" = "$target_machine" ]; then
       echo ${machine_config[1]} ${machine_config[2]} ${machine_config[3]} ${machine_config[4]}
