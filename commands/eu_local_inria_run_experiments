@@ -145,10 +145,12 @@ exputils.manage.start_experiments(
       ssh $ic_access_machine "
       source eu_activate $EU_ACTIVE_PRJ;
       cd ${EXTERNAL_SCRIPT_PATH};
+      echo -e \"source eu_activate $EU_ACTIVE_PRJ;\" >> $start_script;
       echo -e eu_inria_singularity python -c \"\\\"import exputils\n\
 exputils.manage.start_experiments(\n\
   start_scripts='$run_repetition_script',\n\
-  parallel=$num_of_proc)\\\"\" > $start_script;
+  parallel=$num_of_proc)\\\"\" >> $start_script;
+      echo -e \"rm $start_script\" >> $start_script;
       chmod +x $start_script;
       oarsub -l /host=1/gpudevice=1,walltime=$walltime -p \"cluster='$cluster' $host_definition\" -t besteffort --stdout ${log_name_prefix}_${machine_config_name}_${i}_out.log --stderr ${log_name_prefix}_${machine_config_name}_${i}_err.log ./$start_script"
 
