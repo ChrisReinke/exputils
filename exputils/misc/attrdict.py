@@ -237,6 +237,19 @@ class AttrDict(dict):
         return dict_to_attrdict(loaded_dict, cls)
 
 
+    def to_yaml(self, path) -> None:
+
+        with open(path, 'w') as output_file:
+            yaml.dump(self.toDict(), output_file)
+
+    @classmethod
+    def from_yaml(cls, filepath, **options):
+        with open(filepath, 'r') as config_file:
+            loaded_dict = yaml.load(config_file.read(),
+                                    yaml.FullLoader)
+        return dict_to_attrdict(loaded_dict, cls)
+
+
 class AutoAttrDict(AttrDict):
     def __setattr__(self, k, v):
         """ Works the same as AttrDict.__setattr__ but if you supply
