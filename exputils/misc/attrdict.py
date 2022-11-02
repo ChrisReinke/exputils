@@ -1,6 +1,7 @@
 import exputils
 import numpy as np
 import collections
+import yaml
 from collections import defaultdict
 from collections.abc import Mapping
 from six import iteritems, iterkeys  # pylint: disable=unused-import
