@@ -38,19 +38,17 @@ __1) Exputils__
 
 *Via PIP*
 
-    pip install exp-utils
+    pip install experiment-utils
 
 *From Source*
 
-Clone via Git or download the current version of the exputils library.
-Open the library in the console.  
-
-To install the library:
-
-    pip install .
+Clone the repository via git and install via pip:
+    
+    git clone git@gitlab.inria.fr:creinke/exputils.git .
+    pip install ./exputils
 
 (To install the library as a developer so that changes to its source code are directly usable in other projects:
-`pip install -e .`)
+`pip install -e ./exputils`)
 
 
 __2) Jupiter Notebook__
