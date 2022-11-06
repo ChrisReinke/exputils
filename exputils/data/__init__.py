@@ -1,3 +1,12 @@
+##
+## This file is part of the exputils package.
+##
+## Copyright: INRIA
+## Year: 2022
+## Contact: chris.reinke@inria.fr
+##
+## exputils is provided under GPL-3.0-or-later
+##
 from exputils.data.loading import load_experiment_descriptions
 from exputils.data.loading import load_experiment_data
 from exputils.data.loading import load_single_experiment_data

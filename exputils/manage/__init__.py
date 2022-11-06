@@ -1,3 +1,12 @@
+##
+## This file is part of the exputils package.
+##
+## Copyright: INRIA
+## Year: 2022
+## Contact: chris.reinke@inria.fr
+##
+## exputils is provided under GPL-3.0-or-later
+##
 from exputils.manage.experimentgenerator import generate_experiment_files
 from exputils.manage.experimentstarter import start_experiments
 from exputils.manage.experimentstarter import start_slurm_experiments

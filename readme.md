@@ -1,4 +1,4 @@
-Current version: 0.2.27 (11/10/2022)
+Current version: 0.3.0 (06/11/2022)
 
 # Introduction
 
@@ -8,21 +8,19 @@ It is especially designed to handle experimental repetitions, including to run d
 Main features:
 * Easy definition of default configurations using nested python dictionaries.
 * Setup of experimental configuration parameters using an ODF file.
-* Running of experiments and their repetitions locally or on clusters.
+* Running of experiments and their repetitions in parallel.
 * Logging of experimental data (numpy, json).
 * Loading and filtering of experimental data.
 * Interactive Jupyter widgets to load, select and plot data as line, box and bar plots.  
 
-# <a name="setup"></a>Setup
+# <a name="requirements"></a>Requirements
 
-## <a name="requirements"></a>Requirements
+Developed and tested for Python 3.6 to 3.9 on Linux (Ubuntu 18.04).
 
-Developed and tested for Python 3.6, and the Linux OS (developed under Ubuntu 18.04).
-
-Needs several additional python packages which will be automatically installed during the installation:
+Depends on the following python packages which will be automatically installed during the setup:
 * numpy >= 1.19.5
 * six >= 1.15.0
-* ipywidgets >= 7.5.1
+* ipywidgets >= 7.5.1,<= 7.6.5
 * qgrid >= 1.3.1
 * plotly >= 4.13.0
 * cloudpickle >= 1.6.0
@@ -33,52 +31,42 @@ Needs several additional python packages which will be automatically installed d
 * tensorboard >= 1.15.0
 * fasteners >= 0.18
 
-## Installation
 
-__1) Exputils Package__
+# <a name="setup"></a>Setup
+
+__1) Exputils__
+
+*Via PIP*
+
+    pip install exp-utils
+
+*From Source*
 
 Clone via Git or download the current version of the exputils library.
 Open the library in the console.  
 
 To install the library:
 
-`pip install .`
+    pip install .
 
 (To install the library as a developer so that changes to its source code are directly usable in other projects:
 `pip install -e .`)
 
-For using Jupyter GUIs with Jupyter Notebook, run the following command.
+
+__2) Jupiter Notebook__
+
+For using the exputils GUIs for loading and plotting of data in Jupyter Notebook, the *qgrid* widget must be activated.
 (Note: The GUI is currently only tested for Jupyter notebooks. For Jupyterlab, other installation procedures are necessary.)
+Activate *qgrid* with:
 
-`jupyter nbextension enable --py --sys-prefix qgrid`
+    jupyter nbextension enable --py --sys-prefix qgrid
 
-I recommend to use the [Jupyter Notebooks Extensions](https://github.com/ipython-contrib/jupyter_contrib_nbextensions) to allow for example code folding or folding of headlines.
-Install the extensions with these commands:
+It is recommended to use the [Jupyter Notebooks Extensions](https://github.com/ipython-contrib/jupyter_contrib_nbextensions) to allow folding of code and headlines.
+This makes the notebooks more readable.
+Install the extensions with:
 
-`pip install jupyter_contrib_nbextensions` \
-`jupyter contrib nbextension install --user`
-
-__2) Commands__
-
-Several commands exist which make it easier to run experiments.
-These commands are located in the *./commands/* directory.
-These commands have to be adjusted for each project to your local machine and possible external machines or clusters.
-Each project has a configuration file in the *./projects/* directory.
-
-Create a copy of the script *TEMPLATE* and name it after your project *<project_name>*.
-Then adjust the environment varibales in this file according to your local settings and external settings.
- 
-Add the following lines to your *~/.bashrc* to add the commands to the PATH and to load environment varibles of your default project:
- 
-    # define path to the exputils folder
-    PATH_TO_EXPUTILS="<Path to exputils library, for example /home/user/code/exputils>"
-    if [ -f "$PATH_TO_EXPUTILS/commands/eu_setup.sh" ] ; then
-            . "$PATH_TO_EXPUTILS/commands/eu_setup.sh" "$PATH_TO_EXPUTILS"
-    fi
-    # set default project for exputils commands
-    export EU_DEFAULT_PRJ=<name of your default project>
-    # activate the default project
-    source eu_activate
+    pip install jupyter_contrib_nbextensions 
+    jupyter contrib nbextension install --user
 
 # <a name="overview"></a>Overview
 
@@ -116,4 +104,10 @@ Folder structure:
 
 # <a name="team-members"></a>Development Team
 
-* [Chris Reinke](http:www.scirei.net) <chris.reinke@inria.fr>
+__Main__
+
+* [Chris Reinke](http:www.scirei.net): <chris.reinke@inria.fr>
+
+__Contributors__
+
+ * Gaetan Lepage

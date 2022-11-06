@@ -3,3 +3,5 @@
 build/
 .idea/
 **/.ipynb_checkpoints/
+*.whl
+*.tar.gz

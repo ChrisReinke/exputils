@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-echo $EU_ACTIVE_PRJ
