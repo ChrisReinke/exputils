@@ -30,6 +30,7 @@ Depends on the following python packages which will be automatically installed d
 * scipy >= 1.5.4
 * tensorboard >= 1.15.0
 * fasteners >= 0.18
+* pyyaml >= 6.0
 
 
 # <a name="setup"></a>Setup
@@ -38,7 +39,7 @@ __1) Exputils__
 
 *Via PIP*
 
-    pip install experiment-utils
+    pip install experiment-utilities
 
 *From Source*
 
