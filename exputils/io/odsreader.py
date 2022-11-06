@@ -1,3 +1,12 @@
+##
+## This file is part of the exputils package.
+##
+## Copyright: INRIA
+## Year: 2022
+## Contact: chris.reinke@inria.fr
+##
+## exputils is provided under GPL-3.0-or-later
+##
 # Code from https://github.com/marcoconti83/read-ods-with-odfpy
 # FILE: ODSReader.py
 

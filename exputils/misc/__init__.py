@@ -1,3 +1,12 @@
+##
+## This file is part of the exputils package.
+##
+## Copyright: INRIA
+## Year: 2022
+## Contact: chris.reinke@inria.fr
+##
+## exputils is provided under GPL-3.0-or-later
+##
 from exputils.misc.misc import numpy_vstack_2d_default
 from exputils.misc.misc import replace_str_from_dict
 from exputils.misc.misc import do_subdict_boolean_filtering

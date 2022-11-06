@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-find . -name "run_experiment.sh.status" -print0 | while read -d $'\0' file
-do
-    new_file_name="${file/run_experiment.sh.status/run_repetition.sh.status}"
-    mv "$file" "$new_file_name"
-done
-

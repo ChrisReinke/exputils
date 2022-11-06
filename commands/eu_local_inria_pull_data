@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-# set defaults for INRIA workstations
-EXTERNAL_EXPERIMENTS_PATH=$EU_PRJ_INRIA_EXPERIMENTS_PATH
-EXTERNAL_MACHINE=$EU_PRJ_INRIA_DEFAULT_MACHINE
-
-eu_local_external_pull_data -s "$EXTERNAL_EXPERIMENTS_PATH" -m "$EXTERNAL_MACHINE" "$@"
