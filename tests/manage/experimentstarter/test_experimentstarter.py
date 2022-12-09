@@ -44,7 +44,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, parallel=True)
+    eu.manage.start_experiments(directory=directory, parallel=True, verbose=True)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
@@ -115,14 +115,16 @@ def test_is_to_start_status():
     assert eu.manage.experimentstarter.is_to_start_status('dwdw') == False
 
 
-def test_update_status_file(tmpdir):
+def test_status_file_writing_default_on(tmpdir):
+
+    ####################################################################
+    # Automatic writting of status file is on by default
 
     # job4 of the scripts is writing a message into the status file, check it
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     # change working directory to this path
     os.chdir(dir_path)
-
 
     # copy the scripts in the temporary folder
     directory = os.path.join(tmpdir.strpath, 'test_update_status_file')
@@ -137,13 +139,70 @@ def test_update_status_file(tmpdir):
     assert os.path.isfile(status_file_path)
 
     # read file and see if the message was written
-    n_messages = 0
+    n_todo_messages = 0
+    n_running_messages = 0
+    n_custom_messages = 0
+    n_finished_messages = 0
 
     f = open(status_file_path, 'r')
     lines = f.readlines()
     for line in lines:
+        if line == 'todo\n':
+            n_todo_messages += 1
+        if line == 'running\n':
+            n_running_messages += 1
         if line == 'running hello\n':
-            n_messages += 1
+            n_custom_messages += 1
+        if line == 'finished\n':
+            n_finished_messages += 1
 
-    assert n_messages == 1
+    assert n_todo_messages == 1
+    assert n_running_messages == 1
+    assert n_custom_messages == 1
+    assert n_finished_messages == 1
 
+
+def test_status_file_writing_off(tmpdir):
+    ####################################################################
+    # Automatic writting of status file is on by default
+
+    # job4 of the scripts is writing a message into the status file, check it
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    # change working directory to this path
+    os.chdir(dir_path)
+
+    # copy the scripts in the temporary folder
+    directory = os.path.join(tmpdir.strpath, 'test_update_status_file')
+    shutil.copytree('./start_scripts', directory)
+
+    # run scripts
+    eu.manage.start_experiments(directory=directory, parallel=False, write_status_files_automatically=False)
+
+    # exists a status file?
+    status_file_path = os.path.join(directory, 'job04/start.sh.status')
+
+    assert os.path.isfile(status_file_path)
+
+    # read file and see if the message was written
+    n_todo_messages = 0
+    n_running_messages = 0
+    n_custom_messages = 0
+    n_finished_messages = 0
+
+    f = open(status_file_path, 'r')
+    lines = f.readlines()
+    for line in lines:
+        if line == 'todo\n':
+            n_todo_messages += 1
+        if line == 'running\n':
+            n_running_messages += 1
+        if line == 'running hello\n':
+            n_custom_messages += 1
+        if line == 'finished\n':
+            n_finished_messages += 1
+
+    assert n_todo_messages == 0
+    assert n_running_messages == 0
+    assert n_custom_messages == 1
+    assert n_finished_messages == 0

@@ -18,27 +18,35 @@ import fasteners
 
 STATUS_FILE_EXTENSION = '.status'
 
+
 def start_slurm_experiments(directory=None, start_scripts='*.slurm', is_parallel=True, verbose=False, post_start_wait_time=0):
 
-    return start_experiments(directory=directory,
-                             start_scripts=start_scripts,
-                             start_command='sbatch {}',
-                             parallel=is_parallel,
-                             verbose=verbose,
-                             post_start_wait_time=post_start_wait_time)
+    return start_experiments(
+        directory=directory,
+        start_scripts=start_scripts,
+        start_command='sbatch {}',
+        parallel=is_parallel,
+        verbose=verbose,
+        post_start_wait_time=post_start_wait_time,
+        write_status_files_automatically=False
+    )
 
 
 def start_torque_experiments(directory=None, start_scripts='*.torque', is_parallel=True, verbose=False, post_start_wait_time=0):
 
-    return start_experiments(directory=directory,
-                             start_scripts=start_scripts,
-                             start_command='qsub {}',
-                             parallel=is_parallel,
-                             verbose=verbose,
-                             post_start_wait_time=post_start_wait_time)
+    return start_experiments(
+        directory=directory,
+        start_scripts=start_scripts,
+        start_command='qsub {}',
+        parallel=is_parallel,
+        verbose=verbose,
+        post_start_wait_time=post_start_wait_time,
+        write_status_files_automatically=False
+    )
 
 
-def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', parallel=True, is_chdir=True, verbose=False, post_start_wait_time=0):
+def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', parallel=True, is_chdir=True, verbose=False, post_start_wait_time=0,
+                      write_status_files_automatically=True):
     """
     Starts experiments and repetitions in a parallel.
 
@@ -50,6 +58,8 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
     :param is_chdir: Before starting a script, should the main process change to its working directory. (Default: True)
     :param verbose:
     :param post_start_wait_time:
+    :param write_status_files_automatically: Should the status file for the started scripts be written automatically by exputils or by the started
+                                             process itself. (Default: True)
     :return:
     """
 
@@ -89,14 +99,15 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
             status = get_script_status(script)
 
             if status is None:
-                update_script_status(script, 'todo')
+                if write_status_files_automatically:
+                    update_script_status(script, 'todo')
                 todo_scripts.append(script)
 
             elif status.lower() != 'finished':
                 todo_scripts.append(script)
 
             else:
-                ignored_scripts.append(script)
+                ignored_scripts.append((script, status))
 
     # start all in parallel if wanted
     if n_parallel == np.inf:
@@ -129,7 +140,8 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                     status = get_script_status(script)
                     if is_to_start_status(status):
 
-                        update_script_status(script, 'running')
+                        if write_status_files_automatically:
+                            update_script_status(script, 'running')
 
                         # start
                         script_directory = os.path.dirname(script)
@@ -157,7 +169,7 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
 
                     else:
                         # do not start
-                        ignored_scripts.append(script)
+                        ignored_scripts.append((script, status))
 
         # check the activity of the started processes
         n_active_processes = 0
@@ -173,7 +185,9 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                         status = 'finished'
                     else:
                         status = 'error'
-                    update_script_status(started_scripts[p_idx], status)
+
+                    if write_status_files_automatically:
+                        update_script_status(started_scripts[p_idx], status)
 
                     print('{} finished {!r} (status: {})'.format(datetime.now().strftime("%Y/%m/%d %H:%M:%S"), started_scripts[p_idx], status))
 
@@ -183,7 +197,7 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
     if verbose:
         if ignored_scripts:
             print('Ignored scripts:')
-            for [script_path, status] in ignored_scripts:
+            for (script_path, status) in ignored_scripts:
                 print('\t- {!r} (status: {})'.format(script_path, status))
 
 

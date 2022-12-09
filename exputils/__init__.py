@@ -21,12 +21,12 @@ from exputils.misc.attrdict import combine_dicts
 
 from exputils.misc import update_status
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 DEFAULT_ODS_CONFIGURATION_FILE = 'experiment_configurations.ods'
 DEFAULT_EXPERIMENTS_DIRECTORY = 'experiments'
 EXPERIMENT_DIRECTORY_TEMPLATE = 'experiment_{:06d}'
 REPETITION_DIRECTORY_TEMPLATE = 'repetition_{:06d}'
-DEFAULT_DATA_DIRECTORY = 'data' # name of the data directory under the experiments and repetition folders
+DEFAULT_DATA_DIRECTORY = 'data'  # name of the data directory under the experiments and repetition folders
 
-REPETITION_DATA_KEY = 'repetition_data' # key name  for repetition data in the experiment_data dictionary
+REPETITION_DATA_KEY = 'repetition_data'  # key name  for repetition data in the experiment_data dictionary
