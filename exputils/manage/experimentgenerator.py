@@ -2,7 +2,7 @@
 ## This file is part of the exputils package.
 ##
 ## Copyright: INRIA
-## Year: 2022
+## Year: 2022, 2023
 ## Contact: chris.reinke@inria.fr
 ##
 ## exputils is provided under GPL-3.0-or-later
@@ -328,7 +328,14 @@ def generate_files_from_config(config_data, directory='.', extra_files=None, ext
                 else:
                     source_files = experiment_config['repetition_source_file_locations'] + extra_files
 
-                generate_source_files(source_files, experiment_files_directory, experiment_config, experiment_id, repetition_id, copy_operator)
+                generate_source_files(
+                    source_files,
+                    experiment_files_directory,
+                    experiment_config,
+                    experiment_id,
+                    repetition_id,
+                    copy_operator=copy_operator
+                )
 
             # if there are experiment - repetitions defined, then generate the files for the experiment folder
             if experiment_config['experiment_source_file_locations'] is None:
@@ -337,7 +344,13 @@ def generate_files_from_config(config_data, directory='.', extra_files=None, ext
                 source_files = experiment_config['experiment_source_file_locations'] + extra_experiment_files
 
             if source_files:
-                generate_source_files(source_files, experiment_directory, experiment_config, experiment_id, copy_operator)
+                generate_source_files(
+                    source_files,
+                    experiment_directory,
+                    experiment_config,
+                    experiment_id,
+                    copy_operator=copy_operator
+                )
 
 
 def generate_source_files(source_files, experiment_files_directory, experiment_config, experiment_id, repetition_id=None, copy_operator='shutil'):
