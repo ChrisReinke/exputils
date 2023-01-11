@@ -1,4 +1,4 @@
-Current version: 0.3.1 (09/12/2022)
+Current version: 0.3.2 (11/01/2023)
 
 # Introduction
 
