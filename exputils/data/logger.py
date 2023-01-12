@@ -136,19 +136,6 @@ class Logger:
                 self.tensorboard.add_scalar(name, scalar, tb_global_step, tb_walltime)
 
 
-    def add_scalar(self, name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None):
-
-        safe_name = name.replace('/', '_')
-
-        if safe_name not in self.numpy_data:
-            self.numpy_data[safe_name] = []
-
-        self.numpy_data[safe_name].append(value)
-
-        if log_to_tb is True or (self._is_tensorboard_active and log_to_tb is not False):
-            self.tensorboard.add_scalar(name, value, tb_global_step, tb_walltime)
-
-
     def add_object(self, name, obj):
         """
         Adds an object ...

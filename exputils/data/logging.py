@@ -92,7 +92,8 @@ def add_value(name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None
 
 def add_scalar(name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=None):
     """
-    Adds a new scalar to the log. Scalars are stored in numpy arrays. Allows to log in parallel to tensorboard.
+    Adds a new scalat to the log. Scalars are stored in numpy arrays. Allows to log in parallel to tensorboard if the value is a scalar.
+
 
     :param: name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
     :param: scalar: Value to save.
@@ -101,7 +102,7 @@ def add_scalar(name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=No
     :param tb_global_step (int): Tensorboards global step value to record. (default = None)
     :param tb_walltime (float): Optional tensorboard override of default walltime (time.time()) with seconds after epoch of event. (default = None)
     """
-    log.add_scalar(name, scalar, log_to_tb, tb_global_step, tb_walltime)
+    log.add_value(name, scalar, log_to_tb, tb_global_step, tb_walltime)
 
 
 def get_values(name):
