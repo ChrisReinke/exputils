@@ -10,6 +10,7 @@
 import numpy as np
 import exputils as eu
 
+
 def global_access_test(name, value):
     import exputils.data.logging as log
 
@@ -21,6 +22,7 @@ class TestObjClass():
     def __init__(self, val):
         self.val = val
         self.func = lambda x: x + val
+
 
 def test_default_logger(tmp_path):
 
@@ -63,7 +65,7 @@ def test_default_logger(tmp_path):
     # write two logging entries
     log.add_value('prop1', 3.0)
     log.add_value('prop1', 4.0)
-    log.add_value('prop2', 30.0)
+    log.add_scalar('prop2', 30.0)
 
     # write objects
     test_obj_1 = TestObjClass(1)
