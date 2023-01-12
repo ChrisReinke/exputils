@@ -24,7 +24,11 @@ except ImportError:
     is_exist_tensorboard_module = False
 
 
-# TODO: Featrue - allow to log sub values, for example: agent/epsilon
+def _get_safe_name(name):
+    """Returns a name that is safe to save as a log entry."""
+    return name.replace('/', '_')
+
+
 class Logger:
     """
         Configuration:
@@ -77,7 +81,7 @@ class Logger:
 
 
     def __getitem__(self, key):
-        key = key.replace('/', '_')
+        key = _get_safe_name(key)
 
         if key in self.numpy_data:
             return self.numpy_data[key]
@@ -88,7 +92,7 @@ class Logger:
 
 
     def __contains__(self, item):
-        item = item.replace('/', '_')
+        item = _get_safe_name(item)
 
         return (item in self.numpy_data) or (item in self.object_data)
 
@@ -105,7 +109,7 @@ class Logger:
                      (default=None)
         """
         if name is not None:
-            name = name.replace('/', '_')
+            name = _get_safe_name(name)
 
         if name is None:
             self.numpy_data.clear()
@@ -121,43 +125,37 @@ class Logger:
                 del self.numpy_data[name]
 
 
-    def add_value(self, name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+    def add_value(self, name, val, log_to_tb=None, tb_global_step=None, tb_walltime=None):
 
-        safe_name = name.replace('/', '_')
+        safe_name = _get_safe_name(name)
 
         if safe_name not in self.numpy_data:
             self.numpy_data[safe_name] = []
 
-        self.numpy_data[safe_name].append(scalar)
+        self.numpy_data[safe_name].append(val)
 
         if log_to_tb is True or (self._is_tensorboard_active and log_to_tb is not False):
             # identify if the value is a scalar, if yes, then add it to tensorboard
-            if not isinstance(scalar, (list, tuple, np.ndarray)):
-                self.tensorboard.add_scalar(name, scalar, tb_global_step, tb_walltime)
+            if not isinstance(val, (list, tuple, np.ndarray)):
+                self.tensorboard.add_scalar(name, val, tb_global_step, tb_walltime)
+            else:
+                warnings.warn('Can not log value for "{}" to tensorboard as it is not a scalar. Value: {}'.format(name, val))
 
 
-    def add_scalar(self, name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None):
-
-        safe_name = name.replace('/', '_')
-
-        if safe_name not in self.numpy_data:
-            self.numpy_data[safe_name] = []
-
-        self.numpy_data[safe_name].append(value)
-
-        if log_to_tb is True or (self._is_tensorboard_active and log_to_tb is not False):
-            self.tensorboard.add_scalar(name, value, tb_global_step, tb_walltime)
+    def add_scalar(self, name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+        # same functionality as add_value, but is more consistent with the naming of tensorboard API
+        self.add_value(name, scalar, log_to_tb=log_to_tb, tb_global_step=tb_global_step, tb_walltime=tb_walltime)
 
 
     def add_object(self, name, obj):
         """
-        Adds an object ...
+        Adds an object to the log that will be saved in a dill file when the log is saved.
 
         :param name:
         :param obj:
         :return:
         """
-        name = name.replace('/', '_')
+        name = _get_safe_name(name)
 
         if name not in self.object_data:
             self.object_data[name] = []
@@ -173,7 +171,7 @@ class Logger:
         if directory is None:
             directory = self.directory
 
-        name = name.replace('/', '_')
+        name = _get_safe_name(name)
 
         file_path = os.path.join(directory, name)
         eu.io.save_dill(obj, file_path)
@@ -186,7 +184,7 @@ class Logger:
         :param name: Name of the object.
         :return: Loaded object.
         """
-        name = name.replace('/', '_')
+        name = _get_safe_name(name)
 
         file_path = os.path.join(self.directory, name)
         return eu.io.load_dill(file_path)

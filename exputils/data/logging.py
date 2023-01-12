@@ -80,8 +80,8 @@ def add_value(name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None
     """
     Adds a new value to the log. Values are stored in numpy arrays. Allows to log in parallel to tensorboard if the value is a scalar.
 
-    :param: name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
-    :param: scalar: Value to save.
+    :param name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
+    :param value: Value to save.
     :param log_to_tb (bool): True if the value should be logged to tensorboard. False if not.
         If None, then it gets logged if the tensorboard is active. (default = None)
     :param tb_global_step (int): Tensorboards global step value to record. (default = None)
@@ -92,10 +92,10 @@ def add_value(name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None
 
 def add_scalar(name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=None):
     """
-    Adds a new scalar to the log. Scalars are stored in numpy arrays. Allows to log in parallel to tensorboard.
+    Adds a new scalar to the log. Scalars are stored in numpy arrays. Allows to log in parallel to tensorboard if the value is a scalar.
 
-    :param: name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
-    :param: scalar: Value to save.
+    :param name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
+    :param scalar: Value to save.
     :param log_to_tb (bool): True if the value should be logged to tensorboard. False if not.
         If None, then it gets logged if the tensorboard is active. (default = None)
     :param tb_global_step (int): Tensorboards global step value to record. (default = None)
