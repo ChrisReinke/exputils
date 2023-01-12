@@ -66,6 +66,8 @@ def test_default_logger(tmp_path):
     log.add_value('prop1', 3.0)
     log.add_value('prop1', 4.0)
     log.add_scalar('prop2', 30.0)
+    log.add_histogram('prop3', [110.0, 120.0])
+    log.add_histogram('prop3', [130.0, 140.0])
 
     # write objects
     test_obj_1 = TestObjClass(1)
@@ -81,6 +83,10 @@ def test_default_logger(tmp_path):
     assert log.get_values('prop1')[0] == 3.0
     assert log.get_values('prop1')[1] == 4.0
     assert log.get_values('prop2')[0] == 30.0
+    assert log.get_values('prop3')[0][0] == 110.0
+    assert log.get_values('prop3')[0][1] == 120.0
+    assert log.get_values('prop3')[1][0] == 130.0
+    assert log.get_values('prop3')[1][1] == 140.0
 
     assert isinstance(log.get_values('objects')[0], TestObjClass) and log.get_values('objects')[0].val == 1
     assert isinstance(log.get_values('objects')[1], TestObjClass) and log.get_values('objects')[1].val == 2
@@ -99,6 +105,10 @@ def test_default_logger(tmp_path):
     assert mylogger['prop1'][0] == 3.0
     assert mylogger['prop1'][1] == 4.0
     assert mylogger['prop2'][0] == 30.0
+    assert mylogger['prop3'][0][0] == 110.0
+    assert mylogger['prop3'][0][1] == 120.0
+    assert mylogger['prop3'][1][0] == 130.0
+    assert mylogger['prop3'][1][1] == 140.0
 
     assert 'objects' not in mylogger
     assert 'test_obj_3' not in mylogger
@@ -112,6 +122,10 @@ def test_default_logger(tmp_path):
     assert mylogger['prop1'][0] == 3.0
     assert mylogger['prop1'][1] == 4.0
     assert mylogger['prop2'][0] == 30.0
+    assert mylogger['prop3'][0][0] == 110.0
+    assert mylogger['prop3'][0][1] == 120.0
+    assert mylogger['prop3'][1][0] == 130.0
+    assert mylogger['prop3'][1][1] == 140.0
 
     assert isinstance(mylogger['objects'][0], TestObjClass) and mylogger['objects'][0].val == 1
     assert isinstance(mylogger['objects'][1], TestObjClass) and mylogger['objects'][1].val == 2

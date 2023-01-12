@@ -149,7 +149,7 @@ class Logger:
 
     def add_histogram(self, name, values, log_to_tb=None, tb_global_step=None, tb_walltime=None):
 
-        safe_name = name.replace('/', '_')
+        safe_name = _get_safe_name(name)
 
         if safe_name not in self.numpy_data:
             self.numpy_data[safe_name] = []
@@ -157,6 +157,8 @@ class Logger:
         self.numpy_data[safe_name].append(values)
 
         if log_to_tb is True or (self._is_tensorboard_active and log_to_tb is not False):
+            # values must be a numpy array
+            values = np.array(values)
             self.tensorboard.add_histogram(name, values, global_step=tb_global_step, walltime=tb_walltime)
 
 

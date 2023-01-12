@@ -21,6 +21,7 @@ def _create_no_tb_logging_test_code(path):
         'if __name__ == \'__main__\':', '\n',
         '   log.add_value(\'val\', 100)', '\n',
         '   log.add_scalar(\'val2\', 100)', '\n',
+        '   log.add_histogram(\'hist1\', [100, 100])', '\n',
         '   log.save()' '\n',
     ])
     f.close()
@@ -35,6 +36,7 @@ def _create_nonactive_tb_logging_test_code(path):
         '   log.create_tensorboard()', '\n',
         '   log.add_value(\'cata/val\', 100)', '\n',
         '   log.add_scalar(\'val2\', 100)', '\n',
+        '   log.add_histogram(\'hist1\', [100, 100])', '\n',
         '   log.save()' '\n',
     ])
     f.close()
@@ -49,6 +51,7 @@ def _create_active_tb_logging_test_code(path):
         '   log.activate_tensorboard()', '\n',
         '   log.add_value(\'val\', 100)', '\n',
         '   log.add_scalar(\'cat/val\', 100)', '\n',
+        '   log.add_histogram(\'hist1\', [100, 100])', '\n',
         '   log.save()' '\n',
     ])
     f.close()
