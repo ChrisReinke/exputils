@@ -147,6 +147,19 @@ class Logger:
         self.add_value(name, scalar, log_to_tb=log_to_tb, tb_global_step=tb_global_step, tb_walltime=tb_walltime)
 
 
+    def add_histogram(self, name, values, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+
+        safe_name = name.replace('/', '_')
+
+        if safe_name not in self.numpy_data:
+            self.numpy_data[safe_name] = []
+
+        self.numpy_data[safe_name].append(values)
+
+        if log_to_tb is True or (self._is_tensorboard_active and log_to_tb is not False):
+            self.tensorboard.add_histogram(name, values, global_step=tb_global_step, walltime=tb_walltime)
+
+
     def add_object(self, name, obj):
         """
         Adds an object to the log that will be saved in a dill file when the log is saved.
