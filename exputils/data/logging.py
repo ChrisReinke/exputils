@@ -104,6 +104,20 @@ def add_scalar(name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=No
     log.add_scalar(name, scalar, log_to_tb, tb_global_step, tb_walltime)
 
 
+def add_histogram(name, values, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+    """
+    Adds a new histogram to the log. Histograms data are stored in numpy arrays. Allows to log in parallel to tensorboard.
+
+    :param: name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
+    :param: values: Values to build histogram.
+    :param log_to_tb (bool): True if the value should be logged to tensorboard. False if not.
+        If None, then it gets logged if the tensorboard is active. (default = None)
+    :param tb_global_step (int): Tensorboards global step value to record. (default = None)
+    :param tb_walltime (float): Optional tensorboard override of default walltime (time.time()) with seconds after epoch of event. (default = None)
+    """
+    log.add_histogram(name, values, log_to_tb, tb_global_step, tb_walltime)
+
+
 def get_values(name):
     """
     Returns the values for the given name. Values are stored in numpy arrays.
