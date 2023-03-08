@@ -15,6 +15,9 @@ import shutil
 import exputils
 from collections import OrderedDict
 
+# TODO: allow default values in the config
+# TODO: allow to delete a line in the config, for example if the value of a param is "#RM"
+
 
 def generate_experiment_files(ods_filepath=None, directory=None, extra_files=None, extra_experiment_files=None, verbose=False, copy_operator='shutil'):
     """
@@ -233,7 +236,7 @@ def load_configuration_data_from_ods(ods_filepath):
 
                         if col_idx > len(sheet_data[row_idx]) - 1:
                             # if there is no content in the final cells, the array that holds the data is shorter
-                            cur_cell_data = ''
+                            cur_cell_data = None
                         else:
                             cur_cell_data = get_cell_data(sheet_data[row_idx][col_idx])
 
@@ -249,7 +252,7 @@ def load_configuration_data_from_ods(ods_filepath):
 def get_cell_data(data):
 
     if data is None:
-        data = ''
+        return None
 
     # replace strange characters that are not used for python strings
     data = data.replace('’', '\'')
@@ -355,6 +358,8 @@ def generate_files_from_config(config_data, directory='.', extra_files=None, ext
 
 def generate_source_files(source_files, experiment_files_directory, experiment_config, experiment_id, repetition_id=None, copy_operator='shutil'):
 
+    default_value = ''
+
     if copy_operator.lower() == 'shutil':
         copy_function = _copy_operator_shutil
     elif copy_operator.lower() == 'cp':
@@ -382,25 +387,55 @@ def generate_source_files(source_files, experiment_files_directory, experiment_c
             permissions = os.stat(template_file_path)[stat.ST_MODE]
 
             # Read in the template file
+            file_lines = []
             with open(template_file_path, 'r') as file:
-                file_content = file.read()
+                file_lines = file.readlines()
 
-            # Replace the variables
-            file_content = file_content.replace('<experiment_id>', str(experiment_id))
+            # lines that should be written
+            write_lines = []
+            for line in file_lines:
 
-            if repetition_id is not None:
-                file_content = file_content.replace('<repetition_id>', str(repetition_id))
+                # Replace the variables
+                line = line.replace('<experiment_id>', str(experiment_id))
 
-            for variable_name, variable_value in file_config['variables'].items():
-                file_content = re.sub('<{}>'.format(variable_name),
-                                      variable_value,
-                                      file_content,
-                                      flags=re.IGNORECASE)
+                if repetition_id is not None:
+                    line = line.replace('<repetition_id>', str(repetition_id))
+
+                is_remove_line = False
+                for variable_name, variable_value in file_config['variables'].items():
+
+                    match = True
+                    while match is not None:
+                        # allow default values that come directly after the varibale_name: "<var_name,'varibale'>"
+                        match = re.search(r"<{}(,[^<]+)?>".format(variable_name), line, flags=re.IGNORECASE)
+
+                        if match is not None:
+                            # value is the variable_value
+                            val = variable_value
+
+                            # if it is None, then use the default value from the file, or the general default value which is ''
+                            if val is None:
+                                # if there is a default value defined in the source file
+                                if match.group(1) is None:
+                                    val = default_value
+                                else:
+                                    val = match.group(1)[1:]  # remove the initial ','
+
+                            # delete the whole line if the varibale value is "%RM"
+                            if val == '%RM':
+                                is_remove_line = True
+                                break
+
+                            line = line.replace(match.group(0), val)
+
+                # delete the whole line if the varibale value is "%RM"
+                if not is_remove_line:
+                    write_lines.append(line)
 
             # Write the final output file
             file_path = os.path.join(experiment_files_directory, file_config['file_name_template'].format(experiment_id))
             with open(file_path, 'w') as file:
-                file.write(file_content)
+                file.writelines(write_lines)
             os.chmod(file_path, permissions)
 
     # copy all other sources, but not the templates if they are in one of the source directories
