@@ -97,6 +97,18 @@ def test_datasource_experimentid_repetitionid_filters():
     eu.misc.list_equal(data, target_data)
 
 
+
+    # several data sources and default of experiment_ids which is 'all'
+    data, _ = eu.data.select_experiment_data(experiment_data,
+                                        datasources=['sub_dict_1.values', 'sub_dict_2.values'])
+    target_data = [[experiment_data['exp0']['sub_dict_1']['values'],
+                    experiment_data['exp1']['sub_dict_1']['values']],
+                   [experiment_data['exp0']['sub_dict_2']['values'],
+                    experiment_data['exp1']['sub_dict_2']['values']]
+                   ]
+    eu.misc.list_equal(data, target_data)
+
+
     # sub indexes
     data, _ = eu.data.select_experiment_data(experiment_data,
                                         datasources=['sub_dict_1.values', 'sub_dict_2.values[:,-1]'],
