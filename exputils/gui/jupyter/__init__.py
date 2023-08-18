@@ -30,10 +30,9 @@ from exputils.gui.jupyter.misc import remove_children_from_widget
 from exputils.gui.jupyter.misc import set_children_of_widget
 from exputils.gui.jupyter.misc import generate_random_state_backup_name
 
-from exputils.gui.jupyter.ipynbname import get_notebook_name
-from exputils.gui.jupyter.ipynbname import get_notebook_path
-
 DEFAULT_CONFIG_DIRECTORY = '.ipython_config'
 
 # TODO: Refactor - create plotly plots as objects
 # TODO: Feature - create table widget that shows statistical significant difference measures for same data that is given to bar or box plots
+
+

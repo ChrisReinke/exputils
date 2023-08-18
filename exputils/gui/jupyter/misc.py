@@ -13,7 +13,8 @@ import IPython
 from datetime import datetime
 import ipywidgets
 import base64
-from IPython.display import Javascript, display
+import ipynbname
+from IPython.display import Javascript
 
 def create_new_cell(code='', where='below'):
     """Create a code cell in the IPython Notebook.
@@ -50,7 +51,7 @@ def save_config(config, name, directory=None, profile=None):
     '''
 
     if directory is None: directory = eu.gui.jupyter.DEFAULT_CONFIG_DIRECTORY
-    if profile is None: profile = eu.gui.jupyter.get_notebook_name()
+    if profile is None: profile = ipynbname.name()
 
     filepath = os.path.join(directory, profile, name + '.json')
 
@@ -69,7 +70,7 @@ def load_config(name, directory=None, profile=None):
     '''
 
     if directory is None: directory = eu.gui.jupyter.DEFAULT_CONFIG_DIRECTORY
-    if profile is None: profile = eu.gui.jupyter.get_notebook_name()
+    if profile is None: profile = ipynbname.name()
 
     filepath = os.path.join(directory, profile, name + '.json')
 
