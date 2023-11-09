@@ -1,4 +1,4 @@
-Current version: 0.3.5 (18/08/2023)
+Current version: 0.3.6 (09/11/2023)
 
 # Introduction
 
@@ -20,7 +20,9 @@ Developed and tested for Python 3.6 to 3.9 on Linux (Ubuntu 18.04).
 Depends on the following python packages which will be automatically installed during the setup:
 * numpy >= 1.19.5
 * six >= 1.15.0
-* ipywidgets >= 7.5.1,<= 7.6.5
+* notebook <= 6.5.6  # exputils notebook widgets do not support new notebook version of 7
+* ipywidgets >= 7.5.1,<= 7.6.5  # needs older version due to https://github.com/quantopian/qgrid/issues/372
+* jupyter_contrib_nbextensions >= 0.7.0
 * qgrid >= 1.3.1
 * plotly >= 4.13.0
 * cloudpickle >= 1.6.0
@@ -58,14 +60,17 @@ For using the exputils GUIs for loading and plotting of data in Jupyter Notebook
 (Note: The GUI is currently only tested for Jupyter notebooks. For Jupyterlab, other installation procedures are necessary.)
 Activate *qgrid* with:
 
+    jupyter contrib nbextension install --user
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension
     jupyter nbextension enable --py --sys-prefix qgrid
 
 It is recommended to use the [Jupyter Notebooks Extensions](https://github.com/ipython-contrib/jupyter_contrib_nbextensions) to allow folding of code and headlines.
 This makes the notebooks more readable.
-Install the extensions with:
+Activate the extensions with:
 
-    pip install jupyter_contrib_nbextensions 
-    jupyter contrib nbextension install --user
+    jupyter nbextension enable codefolding/main
+    jupyter nbextension enable collapsible_headings/main
+
 
 # <a name="overview"></a>Overview
 
