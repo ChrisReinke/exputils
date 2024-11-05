@@ -12,6 +12,8 @@ import os
 import subprocess
 import glob
 
+import pytest
+pytest.importorskip('torch.utils.tensorboard')
 
 def _create_no_tb_logging_test_code(path):
     f = open(path, 'a')

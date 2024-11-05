@@ -233,17 +233,17 @@ def test_moving_average():
 
     input = np.array([2, 4, 6, 8, 10, 12])
     output = eu.misc.moving_average(input, n=2)
-    print(output)
+    # print(output)
     assert np.array_equal(output, [3, 3, 5, 7, 9, 11])
 
     input = np.array([2, 4, 6, 8, 10, 12])
     output = eu.misc.moving_average(input, n=3)
-    print(output)
+    # print(output)
     assert np.array_equal(output, [4, 4, 4, 6, 8, 10])
 
     input = np.array([2, 4, 6, 8, 10, 12, np.nan])
     output = eu.misc.moving_average(input, n=3)
-    print(output)
+    # print(output)
     assert np.array_equal(output, [4, 4, 4, 6, 8, 10, np.nan], equal_nan=True)
 
     #########################
@@ -251,19 +251,19 @@ def test_moving_average():
     input = np.array([[2, 4, 6, 8, 10, 12],
                       [20, 40, 60, 80, 100, 120]])
     output = eu.misc.moving_average(input, n=2)
-    print(output)
+    # print(output)
     assert np.array_equal(output, [[3, 3, 5, 7, 9, 11],[30, 30, 50, 70, 90, 110]])
 
     input = np.array([[2, 4, 6, 8, 10, 12],
                       [20, 40, 60, 80, 100, 120]])
     output = eu.misc.moving_average(input, n=3)
-    print(output)
+    # print(output)
     assert np.array_equal(output, [[4, 4, 4, 6, 8, 10],[40, 40, 40, 60, 80, 100]])
 
     input = np.array([[2, 4, 6, 8, np.nan, np.nan],
                       [20, 40, 60, 80, 100, 120]])
     output = eu.misc.moving_average(input, n=3)
-    print(output)
+    # print(output)
     assert np.array_equal(output, [[4, 4, 4, 6, np.nan, np.nan],[40, 40, 40, 60, 80, 100]], equal_nan=True)
 
 

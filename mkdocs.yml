@@ -1,0 +1,40 @@
+site_name: Exputils Docs
+
+#theme: readthedocs
+theme:
+  name: material
+  icon:
+    logo: material/tools
+
+  palette:
+      primary: blue
+
+plugins:
+  - search
+  - mkdocstrings
+
+nav:
+  - Welcome: overview.md
+  - tutorials.md
+  - Reference:
+      - Overview: reference/overview.md
+      - Logging: reference/logging.md
+      - Loading: reference/loading.md
+      - IO: reference/io.md
+
+# allow emojis
+markdown_extensions:
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+extra_css:
+  - stylesheets/extra.css

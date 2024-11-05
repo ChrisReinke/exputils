@@ -23,7 +23,7 @@ from exputils.misc import update_status
 
 __version__ = '0.3.6'
 
-DEFAULT_ODS_CONFIGURATION_FILE = 'experiment_configurations.ods'
+DEFAULT_ODS_CONFIGURATION_FILE = 'experiment_configurations.ods'  # sometthing
 DEFAULT_EXPERIMENTS_DIRECTORY = 'experiments'
 EXPERIMENT_DIRECTORY_TEMPLATE = 'experiment_{:06d}'
 REPETITION_DIRECTORY_TEMPLATE = 'repetition_{:06d}'

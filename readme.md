@@ -1,4 +1,4 @@
-Current version: 0.3.6 (09/11/2023)
+Current version: 0.3.7 (05/11/2024)
 
 # Introduction
 
@@ -7,15 +7,15 @@ It is especially designed to handle experimental repetitions, including to run d
  
 Main features:
 * Easy definition of default configurations using nested python dictionaries.
-* Setup of experimental configuration parameters using an ODF file.
-* Running of experiments and their repetitions in parallel.
-* Logging of experimental data (numpy, json).
+* Setup of experimental configuration parameters using an ODF file (Libreoffice alternative of MS Excel).
+* Running experiments and their repetitions in parallel.
+* Logging of experimental data (numpy, json) with tensorboard support.
 * Loading and filtering of experimental data.
 * Interactive Jupyter widgets to load, select and plot data as line, box and bar plots.  
 
 # <a name="requirements"></a>Requirements
 
-Developed and tested for Python 3.6 to 3.9 on Linux (Ubuntu 18.04).
+Developed and tested on Python 3.11 on Linux (Ubuntu 24).
 
 Depends on the following python packages which will be automatically installed during the setup:
 * numpy >= 1.19.5
@@ -105,6 +105,31 @@ Folder structure:
                 * **data** folder: Experimental data for the whole experiment, e.g. statistics that are calculated over all repetitions.   
                 * **\<code\>** files: Generated code and resource files.
         * **\<run scripts\>.sh** files: Various shell scripts to run experiments and calculate statistics locally or on clusters.
+
+
+# <a name="Development"></a>Documentation
+
+To generate the documentation manually use MkDocs which need to be installed: 
+ * mkdocs: `pip install mkdocs`
+ * mkdocs python handler: `pip install mkdocstrings-python`
+
+Then run:
+
+
+
+
+
+
+
+# <a name="Development"></a>Development
+
+If you wish to further develop the exputils or adapt them, then it is useful to run its unittests.
+They are written for pytest which needs to be installed:
+ * pytest `pip install pytest`
+
+To run all tests (otherwise some will be skipped), you need some additional packages:
+ * torch: `pip install torch` 
+
 
 # <a name="team-members"></a>Development Team
 

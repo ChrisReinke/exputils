@@ -7,19 +7,32 @@
 ##
 ## exputils is provided under GPL-3.0-or-later
 ##
+from typing import Optional
 import exputils as eu
 import numpy as np
 import os
 from glob import glob
+from exputils.misc.attrdict import AttrDict
 
 
-def save_dict_to_numpy_files(data, path='.', mode = 'npy'):
-    """
-    Saves the data in a dictionary to numpy files. Either several npy or one npz (compressed or un-compressed).
+def save_dict_to_numpy_files(data: dict,
+                             path: Optional[str] = '.',
+                             mode: Optional[str] = 'npy'):
+    """Saves a dictionary with numpy arrays to numpy files (either .npy, .npz, or .npz compressed formats).
 
-    :param data: Dictionary with data.
-    :param path: Path to folder if npy files are saved, or to the npz file.
-    :param mode: Defines if npy files or one npz file are saved: 'npy', 'npz', 'cnpz' - compressed. (Default: 'npy')
+    Parameters:
+        data (dict):
+            Dictionary containing the data to be saved, with keys as filenames and values as data to be saved.
+        path (str):
+            Directory or file path where the numpy files will be saved.
+            Default is the current directory.
+        mode (str):
+            Mode in which to save the data.
+            Can be 'npy', 'npz', or 'cnpz'.
+            Default is 'npy'.
+
+    Raises:
+        ValueError: If an invalid mode is provided.
     """
 
     # save logs in numpy format if they exist
@@ -37,11 +50,42 @@ def save_dict_to_numpy_files(data, path='.', mode = 'npy'):
         np.savez_compressed(path, **data)
 
     else:
-        raise ValueError('Unknown numpy logging mode {!r}!'.format(mode))
+        raise ValueError('Unknown numpy logging mode {!r}! Only \'npy\', \'npz\' and \'cnpz\' are allowed.'.format(mode))
 
 
-def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=None, allow_pickle=True):
-    """Loads data from all npy and npz files in a given directory."""
+def load_numpy_files(directory: str,
+                    allowed_data_filter: Optional[list] = None,
+                    denied_data_filter: Optional[list] = None,
+                    allow_pickle: bool = True) -> AttrDict:
+    """Loads numpy files from a specified directory into an AttrDict.
+
+    Parameters:
+        directory (str):
+            The path to the directory containing the numpy files.
+        allowed_data_filter (list, optional):
+            A list of allowed file names to be loaded.
+            If specified, only files with names in this list will be loaded.
+        denied_data_filter (list, optional):
+            A list of denied file names to be excluded from loading.
+            If specified, files with names in this list will not be loaded.
+        allow_pickle (bool):
+            Whether to allow loading pickled (serialized) objects.
+            Default is True. <br>
+            :warning: This could allow arbitrary code execution. Only load files you trust!
+
+    Raises:
+        ValueError:
+            If both allowed_data_filter and denied_data_filter are specified.
+        FileNotFoundError:
+            If the specified directory does not exist.
+        Exception:
+            If an error occurs during loading of a file.
+
+    Returns:
+        data (AttrDict):
+            Dictionary with loaded data where the keys are file names without extensions
+            and the values are the respective numpy arrays.
+    """
 
     if allowed_data_filter is not None and denied_data_filter is not None:
         raise ValueError('in_data_filter and out_data_filter can not both be set, only one or none!')
@@ -49,7 +93,7 @@ def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=Non
     if not os.path.isdir(directory):
         raise FileNotFoundError('Directory {!r} does not exist!'.format(directory))
 
-    data = eu.AttrDict()
+    data = AttrDict()
 
     for file in glob(os.path.join(directory, '*.npy')):
         stat_name = os.path.splitext(os.path.basename(file))[0]
@@ -71,7 +115,7 @@ def load_numpy_files(directory, allowed_data_filter=None, denied_data_filter=Non
         stat_name = os.path.splitext(os.path.basename(file))[0]
         if eu.misc.is_allowed(stat_name, allowed_list=allowed_data_filter, denied_list=denied_data_filter):
             try:
-                stat_vals = eu.AttrDict(np.load(file, allow_pickle=allow_pickle))
+                stat_vals = AttrDict(np.load(file, allow_pickle=allow_pickle))
             except FileNotFoundError:
                 raise
             except Exception as e:
