@@ -11,18 +11,30 @@ theme:
 
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_symbol_type_toc: false
+            parameter_headings: false
+            show_root_toc_entry: false
+            show_symbol_type_heading: true
+            show_docstring_parameters: true
+            show_signature: false
+            heading_level: 3
 
 nav:
-  - Welcome: overview.md
-  - tutorials.md
+  - Welcome: markup/index.md
+  - markup/tutorials.md
   - Reference:
-      - Overview: reference/overview.md
-      - Logging: reference/logging.md
-      - Loading: reference/loading.md
-      - IO: reference/io.md
+      - Overview: markup/reference/overview.md
+      - Manage: markup/reference/manage.md
+      - Logging: markup/reference/logging.md
+      - Visualization: markup/reference/visualization.md
+      - Loading: markup/reference/loading.md
+      - IO: markup/reference/io.md
 
-# allow emojis
+# allow emojis and images
 markdown_extensions:
   - attr_list
   - pymdownx.emoji:
@@ -35,6 +47,8 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - md_in_html
+  - pymdownx.blocks.caption
 
 extra_css:
   - stylesheets/extra.css

@@ -41,39 +41,46 @@ except ImportError:
     import simplejson as json
 
 class AttrDict(dict):
-    """ A dictionary that provides attribute-style access.
-        >>> b = AttrDict()
-        >>> b.hello = 'world'
-        >>> b.hello
-        'world'
-        >>> b['hello'] += "!"
-        >>> b.hello
-        'world!'
-        >>> b.foo = AttrDict(lol=True)
-        >>> b.foo.lol
-        True
-        >>> b.foo is b['foo']
-        True
-        A AttrDict is a subclass of dict; it supports all the methods a dict does...
-        >>> sorted(b.keys())
-        ['foo', 'hello']
-        Including update()...
-        >>> b.update({ 'ponies': 'are pretty!' }, hello=42)
-        >>> print (repr(b))
-        AttrDict({'ponies': 'are pretty!', 'foo': Munch({'lol': True}), 'hello': 42})
-        As well as iteration...
-        >>> sorted([ (k,b[k]) for k in b ])
-        [('foo', AttrDict({'lol': True})), ('hello', 42), ('ponies', 'are pretty!')]
-        And "splats".
-        >>> "The {knights} who say {ni}!".format(**AttrDict(knights='lolcats', ni='can haz'))
-        'The lolcats who say can haz!'
-        See unmunchify/AttrDict.toDict, munchify/AttrDict.fromDict for notes about conversion.
+    """ A dictionary that provides attribute-style access. Can be used to configure experiments.
+
+    Example:
+    ```python
+    >>> b = AttrDict()
+    >>> b.hello = 'world'
+    >>> b.hello
+    'world'
+    >>> b['hello'] += "!"
+    >>> b.hello
+    'world!'
+    >>> b.foo = AttrDict(lol=True)
+    >>> b.foo.lol
+    True
+    >>> b.foo is b['foo']
+    True
+    A AttrDict is a subclass of dict; it supports all the methods a dict does...
+    >>> sorted(b.keys())
+    ['foo', 'hello']
+    Including update()...
+    >>> b.update({ 'ponies': 'are pretty!' }, hello=42)
+    >>> print (repr(b))
+    AttrDict({'ponies': 'are pretty!', 'foo': Munch({'lol': True}), 'hello': 42})
+    As well as iteration...
+    >>> sorted([ (k,b[k]) for k in b ])
+    [('foo', AttrDict({'lol': True})), ('hello', 42), ('ponies', 'are pretty!')]
+    And "splats".
+    >>> "The {knights} who say {ni}!".format(**AttrDict(knights='lolcats', ni='can haz'))
+    'The lolcats who say can haz!'
+    ```
     """
 
     # only called if k not found in normal places
     def __getattr__(self, k):
         """ Gets key if it exists, otherwise throws AttributeError.
-            nb. __getattr__ is only called if key is not found in normal places.
+
+        nb. __getattr__ is only called if key is not found in normal places.
+
+        Example:
+        ```python
             >>> b = AttrDict(bar='baz', lol={})
             >>> b.foo
             Traceback (most recent call last):
@@ -89,6 +96,7 @@ class AttrDict(dict):
             True
             >>> b.lol is getattr(b, 'lol')
             True
+        ```
         """
         try:
             # Throws exception if not in prototype chain
@@ -104,6 +112,9 @@ class AttrDict(dict):
         """ Sets attribute k if it exists, otherwise sets key k. A KeyError
             raised by set-item (only likely if you subclass Munch) will
             propagate as an AttributeError instead.
+
+        Example:
+        ```python
             >>> b = AttrDict(foo='bar', this_is='useful when subclassing')
             >>> hasattr(b.values, '__call__')
             True
@@ -114,6 +125,7 @@ class AttrDict(dict):
             Traceback (most recent call last):
                 ...
             KeyError: 'values'
+        ```
         """
         try:
             # Throws exception if not in prototype chain
@@ -131,12 +143,16 @@ class AttrDict(dict):
         """ Deletes attribute k if it exists, otherwise deletes key k. A KeyError
             raised by deleting the key--such as when the key is missing--will
             propagate as an AttributeError instead.
+
+        Example:
+        ```python
             >>> b = AttrDict(lol=42)
             >>> del b.lol
             >>> b.lol
             Traceback (most recent call last):
                 ...
             AttributeError: lol
+        ```
         """
         try:
             # Throws exception if not in prototype chain
@@ -152,10 +168,14 @@ class AttrDict(dict):
 
     def toDict(self):
         """ Recursively converts a munch back into a dictionary.
+
+        Example:
+        ```python
             >>> b = AttrDict(foo=AttrDict(lol=True), hello=42, ponies='are pretty!')
             >>> sorted(b.toDict().items())
             [('foo', {'lol': True}), ('hello', 42), ('ponies', 'are pretty!')]
             See unmunchify for more info.
+        ```
         """
         return attrdict_to_dict(self)
 
@@ -166,7 +186,12 @@ class AttrDict(dict):
 
 
     def __repr__(self):
-        """ Invertible* string-form of a Munch.
+        """ Invertible string-form of a Munch.
+
+        (Invertible so long as collection contents are each repr-invertible.)
+
+        Example:
+        ```python
             >>> b = AttrDict(foo=AttrDict(lol=True), hello=42, ponies='are pretty!')
             >>> print (repr(b))
             Munch({'ponies': 'are pretty!', 'foo': Munch({'lol': True}), 'hello': 42})
@@ -177,7 +202,7 @@ class AttrDict(dict):
             Munch({'a b': 9, 1: 2, 'c': Munch({'simple': 5})})
             >>> eval(repr(with_spaces))
             Munch({'a b': 9, 1: 2, 'c': Munch({'simple': 5})})
-            (*) Invertible so long as collection contents are each repr-invertible.
+        ```
         """
         return '{0}({1})'.format(self.__class__.__name__, dict.__repr__(self))
 
@@ -401,13 +426,6 @@ class DefaultFactoryAttrDict(defaultdict, AttrDict):
             type(self).__name__, factory, dict.__repr__(self))
 
 
-# While we could convert abstract types like Mapping or Iterable, I think
-# munchify is more likely to "do what you mean" if it is conservative about
-# casting (ex: isinstance(str,Iterable) == True ).
-#
-# Should you disagree, it is not difficult to duplicate this function with
-# more aggressive coercion to suit your own purposes.
-
 def dict_to_attrdict(x, factory=AttrDict):
     """ Recursively transforms a dictionary into a AttrDict via copy.
         >>> b = dict_to_attrdict({'urmom': {'sez': {'what': 'what'}}})
@@ -547,16 +565,43 @@ def attrdict_to_dict(x):
 #     pass
 
 
-def combine_dicts(*args, is_recursive=True, copy_mode='deepcopy'):
-    '''
+def combine_dicts(*args,
+                  is_recursive: bool = True,
+                  copy_mode: str = 'deepcopy') -> AttrDict:
+    """
     Combines several AttrDicts recursively.
-    Kepps the values of the
+    This can be used to combine a given configuration with a default configuration.
 
-    :param args:
-    :param is_recursive: Should
-    :param copy_mode: Defines how the dictionaries should be copied ('deepcopy', 'copy', 'none').
-    :return: Combined AttrDict.
-    '''
+    Example:
+        ```python
+        import exputils as eu
+
+        dict_a = eu.AttrDict(name='a', x_val=1)
+        dict_b = eu.AttrDict(name='default', x_val=0, y_val=0)
+
+        comb_dict = eu.combine_dicts(dict_a, dict_b)
+
+        print(comb_dict)
+        ```
+        Output:
+        ```
+        AttrDict({'name': 'a', 'x_val': 1, 'y_val': 0})
+        ```
+
+    Parameters:
+        *args:
+            Dictionaries that should be combined.
+            The order is important as a dictionary that is given first overwrites the values of
+            properties of all following dictionaries.
+        is_recursive (bool):
+            Should the dictionaries be recursively combined?
+        copy_mode:
+            Defines how the properties of the dictionaries should be copied ('deepcopy', 'copy', 'none')
+            to the combined dictionary.
+
+    Returns:
+        comb_dict (AttrDict): Combined AttrDict.
+    """
 
     args = list(args)
 

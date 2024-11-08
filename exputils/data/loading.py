@@ -8,13 +8,8 @@
 ## exputils is provided under GPL-3.0-or-later
 ##
 
-"""Functions to load data that was logged under experiments and repetitions."""
-
 import os
 import sys
-
-from pandas import option_context
-
 import exputils as eu
 from glob import glob
 import re
@@ -38,19 +33,19 @@ def load_experiment_descriptions(experiments_directory: Optional[str] = None,
     Loads and returns descriptions of experiments from a specified experiments directory.
 
     Arguments:
-        experiments_directory (str, optional): Path to the experiments directory.
+        experiments_directory (str): Path to the experiments directory.
             Defaults to "..\DEFAULT_EXPERIMENTS_DIRECTORY".
-        allowed_experiments_id_list (list, optional): List of experiment IDs to be loaded.
+        allowed_experiments_id_list (list): List of experiment IDs to be loaded.
             Cannot be used with denied_experiments_id_list.
             Default: All experiments are considered.
-        denied_experiments_id_list (list, optional): List of experiment IDs to be excluded.
+        denied_experiments_id_list (list): List of experiment IDs to be excluded.
             Cannot be used with allowed_experiments_id_list.
             Default: All experiments are considered.
-        experiment_directory_template (str, optional): Template string for the name of experiment directories.
+        experiment_directory_template (str): Template string for the name of experiment directories.
             The template should include a placeholder for the experiment id.
             Example: 'experiment_{:06d}' for experiment folders with ids with at least six digits.
             Defaults to EXPERIMENT_DIRECTORY_TEMPLATE.
-        repetition_directory_template (str, optional): Template string for the name of experiment directories.
+        repetition_directory_template (str): Template string for the name of experiment directories.
             The template should include a placeholder for the repetition id.
             Example: 'repetition_{:06d}' for repetition folders with ids with at least six digits.
             Defaults to REPETITION_DIRECTORY_TEMPLATE.
@@ -67,10 +62,6 @@ def load_experiment_descriptions(experiments_directory: Optional[str] = None,
             - description: Description of the experiment. Default: ''.
             - repetition_ids: List of repetition ids.
             - repetition_directories : List of full paths to repetition directories.
-
-    Raises:
-        ValueError: If both allowed_experiments_id_list and denied_experiments_id_list are provided,
-            or if no folders are found within experiments_directory.
     """
 
     if experiments_directory is None:
@@ -143,64 +134,62 @@ def load_experiment_data(experiment_descriptions: Optional[AttrDict]=None,
                          allow_pickle: bool = True) -> tuple[AttrDict, AttrDict]:
     """
     Loads logged data from experiments and their repetitions in form of nested dictionaries and numpy arrays.
-    Collects the data for each datasource (the variable that was logged, for example a loss per network update)
-    over all repetitions in a single numpy array.
 
     [//]: # (TODO: give an example of a file structure and how it is loaded)
 
     Parameters:
-        experiment_descriptions (AttrDict, optional):
+        experiment_descriptions (AttrDict):
             Predefined descriptions of the experiments.
             The descriptions contain the paths to all experiments and their repetitions that should be loaded.
             See [`load_experiment_descriptions`][exputils.data.loading.load_experiment_descriptions] for details.
             Can not be set together with experiments_directory.
-        experiments_directory (str, optional):
+        experiments_directory (str):
             Path to the experiments directory.
             Defaults to `'..\experiments'`.
             Can not be set together with experiment_descriptions.
-        allowed_experiments_id_list (list, optional):
+        allowed_experiments_id_list (list):
             List of allowed experiment IDs.
             Only these will be loaded.
             Can not be set together with denied_experiments_id_list.
-        denied_experiments_id_list (list, optional):
+        denied_experiments_id_list (list):
             List of denied experiment IDs.
             All experiments besides these will be loaded.
             Can not be set together with allowed_experiments_id_list.
-        data_directory (str, optional):
+        data_directory (str):
             Relative path of the data directories under the experiments and repetitions.
             Defaults to `'./data'`.
         is_load_repetition_data (bool):
             Flag to indicate if repetition data should be loaded.
             Defaults to `True`.
-        pre_allowed_data_filter (list, optional):
+        pre_allowed_data_filter (list):
             List of datasources that will be loaded before the loading callback functions
             (see `on_experiment_data_loaded` and `on_repetition_data_loaded`) are called.
             Thus this data will be given to the callback functions.
             If defined then only these datasources will be loaded.
             The list contains strings with names of datasources.
-        pre_denied_data_filter (list, optional):
+        pre_denied_data_filter (list):
             List of datasources that will NOT be loaded before the loading callback functions
             (see `on_experiment_data_loaded` and `on_repetition_data_loaded`) are called.
             Thus this data will NOT be given to the callback functions.
             If defined then all existing datasources besides the ones specified will be loaded.
             The list contains strings with names of datasources.
-        post_allowed_data_filter (list, optional):
+        post_allowed_data_filter (list):
             List of datasources that will be added to the data dictionary that is returned after
             loading and the loading callback functions (see `on_experiment_data_loaded` and `on_repetition_data_loaded`)
             are called.
             If defined then only these datasources will be returned.
             The list contains strings with names of datasources.
-        post_denied_data_filter (list, optional):
+        post_denied_data_filter (list):
             List of datasources that will NOT be added to the data dictionary that is returned after
             loading and the loading callback functions (see `on_experiment_data_loaded` and `on_repetition_data_loaded`)
             are called.
             If defined then all existing datasources besides the ones specified will be returned.
             The list contains strings with names of datasources.
-        on_experiment_data_loaded (list, optional):
+        on_experiment_data_loaded (list):
             List of callback functions executed when experiment data is loaded.
             Can be used to modify the data by changing or adding elements.
             Form of the functions: func(exp_id: int, exp_data: AttrDict) -> AttrDict.
-        on_repetition_data_loaded (list, optional):
+        on_repetition_data_loaded (list):
             List of callback functions executed when repetition data is loaded.
             Can be used to modify the data by changing or adding elements.
             Form of the functions: func(exp_id: int, exp_data: AttrDict) -> AttrDict.
@@ -208,12 +197,6 @@ def load_experiment_data(experiment_descriptions: Optional[AttrDict]=None,
             Indicates if loading of pickled objects is allowed.
             Defaults to True. <br>
             :warning: This could allow arbitrary code execution. Only load files you trust!
-
-    Raises:
-        ValueError: If both experiments_directory and experiment_descriptions are set.
-        ValueError: If both experiment_descriptions and any of (allowed_experiments_id_list or denied_experiments_id_list) are set.
-        ValueError: If both allowed_experiments_id_list and denied_experiments_id_list are set.
-        Exception: If data loading fails for an experiment or a repetition.
 
     Returns:
         data (AttrDict):
@@ -323,13 +306,13 @@ def load_single_experiment_data(experiment_directory: str,
     Parameters:
         experiment_directory (str):
             Path to the experiment directory.
-        data_directory (str, optional):
+        data_directory (str):
             Relative path of the data directories under the experiments and repetitions.
             Defaults to `'./data'`.
-        allowed_data_filter (list, optional):
+        allowed_data_filter (list):
             List of datasource names (strings) that will be loaded.
             If defined then only these datasources will be loaded.
-        denied_data_filter (list, optional):
+        denied_data_filter (list):
             List of datasource names (strings) that will NOT be loaded.
             If defined then all datasources besides the specified ones will be loaded.
         allow_pickle (bool):
@@ -370,6 +353,107 @@ def _filter_data(data, allowed_data_list, denied_data_list):
         del data[delete_key]
 
 
+def load_experiment_data_single_object(name: str,
+                                       experiment_id: Optional[int] = None,
+                                       repetition_id: Optional[int] = None,
+                                       experiments_directory: Optional[str] = None,
+                                       data_directory: Optional[str] = None,
+                                       experiment_directory_template: Optional[str] = None,
+                                       repetition_directory_template: Optional[str] = None,
+                                       add_execution_directory_to_sys_path: bool = True) -> object:
+    """
+    Loads single object that was logged via the [add_single_object][exputils.data.logging.add_single_object].
+    function and saved as a dill file. The file that is either located under the experiments, or a
+    single experiment or repetition directory.
+
+    :warning: This could allow arbitrary code execution. Only load files you trust!
+
+    Example:
+        ```python
+        loaded_obj = load_experiment_data_single_object(
+            'my_object',  # name of the object
+            experiment_id=100,
+            repetition_id=1
+        )
+        print(loaded_obj)
+        ```
+
+    Parameters:
+        name (str):
+            The name of the object which is the name of the dill file with or without extension.
+        experiment_id (int):
+            An optional identifier for a specific experiment.
+            If not provided, then the object is loaded from the experiments directory.
+        repetition_id (int):
+            An optional identifier for a specific repetition of the experiment.
+            If not provided, then the object is loaded from the experiments or experiment directory.
+        experiments_directory (str):
+            The root directory where all experiments are stored.
+            Defaults to `..\experiments`.
+        data_directory (str):
+            Relative path of the data directories under the experiments and repetitions.
+            Defaults to `'./data'`.
+        experiment_directory_template (str):
+            Name template of experiment directories.
+            Defaults to `'experiment_{:06d}'`.
+        repetition_directory_template (str): Template for constructing the repetition directory. Defaults to None.
+            Name template of repetition directories.
+            Defaults to `'repetition_{:06d}'`.
+        add_execution_directory_to_sys_path (bool):
+            Whether to add the execution directory to the system path temporailly while loading the object.
+            This can be necessary if the object has relational import statements.
+            By adding the directory where the object is located temporailly to the python path,
+            these import statments can be processed correctly.
+            Defaults to True.
+
+    Returns:
+        object: The loaded experiment data object.
+    """
+
+
+    if experiments_directory is None:
+        experiments_directory = os.path.join('..', eu.DEFAULT_EXPERIMENTS_DIRECTORY)
+
+    full_execution_dir_path = experiments_directory
+
+    # only add experiment subfolder if needed
+    if experiment_id is not None:
+
+        if experiment_directory_template is None:
+            experiment_directory_template = eu.EXPERIMENT_DIRECTORY_TEMPLATE
+
+        experiment_directory = experiment_directory_template.format(experiment_id)
+
+        full_execution_dir_path = os.path.join(full_execution_dir_path, experiment_directory)
+
+        # only add repetition subfolder if needed
+        if repetition_id is not None:
+
+            if repetition_directory_template is None:
+                repetition_directory_template = eu.REPETITION_DIRECTORY_TEMPLATE
+
+            repetition_directory = repetition_directory_template.format(repetition_id)
+
+            full_execution_dir_path = os.path.join(full_execution_dir_path, repetition_directory)
+
+    if data_directory is None:
+        data_directory = eu.DEFAULT_DATA_DIRECTORY
+
+    # construct the full path to the module
+    full_dill_path = os.path.join(full_execution_dir_path, data_directory, name)
+
+    # add the directory in which the code was executed to system path
+    if add_execution_directory_to_sys_path:
+        sys.path.append(full_execution_dir_path)
+
+    obj = eu.io.dill.load_dill(full_dill_path)
+
+    if add_execution_directory_to_sys_path:
+        sys.path.pop()
+
+    return obj
+
+
 def load_experiment_python_module(module_path: str,
                                   experiment_id: Optional[int] = None,
                                   repetition_id: Optional[int] = None,
@@ -401,22 +485,22 @@ def load_experiment_python_module(module_path: str,
             The realtive path to the python module file either under the experiments, experiment, or
             repetition directory.
             Which level depends on if an experiment_id and a repetition_id are provided or not.
-        experiment_id (optional, int):
+        experiment_id (int):
             An optional identifier for a specific experiment.
             If not provided, then the module is loaded from the experiments directory.
-        repetition_id (optional, int):
+        repetition_id (int):
             An optional identifier for a specific repetition of the experiment.
             If not provided, then the module is loaded from the experiments or experiment directory.
-        experiments_directory (optional, str):
+        experiments_directory (str):
             The root directory where all experiments are stored.
             Defaults to `..\experiments`.
         exec_module (bool):
             If True, the module will be executed after being loaded which means it will be imported.
             Defaults to True.
-        experiment_directory_template (optional, str):
+        experiment_directory_template (str):
             Name template of experiment directories.
             Defaults to `'experiment_{:06d}'`.
-        repetition_directory_template (optional, str): Template for constructing the repetition directory. Defaults to None.
+        repetition_directory_template (str): Template for constructing the repetition directory. Defaults to None.
             Name template of repetition directories.
             Defaults to `'repetition_{:06d}'`.
         add_execution_directory_to_sys_path (bool):
@@ -475,71 +559,3 @@ def load_experiment_python_module(module_path: str,
             sys.path.pop()
 
     return module
-
-
-def load_experiment_data_single_object(name, experiment_id=None, repetition_id=None, experiments_directory=None, data_directory=None,
-                                       experiment_directory_template=None, repetition_directory_template=None,
-                                       add_execution_directory_to_sys_path=True):
-    """
-    Loads a object (a dill file) that is saved in the data directory of an experiment or repetition. Such objects are saved using the
-    log.add_single_object() function.geht es
-
-    Example:
-        log.add_single_object('my_object', obj)
-        obj = load_experiment_data_single_object('my_object', experiment_id=100, repetition_id=3)
-
-    :param name: Name of the object or the dill file (including the '.dill' ending is optional).
-    :param experiment_id: ID of the experiment. If not provided, then the object is assumed to be under the experiments data directory.
-    :param repetition_id: ID of the repetition. If not provided, then the object is assumed to be under the experiment data directory.
-    :param experiments_directory: Path to the experiments directory. (Default = '../experiments')
-    :param data_directory: Name of the data directory. (Default = 'data')
-    :param experiment_directory_template: Alternative template string for experiment directories. (Default = 'experiment_{}')
-    :param repetition_directory_template: Alternative template string for repetition directories. (Default = 'repetition_{}')
-    :param add_execution_directory_to_sys_path: Should the directory in which the code was executed (experiment or repetition) be temporaily added
-                                                to the python system path. This might be necessary if the loaded object has references to it.
-                                                (Default = True)
-    :return: Loaded objected.
-    """
-
-
-    if experiments_directory is None:
-        experiments_directory = os.path.join('..', eu.DEFAULT_EXPERIMENTS_DIRECTORY)
-
-    full_execution_dir_path = experiments_directory
-
-    # only add experiment subfolder if needed
-    if experiment_id is not None:
-
-        if experiment_directory_template is None:
-            experiment_directory_template = eu.EXPERIMENT_DIRECTORY_TEMPLATE
-
-        experiment_directory = experiment_directory_template.format(experiment_id)
-
-        full_execution_dir_path = os.path.join(full_execution_dir_path, experiment_directory)
-
-        # only add repetition subfolder if needed
-        if repetition_id is not None:
-
-            if repetition_directory_template is None:
-                repetition_directory_template = eu.REPETITION_DIRECTORY_TEMPLATE
-
-            repetition_directory = repetition_directory_template.format(repetition_id)
-
-            full_execution_dir_path = os.path.join(full_execution_dir_path, repetition_directory)
-
-    if data_directory is None:
-        data_directory = eu.DEFAULT_DATA_DIRECTORY
-
-    # construct the full path to the module
-    full_dill_path = os.path.join(full_execution_dir_path, data_directory, name)
-
-    # add the directory in which the code was executed to system path
-    if add_execution_directory_to_sys_path:
-        sys.path.append(full_execution_dir_path)
-
-    obj = eu.io.dill.load_dill(full_dill_path)
-
-    if add_execution_directory_to_sys_path:
-        sys.path.pop()
-
-    return obj

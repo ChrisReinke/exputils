@@ -104,15 +104,15 @@ def test_get_number_of_scripts(tmpdir):
 
 def test_is_to_start_status():
 
-    assert eu.manage.experimentstarter.is_to_start_status('todo')
-    assert eu.manage.experimentstarter.is_to_start_status('error')
-    assert eu.manage.experimentstarter.is_to_start_status('none')
-    assert eu.manage.experimentstarter.is_to_start_status(None)
-    assert eu.manage.experimentstarter.is_to_start_status('unfinished')
+    assert eu.manage.experimentstarter._is_to_start_status('todo')
+    assert eu.manage.experimentstarter._is_to_start_status('error')
+    assert eu.manage.experimentstarter._is_to_start_status('none')
+    assert eu.manage.experimentstarter._is_to_start_status(None)
+    assert eu.manage.experimentstarter._is_to_start_status('unfinished')
 
-    assert eu.manage.experimentstarter.is_to_start_status('running') == False
-    assert eu.manage.experimentstarter.is_to_start_status('running 50%') == False
-    assert eu.manage.experimentstarter.is_to_start_status('dwdw') == False
+    assert eu.manage.experimentstarter._is_to_start_status('running') == False
+    assert eu.manage.experimentstarter._is_to_start_status('running 50%') == False
+    assert eu.manage.experimentstarter._is_to_start_status('dwdw') == False
 
 
 def test_status_file_writing_default_on(tmpdir):

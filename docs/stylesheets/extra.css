@@ -1,3 +1,4 @@
+/* do not put line breaks in code blocks */
 td code {
 	word-break: inherit !important;
 }

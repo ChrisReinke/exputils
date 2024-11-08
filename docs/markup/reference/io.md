@@ -1,7 +1,8 @@
 # IO
 
 Different IO operations used to load and save data through the exputils package. 
-They are usually not required to be called manually.
+They are usually not needed to log or load data which is done with the functions under the `exputils.data` module.
+See the [Logging](logging.md) and [Loading](loading.md) sections for more information.
 
 ::: exputils.io.general
     options:

@@ -12,9 +12,10 @@ import numpy as np
 import scipy.stats
 from tabulate import tabulate as original_tabulate
 import IPython
+from typing import Optional
 
 
-def is_needed_pairwise_combination(idx1, idx2, pairwise_mode):
+def _is_needed_pairwise_combination(idx1, idx2, pairwise_mode):
     is_needed = True
     if 'not_identity' in pairwise_mode and idx1 == idx2:
         is_needed = False
@@ -26,23 +27,51 @@ def is_needed_pairwise_combination(idx1, idx2, pairwise_mode):
     return is_needed
 
 
-def tabulate_pairwise(data=None, config=None, **kwargs):
+def tabulate_pairwise(data: Optional[list] = None,
+                     config: Optional[dict] = None,
+                     **kwargs):
     """
     Plots a pairwise comparison between data from experiments based on a pairwise function d = f(exp_a, exp_b).
+    By default it performs a Mann-WhitneyU P-Value test to identify significant differences between experiments.
 
-    :param data:
-    :param config:
-        tabulate: Parameters for the tabulate function that plots the table.
-                  See https://pypi.org/project/tabulate/ for possible parameters.
-                  Some important ones:
+    TODO: image of plot
 
-            tablefmt: Format of the table. (Default='html')
-                        "plain", "simple", "github", "grid", "fancy_grid", "pipe", "orgtbl", "jira", "presto", "pretty",
-                        "psql",  "rst", "mediawiki", "moinmoin", "youtrack", "html", "unsafehtml", "latex", "latex_raw",
-                        "latex_booktabs", "latex_longtable", "textile", "tsv"
+    Parameters:
+        data (list): Data to plot.
+        config (dict): Dictionary with configuration of plot.
 
-    :param kwargs:
-    :return:
+    __Configuration__:
+
+    - `pairwise_function` (`function`):
+            Handle to function that computes the difference between the data of two experiments.
+            Function format: `func(exp1_data: nparray, exp2_data: nparray) -> scalar`.
+            Default is `eu.misc.mannwhitneyu_pvalue`.
+
+    - `pairwise_mode` (`str`):
+            Which pairs of experiments are compared?
+            Possible values are `'full'`, `'full_not_identity'`, `'upper_triangle'`, `'upper_triangle_not_identiy'`, `'lower_triangle'`, `'lower_triangle_not_identiy'`.
+            Default is `'full'`.
+
+    - `tabulate` (`dict`): Parameters for the tabulate function that plots the table.
+            See [tabulate](https://pypi.org/project/tabulate/) for all possible parameters.
+            Some important ones:
+        -  `tablefmt` (`str`):
+            Format of the table such as `'html'`, `'latex'`, or `'simple'`.
+            Default is `'html'`.
+        - `numalign` (`str`): Alignment of numbers in the table (`'right'`, `'center'`, or `'left'`).
+            Default is `'right'`.
+
+        - `cell_format` (`str`):
+            Format of the cell content. The format can take 1 number.
+            Default is `'{}'`.
+
+    - `top_left_cell_content` (`str`): Content of the top left cell which can be used as a label for the table.
+            Default is `''`.
+
+    Returns:
+        fig (figure): Plotly figure object that can be displayed using `display(fig)`.
+
+    The plot is based on [tabulate](https://pypi.org/project/tabulate/).
     """
 
     default_config = eu.AttrDict(
@@ -154,7 +183,7 @@ def tabulate_pairwise(data=None, config=None, **kwargs):
         for first_trace_idx in range(n_traces):
             for second_trace_idx in range(n_traces):
                 # decide if data has to be compared based on the config.pairwise_mode
-                if is_needed_pairwise_combination(first_trace_idx, second_trace_idx, config.pairwise_mode):
+                if _is_needed_pairwise_combination(first_trace_idx, second_trace_idx, config.pairwise_mode):
                     pairwise_data[first_trace_idx, second_trace_idx] = eu.misc.call_function_from_config(
                         config.pairwise_function,
                         data_per_trace[first_trace_idx],
@@ -204,7 +233,7 @@ def tabulate_pairwise(data=None, config=None, **kwargs):
         # fill table
         for first_trace_idx in range(n_traces):
             for second_trace_idx in range(n_traces):
-                if is_needed_pairwise_combination(first_trace_idx, second_trace_idx, config.pairwise_mode):
+                if _is_needed_pairwise_combination(first_trace_idx, second_trace_idx, config.pairwise_mode):
 
                     if isinstance(config.cell_format, str):
                         cell_data = config.cell_format.format(pairwise_data[first_trace_idx, second_trace_idx])
@@ -221,12 +250,3 @@ def tabulate_pairwise(data=None, config=None, **kwargs):
             **config.tabulate)
 
         return table
-
-
-if __name__ == '__main__':
-
-    # scalar values
-    data = [[3, 5, 6]]
-    data_labels = [('ds1', ['exp1', 'exp2', 'exp2'])]
-
-    tabulate_pairwise(data, labels=data_labels)

@@ -12,28 +12,49 @@ import stat
 import re
 import copy
 import shutil
+from typing import Optional
 import exputils
 from collections import OrderedDict
 
-# TODO: allow default values in the config
 # TODO: allow to delete a line in the config, for example if the value of a param is "#RM"
 
 
-def generate_experiment_files(ods_filepath=None, directory=None, extra_files=None, extra_experiment_files=None, verbose=False, copy_operator='shutil'):
+def generate_experiment_files(ods_filepath: Optional[str] = None,
+                              directory: Optional[str] = None,
+                              extra_files: Optional[list] = None,
+                              extra_experiment_files: Optional[list] = None,
+                              verbose: bool = False,
+                              copy_operator: str = 'shutil'):
     """
-    Generates experiment files and configurations based on entries in a ODS file (LibreOffice Spreadsheet).
+    Generates experiments based on a configuration ODS file (LibreOffice Spreadsheet) and template
+    source code.
 
-    The ODS has to be in a specific form.
-    Sheets define group of experiment for which an extra subfolder in the output directory will be generated.
+    The configuration ODS has to be in a specific form.
+    See `resources/experiment_configurations.ods` for an example file.
 
-    For an example of the ods format see the pytest files.
+    The template source code is usually located in `.\src\exp` for code on the experiment level
+    and `.\src\\rep` for code on the repetition level.
 
-    :param ods_filepath: Path to the ODS file.
-    :param directory: Directory where the experiments are generated.
-    :param extra_files: Files that are mentioned in the ODS file but should be added to each experiment folder.
-    :param copy_operator: Define the copy operator. Either 'shutil' (default) for the python copy function or 'cp' for the linux terminal cp operator.
+    [//]: # (TODO: either remove or document the options for extra-files)
 
-    The choice of the 'cp' copy operator was introduced as for some systems (GRICAD cluster, f-dahu node) the 'shutil' did not work under python 3.8.
+    Parameters:
+        ods_filepath (str):
+            Path to the ODS configuration file that defines the experiments.
+            Default is `'./experiment_configurations.ods'`
+        directory (str):
+            Path to directory where the experiments will be generated.
+            Default is `'./experiments'`.
+        verbose (bool):
+            Should verbose output with more information given. Default is `False`.
+        copy_operator (str):
+            Define the copy operator for source code files. Either 'shutil' (default) for the python
+            copy function or 'cp' for the linux terminal cp operator. The choice of the 'cp' copy
+            operator was introduced as for some OS systems the 'shutil' did not work under python 3.8.
+
+    Notes:
+
+    - Sheets in the configuration ODS file define groups of experiments for which an extra
+       subfolder in the output directory will be generated.
     """
 
     if ods_filepath is None:
@@ -47,19 +68,19 @@ def generate_experiment_files(ods_filepath=None, directory=None, extra_files=Non
     if verbose:
         print('Load config from {!r} ...'.format(ods_filepath))
 
-    config_data = load_configuration_data_from_ods(ods_filepath)
+    config_data = _load_configuration_data_from_ods(ods_filepath)
 
     # generate experiment files based on the loaded configurations
     if verbose:
         print('Generate experiments ...'.format(ods_filepath))
 
-    generate_files_from_config(
+    _generate_files_from_config(
         config_data, directory,
         extra_files=extra_files, extra_experiment_files=extra_experiment_files, verbose=verbose, copy_operator=copy_operator
     )
 
 
-def load_configuration_data_from_ods(ods_filepath):
+def _load_configuration_data_from_ods(ods_filepath):
     """
 
     :param ods_filepath:
@@ -261,7 +282,7 @@ def get_cell_data(data):
     return data
 
 
-def generate_files_from_config(config_data, directory='.', extra_files=None, extra_experiment_files=None, verbose=False, copy_operator='shutil'):
+def _generate_files_from_config(config_data, directory='.', extra_files=None, extra_experiment_files=None, verbose=False, copy_operator='shutil'):
     """
 
     Format of configuration data:
@@ -331,7 +352,7 @@ def generate_files_from_config(config_data, directory='.', extra_files=None, ext
                 else:
                     source_files = experiment_config['repetition_source_file_locations'] + extra_files
 
-                generate_source_files(
+                _generate_source_files(
                     source_files,
                     experiment_files_directory,
                     experiment_config,
@@ -347,7 +368,7 @@ def generate_files_from_config(config_data, directory='.', extra_files=None, ext
                 source_files = experiment_config['experiment_source_file_locations'] + extra_experiment_files
 
             if source_files:
-                generate_source_files(
+                _generate_source_files(
                     source_files,
                     experiment_directory,
                     experiment_config,
@@ -356,7 +377,7 @@ def generate_files_from_config(config_data, directory='.', extra_files=None, ext
                 )
 
 
-def generate_source_files(source_files, experiment_files_directory, experiment_config, experiment_id, repetition_id=None, copy_operator='shutil'):
+def _generate_source_files(source_files, experiment_files_directory, experiment_config, experiment_id, repetition_id=None, copy_operator='shutil'):
 
     default_value = ''
 
@@ -442,10 +463,10 @@ def generate_source_files(source_files, experiment_files_directory, experiment_c
     template_files = [file_config['template_file_path'] for file_config in experiment_config['files']]
 
     for src in source_files:
-        copy_experiment_files(src, experiment_files_directory, template_files, copy_function)
+        _copy_experiment_files(src, experiment_files_directory, template_files, copy_function)
 
 
-def copy_experiment_files(src, dst, template_files, copy_function):
+def _copy_experiment_files(src, dst, template_files, copy_function):
 
     if os.path.isdir(src):
         # if directory, then copy the content
@@ -467,7 +488,7 @@ def copy_experiment_files(src, dst, template_files, copy_function):
             else:
                 d = dst
 
-            copy_experiment_files(s, d, template_files, copy_function)
+            _copy_experiment_files(s, d, template_files, copy_function)
 
     else:
         # if file, then copy it directly

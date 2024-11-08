@@ -8,6 +8,8 @@
 ## exputils is provided under GPL-3.0-or-later
 ##
 import warnings
+from typing import Optional, Union
+
 import numpy as np
 import exputils as eu
 import re
@@ -385,7 +387,48 @@ def moving_average(data, n, mode='fill_start'):
 
 
 def call_function_from_config(config, *args, func_attribute_name='func', **argv):
-    """Calls a function that is defined as a config dictionary or AttrDict."""
+    """Calls a function that is defined as a config dictionary or AttrDict.
+
+    The configuration dictionary must contain a property that holds the function handle. This is
+    by default called `func`, but can be differently defined using the `func_attribute_name` parameter.
+    All other properties of the configuration dictionary are used as parameters for the function call.
+
+    If the given `config` argument is a function handle, then this function is called and the given
+    *args and **argvs given as arguments.
+    If the given `config` argument is not a dictionary or a function handle, then it is directly
+    returned.
+
+    Example:
+        ```python
+        import exputils as eu
+
+        def calc_area(length, width, unit='sm'):
+            area = length * width
+            return f"{area} {unit}"
+
+        config = eu.AttrDict()
+        config.func = calc_area  # function that should be called
+        config.unit = 'square meters'
+
+        # calls the function with: calc_area(length=3, width=4, unit='square meters')
+        out = eu.call_function_from_config(config, length=3, width=4)
+
+        print(out)
+        ```
+        Output:
+        ```
+        '12 square meters'
+        ```
+
+    Parameters:
+        config (dict): Configuration dictionary func property that holds the function handle.
+        func_attribute_name (str): Name of the func attribute.
+        *args: Additional arguments to pass to the function.
+        *argv: Additional arguments to pass to the function.
+
+    Returns:
+        res (Any): The return value of the function.
+    """
 
     if isinstance(config, dict) and func_attribute_name in config:
 
@@ -404,21 +447,64 @@ def call_function_from_config(config, *args, func_attribute_name='func', **argv)
         return config
 
 
-def create_object_from_config(config, *args, **argv):
-    """Creates a class object that is defined as a config dictionary or AttrDict."""
+def create_object_from_config(config: dict, *args, **argv):
+    """
+    Creates a class object that is defined as a config dictionary or AttrDict.
+
+    The configuration dictionary must contain a 'cls' property that holds the class type.
+    All other properties are used as parameters for the constructor of the object.
+
+    Example:
+        ```python
+        import exputils as eu
+        from collections import Counter
+
+        config = eu.AttrDict()
+        config.cls = Counter  # class type that should be created
+        config.green=2
+        config.blue=1
+
+        # creates the Counter object using: obj = Counter(red=3, green=2, blue=1)
+        obj = eu.create_object_from_config(config, red=3)
+
+        print(obj)
+        ```
+        Output:
+        ```
+        Counter({'red': 3, 'green': 2, 'blue': 1})
+        ```
+
+    Parameters:
+        config (dict): Configuration dictionary with `cls` property that holds the class type.
+        *args: Additional arguments to pass to the constructor of the object.
+        *argv: Additional arguments to pass to the constructor of the object.
+
+    Returns:
+        obj (object): The resulting object.
+    """
     return call_function_from_config(config, *args, func_attribute_name='cls', **argv)
 
 
-def seed(seed=None, is_set_random=True, is_set_numpy=True, is_set_torch=True):
+def seed(seed: Optional[Union[int, dict]] = None,
+         is_set_random: bool = True,
+         is_set_numpy: bool = True,
+         is_set_torch: bool = True) -> int:
     """
-    Sets the random seed for random, numpy and pytorch (if it exists as a package).
+    Sets the random seed for random, numpy and pytorch (if it is installed).
 
-    :param seed: Seed (integer) or configuration dictionary which contains a 'seed' property.
-                 If None is given, a seed is chosen via torch.seed().
-    :param is_set_random: Should random seed of random be set. (default=True)
-    :param is_set_numpy: Should random seed of numpy.random be set. (default=True)
-    :param is_set_torch: Should random seed of torch be set. (default=True)
-    :return: Seed that was set.
+    Parameters:
+        seed (int, dict):
+            Seed (integer) or a configuration dictionary which contains a 'seed' property.
+            If `None` is given, a random seed is chosen.
+        is_set_random (bool):
+            Should the random seed of the python `random` package be set.
+        is_set_numpy (bool):
+            Should random seed of `numpy.random` be set.
+        is_set_torch:
+            Should random seed of torch be set.
+
+    Returns:
+        seed (int): Integer that was used as seed.
     """
 
     if seed is None:
@@ -576,14 +662,17 @@ def mannwhitneyu_pvalue(data_1, data_2):
     return pvalue
 
 
-def update_status(status, status_file=None):
+def update_status(status: str,
+                  status_file: Optional[str] = None):
     """
-    Updates the status of the running experiment/repetition which can be queried via the eu_get_status commands.
+    Updates the status of the running experiment/repetition in its status file.
 
-    :param status: String with status.
-    :param status_file: Optional status file. (Default: None)
+    Parameters:
+        status (str): Status in form of a string.
+        status_file (str):
+            Optional path to the status file.
+            By default, it is the status file of the running process.
     """
-
 
     if status_file is None:
         status_file = os.environ.get('EU_STATUS_FILE', default=None)

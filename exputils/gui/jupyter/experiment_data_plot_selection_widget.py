@@ -111,7 +111,7 @@ selection_widget = eu.gui.jupyter.ExperimentDataPlotSelectionWidget(experiment_d
 display(selection_widget)
 selection_widget.plot_data()"""
 
-def config_obj_to_dict(config_obj):
+def _config_obj_to_dict(config_obj):
     '''
     Transforms a potential configuration (either dict or string) to configuration dictionary.
     If it is a string, it tries to execute the <string> as python code with 'dict(<string>)'.
@@ -132,6 +132,47 @@ def config_obj_to_dict(config_obj):
 
 
 class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
+    """
+        Jupyter widget for plotting experiment data and creating Jupyter cells for dedicated plotting.
+
+        The widget allows to select the datasource that should be plotted and the plotting function.
+        It also allows to select which experiments should be plotted and to create dedicated Jupyter
+        cells to plot specific datasources.
+
+        GUI of the widget:
+        <figure markdown="span">
+          ![Image title](../../assets/images/experiment_data_plot_selection_widget.png)
+        </figure>
+
+        Functionality:
+
+        - _Data Sources_: Allows to define the datasource or datasources that should be plotted.
+            The datasource names correspond to the filenames under the data folder of repetitions and
+            correspond to the names that were used by the [logging](../logging/#writting) functions.
+            A comma-seperated list of datasources can be provided for table plots ([tabulate_meanstd][exputils.gui.jupyter.tabulate_meanstd.tabulate_meanstd]).
+            It is also possible to extract single elements from data arrays using bracket operation after the name.
+            For example `loss[-1]` will access the final loss value.
+        - _Experiments_: Selection of experiments from which data was loaded that should be plotted.
+        - _Repetitions_: Selection of repetitions from which data was loaded that should be plotted.
+        - _Plot Function_: Plotting function that should be used.
+            See the [Plotting Functions](./#plotting-functions) section for a list of exisiting
+            plotting functions.
+        - _Plot Configuration_: Configuration of the plotting function.
+            See the [Plotting Functions](./#plotting-functions) section for details.
+        - _Plot Data_: Plots the data below the widget.
+        - _Code Production_: Creates a new Jupyter notebook cell below the current one that contains
+            the code to plot the data again with all the configuration that was set in the GUI.
+            The code also allows to change the configuration.
+
+        Example:
+            Execute the following code in a Jupyter notebook located in the experiment campaign directory under a subdirectory, such as `./analysis`.
+            This code should be executed after data has been loaded, for example via the [ExperimentDataLoaderWidget][exputils.gui.jupyter.ExperimentDataLoaderWidget].
+            ```python
+            # allow plotting of data loaded by the experiment_data_loader (ExperimentDataLoaderWidget)
+            experiment_data_plotter = eu.gui.jupyter.ExperimentDataPlotSelectionWidget(experiment_data_loader)
+            display(experiment_data_plotter)
+            ```
+    """
 
     @staticmethod
     def default_config():
@@ -244,7 +285,7 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
                     self._plot_function_configs[self._plot_function_key] = None
             else:
                 # if a config is given, then override the _plot_functions_config with it
-                self._plot_function_configs[self._plot_function_key] = config_obj_to_dict(plot_function_config)
+                self._plot_function_configs[self._plot_function_key] = _config_obj_to_dict(plot_function_config)
 
             # if the config is invalid and the user can not change it anymore, then raise an exception
             if not self.config.is_plot_function_config_editor \
@@ -361,7 +402,7 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
 
     @property
     def plot_function_config(self):
-        return config_obj_to_dict(self._plot_function_configs[self._plot_function_key])
+        return _config_obj_to_dict(self._plot_function_configs[self._plot_function_key])
 
 
     @plot_function_config.setter

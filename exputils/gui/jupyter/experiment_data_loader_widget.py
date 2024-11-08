@@ -16,15 +16,60 @@ from exputils.gui.jupyter.base_widget import BaseWidget
 import IPython
 import warnings
 
+# TODO: use a different base table to allow newer versions of Jupyter Notebook and Jupyter Lab
 # TODO: Feature - allow to filter datasources that should be loaded
 # TODO: Feature - progress bar during data loading
 # TODO: Bugfix - If the order of the items is changed rapidely (buttons quicly pressed) then sometimes a wrong item gets selected afterwards
 #                It is unclear what causes this issue.
 
 class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
+    """
+        Jupyter widget for loading experiment data which can then be used for analysis and visualization.
+
+        The widget allows to select which experiments and datasources are loaded.
+        The widget provides basically a GUI for the [load_experiment_data][exputils.data.load_experiment_data] function.
+        It is also possible to define callback functions that allow to compute statistics of the
+        loaded data or alter the data.
+        After the user loaded the data through the widget it is available via its `experiment_data` property.
+
+        GUI of the widget:
+        <figure markdown="span">
+          ![Image title](../../assets/images/experiment_data_loader_widget.png)
+        </figure>
+
+        Functionality:
+
+        - _Update Descriptions_: Load the descriptions of new experiments.
+        This can be used to update the table after more experiments have been performed.
+        - _Reset Descriptions_: Resets the descriptions of experiments in the table to their default if they had been changed by the user.
+        - _Up Button_: Moves the selected experiments up in the order.
+        - _Down Button_: Moves the selected experiments down in the order.
+        - _Sort by Experiment ID_: Resorts the experiments according to their ID.
+        - _Load Data_: Loads the data of all selected experiments. It is then available via the `experiment_data` property.
+        - _Empty Data_: Empties the loaded data to free memory.
+
+        Example:
+            Execute the following code in a Jupyter notebook located in the experiment campaign directory under a subdirectory, such as `./analysis`.
+            ```python
+            import exputils as eu
+
+            experiment_data_loader = eu.gui.jupyter.ExperimentDataLoaderWidget()
+            display(experiment_data_loader)
+            ```
+            To access the experiment data after the user has loaded it through the widget:
+            ```python
+            experiment_data_loader.experiment_data
+            ```
+    """
 
     @staticmethod
     def default_config():
+        """Generates the default configuration for the widget.
+
+            Returns:
+                dict: A dictionary containing default configurations for various components of the widget.
+        """
+
         dc = BaseWidget.default_config()
 
         dc.load_experiment_descriptions_function = eu.AttrDict(
@@ -628,13 +673,17 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
         return super().set_widget_state(state)
 
     def empty_data(self):
-        """Delete experiment_data to free memory."""
+        # Delete experiment_data to free memory
         if self.experiment_data:
             keys = list(self.experiment_data.keys())
             for key in keys:
                 del self.experiment_data[key]
 
     def load_data(self):
+        """Loads the experiment data.
+
+        Can be called directly after initialization of the widget to preload the data without needing a user input.
+        """
 
         # delete old data to free memory
         self.empty_data()

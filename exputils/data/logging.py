@@ -9,6 +9,7 @@
 ##
 import exputils as eu
 from exputils.data.logger import Logger
+from typing import Optional
 
 # holds the global logger object
 log = Logger()
@@ -16,179 +17,312 @@ log = Logger()
 
 def reset():
     """
-    Resets the log to an empty exputils.data.Logger.
+    Resets the log which deletes all data in the memory and resets all changed configuration such
+    as the directory path of the log.
+
+    :warning: Data that has been logged after the [save][exputils.data.logging.save] function
+    was called will be lost.
     """
     global log
     log = Logger()
 
 
 def get_log():
-    """
-    Returns the current logger.
-    """
+    # returns the current logger.
     global log
     return log
 
 
 def set_log(new_log):
-    """
-    Sets the given logger to be the global log
-    """
+    #Sets the given logger to be the global log
     global log
     log = new_log
 
 
-def set_directory(directory):
+def set_directory(directory: str):
     """
-    Sets the directory path for the log.
+    Sets the directory path under which the logs will be saved.
+    The default is `./data`.
+
+    If the directory does not exist it will be created.
+
+    Parameters:
+        directory (str):
+            Path to the directory.
+
     """
     log.directory = directory
 
 
-def get_directory():
+def get_directory() -> str:
     """
-    Returns the directory path of the log.
+    Returns the path to the directory the log.
+
+    Returns:
+        directory (str):
+            Path to the directory.
     """
     return log.directory
 
 
-def contains(name):
+def contains(name: str) -> bool:
     """
-    Returns True if items for the the given name exists in the log. Otherwise False.
+    Check if a log entry for the given name exists.
+
+    Parameters:
+        name (str): The name to be checked in the log.
+
+    Returns:
+        is_contained (bool): True if a log for the name exists, otherwise False.
     """
     return (name in log)
 
 
-def clear(name=None):
+def clear(name: Optional[str] = None):
     """
-    Clears the data of the whole log or of a specific data element.
+    Clears the data of all or a specific log entry.
 
-    :param name: If none, then the whole log is cleared, otherwise only the data element with the given name.
-                 (default=None)
+    :warning: Data that has been logged after the [save][exputils.data.logging.save] function
+    was called will be lost.
+
+    Parameters:
+        name (str):
+            Name of the log entry.
+            If no name is given, then all log entries will be cleared.
     """
     log.clear(name=name)
 
 
-def get_item(name):
+def get_item(name: str) -> object:
     """
-    Returns the item from the log with the given name.
+    Returns the logged data for a certain entry.
+
+    Parameters:
+        name (str):
+            Name of the log entry.
+
+    Returns:
+        Logged data. Usually in form of a numpy array.
     """
     return log[name]
 
 
-def add_value(name, value, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+def add_value(name: str,
+              value,
+              log_to_tb: Optional[bool] = None,
+              tb_global_step: Optional[int] = None,
+              tb_walltime: Optional[float] = None):
     """
-    Adds a new value to the log. Values are stored in numpy arrays. Allows to log in parallel to tensorboard if the value is a scalar.
+    Adds a value to a log entry with optional parallel TensorBoard logging.
 
-    :param name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
-    :param value: Value to save.
-    :param log_to_tb (bool): True if the value should be logged to tensorboard. False if not.
-        If None, then it gets logged if the tensorboard is active. (default = None)
-    :param tb_global_step (int): Tensorboards global step value to record. (default = None)
-    :param tb_walltime (float): Optional tensorboard override of default walltime (time.time()) with seconds after epoch of event. (default = None)
+    Parameters:
+        name (str):
+            The name of the entry where the value is added.
+        value (Any):
+            The value to be added. Can be a scalar or an array.
+        log_to_tb (bool):
+            Defines of the value should be logged to TensorBoard in parallel to the standard log.
+            If True, log the value to TensorBoard.
+            If False, do not log the value to TensorBoard.
+            If not specified, then it gets logged if TensorBoard is globally activated.
+            See [activate_tensorboard][exputils.data.logging.activate_tensorboard] for more details.
+        tb_global_step (int):
+            If logging to TensorBoard is active, then this is the global step value to record with
+            the value in TensorBoard.
+        tb_walltime (float):
+            If logging to TensorBoard is active, then this is an optional override for the walltime
+            in TensorBoard.
     """
     log.add_value(name, value, log_to_tb, tb_global_step, tb_walltime)
 
 
-def add_scalar(name, scalar, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+def add_scalar(name: str,
+              scalar,
+              log_to_tb: Optional[bool] = None,
+              tb_global_step: Optional[int] = None,
+              tb_walltime: Optional[float] = None):
     """
-    Adds a new scalar to the log. Scalars are stored in numpy arrays. Allows to log in parallel to tensorboard if the value is a scalar.
+    Adds a scalar value to a log entry with optional parallel TensorBoard logging.
 
-    :param name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
-    :param scalar: Value to save.
-    :param log_to_tb (bool): True if the value should be logged to tensorboard. False if not.
-        If None, then it gets logged if the tensorboard is active. (default = None)
-    :param tb_global_step (int): Tensorboards global step value to record. (default = None)
-    :param tb_walltime (float): Optional tensorboard override of default walltime (time.time()) with seconds after epoch of event. (default = None)
+    Note: Has the same functionality as [add_value][exputils.data.logging.add_value] and exists to
+    have a similar named log function as TensorBoard.
+
+    Parameters:
+        name (str):
+            The name of the entry where the value is added.
+        scalar (Any):
+            The scalar value to be added.
+        log_to_tb (bool):
+            Defines of the value should be logged to TensorBoard in parallel to the standard log.
+            If True, log the value to TensorBoard.
+            If False, do not log the value to TensorBoard.
+            If not specified, then it gets logged if TensorBoard is globally activated.
+            See [activate_tensorboard][exputils.data.logging.activate_tensorboard] for more details.
+        tb_global_step (int):
+            If logging to TensorBoard is active, then this is the global step value to record with
+            the value in TensorBoard.
+        tb_walltime (float):
+            If logging to TensorBoard is active, then this is an optional override for the walltime
+            in TensorBoard.
     """
     log.add_scalar(name, scalar, log_to_tb, tb_global_step, tb_walltime)
 
 
-def add_histogram(name, values, log_to_tb=None, tb_global_step=None, tb_walltime=None):
+def add_histogram(name: str,
+                  values,
+                  log_to_tb: Optional[bool] = None,
+                  tb_global_step: Optional[int] = None,
+                  tb_walltime: Optional[float] = None):
     """
-    Adds a new histogram to the log. Histograms data are stored in numpy arrays. Allows to log in parallel to tensorboard.
+    Adds a histogram which is a one-dimensional array a log entry with optional parallel TensorBoard
+    logging.
 
-    :param: name (string): Name of the value. (Can use dividers '/' for tensorbard. They are replaced by '_' for the normal log. )
-    :param values: Values to build histogram.
-    :param log_to_tb (bool): True if the value should be logged to tensorboard. False if not.
-        If None, then it gets logged if the tensorboard is active. (default = None)
-    :param tb_global_step (int): Tensorboards global step value to record. (default = None)
-    :param tb_walltime (float): Optional tensorboard override of default walltime (time.time()) with seconds after epoch of event. (default = None)
+    This allows to add the values as a histogram plot to TensorBoard.
+
+    Parameters:
+        name (str):
+            The name of the entry where the value is added.
+        values (Any):
+            The array of values to be added.
+        log_to_tb (bool):
+            Defines of the value should be logged to TensorBoard in parallel to the standard log.
+            If True, log the value to TensorBoard.
+            If False, do not log the value to TensorBoard.
+            If not specified, then it gets logged if TensorBoard is globally activated.
+            See [activate_tensorboard][exputils.data.logging.activate_tensorboard] for more details.
+        tb_global_step (int):
+            If logging to TensorBoard is active, then this is the global step value to record with
+            the value in TensorBoard.
+        tb_walltime (float):
+            If logging to TensorBoard is active, then this is an optional override for the walltime
+            in TensorBoard.
     """
     log.add_histogram(name, values, log_to_tb, tb_global_step, tb_walltime)
 
 
-def get_values(name):
+def get_values(name: str):
     """
-    Returns the values for the given name. Values are stored in numpy arrays.
+    Returns the logged data for a certain entry.
+
+    Note: Has the same functionality as [get_item][exputils.data.logging.get_item] and exists to
+    have a similar named log function as TensorBoard.
+
+    Parameters:
+        name (str):
+            Name of the log entry.
+
+    Returns:
+        Logged data. Usually in form of a numpy array.
     """
     return log[name]
 
 
-def add_object(name, obj):
+def add_object(name: str,
+               obj: object):
     """
-    Adds a new object to the log. Objects are stored in a list and saved as files using dill.
+    Adds an object to a log entry. Objects are stored in a list and saved as dill files.
+
+    Parameters:
+        name (str):
+            The name of the log entry where the object is added.
+        obj (object):
+            The object to be added to the log.
     """
     log.add_object(name, obj)
 
 
-def get_objects(name):
+def get_objects(name: str) -> list:
     """
-    Returns the objects for the given name. Objects are stored in a list.
+    Returns the logged objects for a certain entry.
+
+    Args:
+        name (str): Name of the log entry.
+
+    Returns:
+        objects (list): Logged objects.
     """
     return log[name]
 
 
-def add_single_object(name, obj, directory=None):
+def add_single_object(name: str,
+                      obj: object,
+                      directory: Optional[str] = None):
     """
-    Adds a single object to the log which is directly written to the hard drive and not stored in memory.
-    The objects is saved via dill.
+    Logs a single object which is directly written to a dill file and not stored in memory.
+
+    Parameters:
+        name (str):
+            The name of the object which is used for the filename.
+        obj (object):
+            The object to be logged.
+        directory (str):
+            Optional directory path where the dill file for the object is saved.
+            Default is the log directory.
     """
     log.add_single_object(name, obj, directory=directory)
 
 
-def items():
+def items() -> list:
     """
-    Returns the items in the log as a list of tuples with the name and values of the items.
+    Returns all log entries as a list of tuples with the name and values of the entries.
+
+    Returns:
+        entries (list): All logged entries.
     """
     return log.items()
 
 
-def save(directory=None):
+def save(directory: Optional[str] = None):
     """
-    Saves the log to its defined directory.
+    Saves the log.
+    All logged values are stored in memory and only written to disk when this function is called.
 
-    :param directory: Optional path to the directory.
+    Parameters:
+        directory (str):
+            Optional directory path where the dill file for the object is saved.
+            Default is the log directory.
     """
     log.save(directory=directory)
 
 
-def load(directory=None, load_objects=False):
+def load(directory: Optional[str] = None,
+         load_objects: bool = False):
     """
-    Loads the items from a log directory into the log.
+    Loads entries from a log directory into the log.
+    Afterwards the loaded entries can be accessed via the [items][exputils.data.logging.items] and
+    [get_item][exputils.data.logging.get_item] functions.
 
-    :param directory: Optional path to the directory.
-    :param load_objects: If True then also objects (dill files) are loaded. Default: False.
+    Parameters:
+        directory (str):
+            Optional directory path where the dill file for the object is saved.
+            Default is the log directory.
+        load_objects (bool):
+            True if objects (dill files) that are in the directory should also be loaded.
+            Default is False to avoid unintended large loads of objects.
     """
     log.load(directory=directory, load_objects=load_objects)
 
 
-def load_single_object(name):
+def load_single_object(name: str) -> object:
     """
-    Loads a single object from a log and returns it.
+    Loads a single object from the log folder and returns it.
+    The object is not stored in the log memory.
 
-    :return:
+    Parameters:
+        name (str):
+            Name of the object which is used for the filename.
+            Either with or without the `'.dill'` extension.
+
+    Returns:
+        obj (object): Loaded object.
     """
     return log.load_single_object(name)
 
 
-def set_config(config=None, **kwargs):
-    """
-    Sets the config of the log.
-
-    :param config: Dictionary with config parameters.
-    :param kwargs: Arguments list of config parameters.
-    """
+def set_config(config: Optional[dict] = None,
+               **kwargs):
+    # sets the config of the underlying Logger object
+    # see logger.py for more information
     log.config = eu.combine_dicts(kwargs, config, log.config)
 
 
@@ -196,51 +330,83 @@ def set_config(config=None, **kwargs):
 # TENSORBOARD
 
 def tensorboard():
-    """The tensorboard SummaryWriter that can be used to log data to the tensorboard.
+    """
+    Returns the tensorboard SummaryWriter object used to log values to TensorBoard.
 
-    The logged data will only be stored in the tensorboard logs!
-
-    Example:
-
-    log.
-
+    Returns:
+        writer (SummaryWriter): TensorBoard SummaryWriter object.
     """
     return log.tensorboard
 
 
-def create_tensorboard(config=None, **kwargs):
+def create_tensorboard(config: Optional[dict] = None,
+                       **kwargs):
     """
-    Creates a tensorboard that can be used for logging.
+    Creates the SummaryWriter object used to log values to TensorBoard.
+    This allows to set its configuration parameters.
 
-    :param config (dict): Dictionary with the configuration of the tensorboard. Has the same entries as the parameters below. (default = None)
-    :param log_dir (string): Save directory location. Default is experiments/tensorboard_logs/exp_<experiment_id>/rep_<repetition_id>/<date>_<time>.
-    :param purge_step (int): When logging crashes at step T+XT+XT+X and restarts at step TTT, any events whose global_step larger or equal to TTT
-        will be purged and hidden from TensorBoard. Note that crashed and resumed experiments should have the same log_dir.
-    :param: max_queue (int): Size of the queue for pending events and summaries before one of the ‘add’ calls forces a flush to disk. (default = 10)
-    :param flush_secs (int): How often, in seconds, to flush the pending events and summaries to disk. (default = 120)
-    :param filename_suffix (string): Suffix added to all event filenames in the log_dir directory. (default = '.tblog')
+    For more details see: https://pytorch.org/docs/stable/tensorboard.html
 
-    :return: SummaryWriter of the tensorboard (See https://pytorch.org/docs/stable/tensorboard.html).
+    Parameters:
+        config (dict):
+            Optional dictionary with the configuration of the SummaryWriter.
+            Has the same entries as the set of "Other Parameters" below.
+
+    Other Parameters:
+        log_dir (str):
+            Directly location of the TensorBoard log files.
+            Default is `experiments/tensorboard_logs/exp_\<experiment_id>/rep_\<repetition_id>/\<date>_\<time>.`
+        purge_step (int):
+            When logging crashes at step T+XT+XT+X and restarts at step TTT, any events whose
+            global_step larger or equal to TTT will be purged and hidden from TensorBoard.
+            Note that crashed and resumed experiments should have the same log_dir.
+        max_queue (int):
+            Size of the queue for pending events and summaries before one of the ‘add’ calls forces
+            a flush to disk. (default = 10)
+        flush_secs (int):
+            How often, in seconds, to flush the pending events and summaries to disk. (default = 120)
+        filename_suffix (string):
+            Suffix added to all event filenames in the log_dir directory. (default = '.tblog')
+
+    Returns:
+        writer (SummaryWriter): TensorBoard SummaryWriter object.
     """
 
     return log.create_tensorboard(config=config, **kwargs)
 
 
-def activate_tensorboard(config=None, **kwargs):
+def activate_tensorboard(config: Optional[dict] = None,
+                         **kwargs):
     """
-    Activates a tensorboard that can be used for logging.
-    If it is activated, then when the function add_value/add_scalar is used and a scalar is given, the tensorboard automatically logs it too.
-    Creates a tensorboard if non existed so far.
+    Activates parallel TensorBoard logging.
+    When it is activated, then the logging functions (
+    [add_value][exputils.data.logging.add_value],
+    [add_scalar][exputils.data.logging.add_scalar],
+    [add_histogram][exputils.data.logging.add_histogram])
+    will automatically log each value also in TensorBoard if not otherwise specified for them.
 
-    :param config (dict): Dictionary with the configuration of the tensorboard. Has the same entries as the parameters below. (default = None)
-    :param log_dir (string): Save directory location. Default is experiments/tensorboard_logs/exp_<experiment_id>/rep_<repetition_id>/<date>_<time>.
-    :param purge_step (int): When logging crashes at step T+XT+XT+X and restarts at step TTT, any events whose global_step larger or equal to TTT
-        will be purged and hidden from TensorBoard. Note that crashed and resumed experiments should have the same log_dir.
-    :param: max_queue (int): Size of the queue for pending events and summaries before one of the ‘add’ calls forces a flush to disk. (default = 10)
-    :param flush_secs (int): How often, in seconds, to flush the pending events and summaries to disk. (default = 120)
-    :param filename_suffix (string): Suffix added to all event filenames in the log_dir directory. (default = '.tblog')
+    Creates a TensorBoard SummaryWriter if non is created yet with the [create_tensorboard][exputils.data.logging.create_tensorboard] function.
+    If non is created then the configureation of the writer can be defined by the parameters of this function.
+    For more details see: https://pytorch.org/docs/stable/tensorboard.html
 
-    :return: SummaryWriter of the tensorboard (See https://pytorch.org/docs/stable/tensorboard.html).
+    Other Parameters:
+        log_dir (str):
+            Directly location of the TensorBoard log files.
+            Default is `experiments/tensorboard_logs/exp_\<experiment_id>/rep_\<repetition_id>/\<date>_\<time>.`
+        purge_step (int):
+            When logging crashes at step T+XT+XT+X and restarts at step TTT, any events whose
+            global_step larger or equal to TTT will be purged and hidden from TensorBoard.
+            Note that crashed and resumed experiments should have the same log_dir.
+        max_queue (int):
+            Size of the queue for pending events and summaries before one of the ‘add’ calls forces
+            a flush to disk. (default = 10)
+        flush_secs (int):
+            How often, in seconds, to flush the pending events and summaries to disk. (default = 120)
+        filename_suffix (string):
+            Suffix added to all event filenames in the log_dir directory. (default = '.tblog')
+
+    Returns:
+        writer (SummaryWriter): TensorBoard SummaryWriter object.
     """
 
     return log.activate_tensorboard(config=config, **kwargs)
@@ -248,13 +414,19 @@ def activate_tensorboard(config=None, **kwargs):
 
 def deactivate_tensorboard():
     """
-    Deactivates a tensorboard. Afterwards, values will not be automatically logged via the add_value / add_scalar function to the tensorboard.
+    Deactivates tensorboard logging.
+    Afterwards, values will not be automatically logged via the add_value / add_scalar function
+    to the tensorboard.
     """
     return log.deactivate_tensorboard()
 
 
-def is_tensorboard_active():
-    """Returns true, if the tensorboard is active."""
+def is_tensorboard_active() -> bool:
+    """Returns true, if the tensorboard is active.
+
+    Returns:
+        is_active (bool): True if the tensorboard is active, otherwise False.
+    """
     return log.is_tensorboard_active
 
 
