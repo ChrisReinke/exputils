@@ -48,7 +48,7 @@ def start_torque_experiments(directory=None, start_scripts='*.torque', is_parall
 
 
 def start_experiments(directory: Optional[str] = None,
-                      start_scripts: Optional[str] = 'run_*',
+                      start_scripts: Optional[str] = 'run_*.py',
                       start_command: Optional[str] = '{}',
                       parallel: Union[bool, int] = True,
                       is_chdir: bool = True,
@@ -251,7 +251,7 @@ def _update_script_status(script, status):
 
 
 def get_scripts(directory: Optional[str] = None,
-                start_scripts: Optional[str] = 'run_*') -> list:
+                start_scripts: Optional[str] = 'run_*.py') -> list:
     """
     Searches all start scripts in the experiments directory.
 
@@ -306,7 +306,7 @@ def get_script_status(script_file: str) -> Optional[str]:
 
 
 def get_number_of_scripts_to_execute(directory: Optional[str] = None,
-                                     start_scripts: str = 'run_*') -> int:
+                                     start_scripts: str = 'run_*.py') -> int:
     """
     Identifies the number of scripts that have to be executed in the experiments directory.
     Scripts that have to be executed have either the status 'none', 'todo', 'error', or 'unfinished'.
@@ -336,7 +336,7 @@ def get_number_of_scripts_to_execute(directory: Optional[str] = None,
 
 
 def get_number_of_scripts(directory: Optional[str] = None,
-                          start_scripts: str = 'run_*'):
+                          start_scripts: str = 'run_*.py'):
     """
     Identifies the number of all scripts in the experiments directory regardless of their execution
     status.

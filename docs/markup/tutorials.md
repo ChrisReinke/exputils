@@ -25,3 +25,26 @@ Folder structure:
                 * **\<code\>** files: Generated code and resource files.
         * **\<run scripts\>.sh** files: Various shell scripts to run experiments and calculate statistics locally or on clusters.
 
+
+
+
+    ./get_status.sh
+
+Output: 
+
+    2024/11/09 20:24:13 ./experiments/experiment_000001/repetition_000000/run_repetition.py.status - running  train epoch 4
+    2024/11/09 20:24:15 ./experiments/experiment_000001/repetition_000001/run_repetition.py.status - running  train epoch 4
+    2024/11/09 20:24:24 ./experiments/experiment_000001/repetition_000002/run_repetition.py.status - running  train epoch 4
+    2024/11/09 20:24:16 ./experiments/experiment_000001/repetition_000003/run_repetition.py.status - running  train epoch 4
+    2024/11/09 20:25:06 ./experiments/experiment_000001/repetition_000004/run_repetition.py.status - finished 
+    2024/11/09 20:24:39 ./experiments/experiment_000002/repetition_000000/run_repetition.py.status - finished 
+    2024/11/09 20:25:09 ./experiments/experiment_000002/repetition_000001/run_repetition.py.status - running  train epoch 5
+    2024/11/09 20:25:06 ./experiments/experiment_000002/repetition_000002/run_repetition.py.status - finished 
+    2024/11/09 20:24:22 ./experiments/experiment_000002/repetition_000003/run_repetition.py.status - running  train epoch 4
+    2024/11/09 20:24:22 ./experiments/experiment_000002/repetition_000004/run_repetition.py.status - running  train epoch 4
+    2024/11/09 20:24:40 ./experiments/experiment_000003/repetition_000000/run_repetition.py.status - running 
+    2024/11/09 20:25:06 ./experiments/experiment_000003/repetition_000001/run_repetition.py.status - running 
+    2024/11/09 20:25:07 ./experiments/experiment_000003/repetition_000002/run_repetition.py.status - running 
+    2024/11/09 20:19:42 ./experiments/experiment_000003/repetition_000003/run_repetition.py.status - todo 
+    2024/11/09 20:19:42 ./experiments/experiment_000003/repetition_000004/run_repetition.py.status - todo 
+    total: 15 | todo: 2 | running: 10 | error: 0 | finished: 3 

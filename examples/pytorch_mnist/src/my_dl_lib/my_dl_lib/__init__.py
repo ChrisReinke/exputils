@@ -1,2 +1,2 @@
-from dllib.mnist_cnn_classifier import MNISTCNNClassifier
-from dllib.core import run_training
+from my_dl_lib.core import run_training
+import my_dl_lib.models
