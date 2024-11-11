@@ -8,11 +8,25 @@
 ## exputils is provided under GPL-3.0-or-later
 ##
 import exputils as eu
-import torch
 import os
+# import warnings
+# import sys
+import pytest
+
+torch = pytest.importorskip("torch")
+
+# try:
+#     import torch
+# except ImportError:
+#     warnings.warn("Torch not installed. Could not test saving of pytorch models via dill! To check do: \"pip install torch\"")
+
 
 def test_dill_pytorch_models(tmp_path):
     """Tests if dill io functions can save and load pyTorch models correctly."""
+
+    # if 'torch' not in sys.modules:
+    #     warnings.warn("Torch not installed. Could not test saving of pytorch models via dill! To check do: \"pip install torch\"")
+    #     return
 
     tmp_path = str(tmp_path)
 

@@ -11,6 +11,8 @@ import glob
 import os
 import subprocess
 import time
+from typing import Optional, Union
+
 import exputils
 import numpy as np
 from datetime import datetime
@@ -45,25 +47,46 @@ def start_torque_experiments(directory=None, start_scripts='*.torque', is_parall
     )
 
 
-def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', parallel=True, is_chdir=True, verbose=False, post_start_wait_time=0,
-                      write_status_files_automatically=True):
+def start_experiments(directory: Optional[str] = None,
+                      start_scripts: Optional[str] = 'run_*.py',
+                      start_command: Optional[str] = '{}',
+                      parallel: Union[bool, int] = True,
+                      is_chdir: bool = True,
+                      verbose: bool = False,
+                      post_start_wait_time: float = 0.,
+                      write_status_files_automatically: bool = True):
     """
-    Starts experiments and repetitions in a parallel.
+    Searches all the start scripts of experiments and/or repetitions in the experiments folder
+    and executes them either in parallel or sequentially.
 
-    :param directory: Directory in which the start scripts are searched.
-    :param start_scripts: Filename of the start script file. Can include * to search for scripts.
-    :param start_command:
-    :param parallel: True if processes are started and executed in parallel. False if they are executed one after the other.
-                     A integer number defines how many processes can run in parallel.
-    :param is_chdir: Before starting a script, should the main process change to its working directory. (Default: True)
-    :param verbose:
-    :param post_start_wait_time:
-    :param write_status_files_automatically: Should the status file for the started scripts be written automatically by exputils or by the started
-                                             process itself. (Default: True)
-    :return:
+    It also documents their execution status (todo, running, finished, error) in a status file
+    that allows it to identify if a script should be executed or not when used again on the
+    same target directory.
+
+    Parameters:
+        directory (str):
+            Directory in which the start scripts are searched.
+            Default is `'./experiments'`.
+        start_scripts (str):
+            Filename of the start script file that are searched under the given target directory.
+            Can include '*' to search for scripts, for example 'run_*.py'.
+            The default `'run_*'` will look for all files that start with 'run' and try to start them.
+        parallel (bool, int):
+            Defines if scripts should be started in parallel and how many are allowed to run in parallel.
+            If `False` then the scripts are started sequentially one after another.
+            If `True` then the scripts are started and executed in parallel all at once.
+            If an integer, then the number defines how many scripts can run in parallel.
+        is_chdir (bool):
+            Before starting a script, should the main process change to its working directory.
+        verbose (bool):
+            Should verbose output with more information given. Default is `False`.
+        post_start_wait_time (float):
+            Time waited before one process is started after another.
+        write_status_files_automatically (bool):
+            Should status files that document if scripts were started and executed be
+            written by the manager. These are important to identify if an experiment or repetition
+            did run already.
     """
-
-    # TODO: remove the is_rerun argument, as it is not used anymore. This makes also changes in the commands necessary!
 
     if directory is None:
         directory = os.path.join('.', exputils.DEFAULT_EXPERIMENTS_DIRECTORY)
@@ -94,13 +117,13 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
     for script in all_scripts:
 
         # lock processing of the script, so that no other running experimentstarter is updating its status in parallel
-        with get_script_lock(script):
+        with _get_script_lock(script):
 
             status = get_script_status(script)
 
             if status is None:
                 if write_status_files_automatically:
-                    update_script_status(script, 'todo')
+                    _update_script_status(script, 'todo')
                 todo_scripts.append(script)
 
             elif status.lower() != 'finished':
@@ -134,14 +157,14 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                 next_todo_script_idx += 1
 
                 # lock processing of the script, so that no other running experimentstarter is starting it in parallel
-                with get_script_lock(script):
+                with _get_script_lock(script):
 
                     # check the script status, only start if needed
                     status = get_script_status(script)
-                    if is_to_start_status(status):
+                    if _is_to_start_status(status):
 
                         if write_status_files_automatically:
-                            update_script_status(script, 'running')
+                            _update_script_status(script, 'running')
 
                         # start
                         script_directory = os.path.dirname(script)
@@ -187,7 +210,7 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                         status = 'error'
 
                     if write_status_files_automatically:
-                        update_script_status(started_scripts[p_idx], status)
+                        _update_script_status(started_scripts[p_idx], status)
 
                     print('{} finished {!r} (status: {})'.format(datetime.now().strftime("%Y/%m/%d %H:%M:%S"), started_scripts[p_idx], status))
 
@@ -201,17 +224,17 @@ def start_experiments(directory=None, start_scripts='*.sh', start_command='{}', 
                 print('\t- {!r} (status: {})'.format(script_path, status))
 
 
-def is_to_start_status(status):
+def _is_to_start_status(status):
     """Returns true if the given status means that the script should be started, otherwise false."""
     return status is None or status.lower().startswith('todo') or status.lower().startswith('none') or status.lower().startswith('error') or status.lower().startswith('unfinished')
 
 
-def get_script_lock(script):
+def _get_script_lock(script):
     """Create a lock for the given script that can be used to have exclusive access to write its status."""
     return fasteners.InterProcessLock(script + '.lock')
 
 
-def update_script_status(script, status):
+def _update_script_status(script, status):
     """
     Updates the status for the given script.
 
@@ -227,14 +250,22 @@ def update_script_status(script, status):
         file.write( time_str + "\n" + status + "\n")
 
 
-def get_scripts(directory=None, start_scripts='*.sh'):
+def get_scripts(directory: Optional[str] = None,
+                start_scripts: Optional[str] = 'run_*.py') -> list:
     """
-    Idenitfies all scripts.
+    Searches all start scripts in the experiments directory.
 
-     :param directory: Directory in which the start scripts are searched.
-     :param start_scripts: Filename of the start script file. Can include * to search for scripts.
+    Parameters:
+        directory (str):
+            Directory in which the start scripts are searched.
+            Default is `'./experiments'`.
+        start_scripts (str):
+            Filename of the start script file that are searched under the given target directory.
+            Can include '*' to search for scripts, for example 'run_*.py'.
+            The default `'run_*'` will look for all files that start with 'run' and try to start them.
 
-     :return: List of scripts (pathes).
+    Returns:
+        scripts (list): List of filepaths to the start scripts.
     """
 
     if directory is None:
@@ -248,13 +279,17 @@ def get_scripts(directory=None, start_scripts='*.sh'):
     return scripts
 
 
-def get_script_status(script_file):
+def get_script_status(script_file: str) -> Optional[str]:
     """
-    Returns the status of the given script file.
+    Returns the execution status of a certain start script.
 
-    :param script_file: Path to the script file.
+    Parameters:
+        script_file (str): Path to the script file.
 
-    :return: Status as a string. ('error', 'running', 'finished'). None if not status exists.
+    Returns:
+        status (str, None):
+            Status as a string. Usually `'todo'`, `'error'`, `'running'`, or `'finished'`.
+            `None` if no status exists.
     """
     status = None
 
@@ -270,14 +305,23 @@ def get_script_status(script_file):
     return status
 
 
-def get_number_of_scripts_to_execute(directory=None, start_scripts='*.sh'):
+def get_number_of_scripts_to_execute(directory: Optional[str] = None,
+                                     start_scripts: str = 'run_*.py') -> int:
     """
-    Returns the number scripts that have to be executed
+    Identifies the number of scripts that have to be executed in the experiments directory.
+    Scripts that have to be executed have either the status 'none', 'todo', 'error', or 'unfinished'.
 
-    :param directory: Directory in which the start scripts are searched.
-    :param start_scripts: Filename of the start script file. Can include * to search for scripts.
+    Parameters:
+        directory (str):
+            Directory in which the start scripts are searched.
+            Default is `'./experiments'`.
+        start_scripts (str):
+            Filename of the start script file that are searched under the given target directory.
+            Can include '*' to search for scripts, for example 'run_*.py'.
+            The default `'run_*'` will look for all files that start with 'run' and try to start them.
 
-    :return: Number of scripts that have to be executed (int).
+    Returns:
+        n_scripts (int): Number of scripts that have to be executed.
     """
 
     scripts = get_scripts(directory=directory, start_scripts=start_scripts)
@@ -285,20 +329,29 @@ def get_number_of_scripts_to_execute(directory=None, start_scripts='*.sh'):
     n = 0
     for script in scripts:
         status = get_script_status(script)
-        if is_to_start_status(status):
+        if _is_to_start_status(status):
             n += 1
 
     return n
 
 
-def get_number_of_scripts(directory=None, start_scripts='*.sh'):
+def get_number_of_scripts(directory: Optional[str] = None,
+                          start_scripts: str = 'run_*.py'):
     """
-    Returns the number scripts of all scripts regardless of their run status.
+    Identifies the number of all scripts in the experiments directory regardless of their execution
+    status.
 
-    :param directory: Directory in which the start scripts are searched.
-    :param start_scripts: Filename of the start script file. Can include * to search for scripts.
+    Parameters:
+        directory (str):
+            Directory in which the start scripts are searched.
+            Default is `'./experiments'`.
+        start_scripts (str):
+            Filename of the start script file that are searched under the given target directory.
+            Can include '*' to search for scripts, for example 'run_*.py'.
+            The default `'run_*'` will look for all files that start with 'run' and try to start them.
 
-    :return: Number of scripts (int).
+    Returns:
+        n_scripts (int): Number of scripts.
     """
 
     scripts = get_scripts(directory=directory, start_scripts=start_scripts)

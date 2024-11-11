@@ -1,7 +1,11 @@
-**/__pycache__/
 *.egg-info/
-build/
 .idea/
+build/
+site/
+**/__pycache__/
 **/.ipynb_checkpoints/
+**/.ipython_config/
 *.whl
 *.tar.gz
+examples/pytorch_mnist/datasets/mnist/
+examples/pytorch_mnist/experiments/my_campaign/experiments/

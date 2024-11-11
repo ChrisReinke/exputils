@@ -10,12 +10,35 @@
 import exputils as eu
 import numpy as np
 import plotly.subplots
+from typing import Optional
 
+def plotly_meanstd_bar(data: Optional[list] = None,
+                       config: Optional[dict] = None,
+                       **kwargs):
+    """
+     Interactive bar plot that shows the mean and std of scalars over all repetitions of each experiment.
 
-def plotly_meanstd_bar(data=None, config=None, **kwargs):
-    """
-    param repetition_ids: Either scalar int with single id, list with several that are used for each experiment, or a dict with repetition ids per experiment.
-    """
+     TODO: image of plot
+
+     Parameters:
+         data (list): Data to plot.
+         config (dict): Dictionary with configuration of plot.
+
+     __Configuration__:
+
+     - `layout` (`dict`): See [Plotly layout](https://plotly.com/python/reference/layout/) for all possible options.
+         - `xaxis` (`dict`):
+             - `title` (`str`): Title of the x-axis.
+             - `range` (`tuple`): Tuple with min and max values of x-axis. Default is `[None, None]`.
+         - `yaxis` (`dict`)
+             - `title` (`str`): Title of the y-axis.
+             - `range` (`tuple`): Tuple with min and max values of y-axis. Default is `[None, None]`.
+
+     Returns:
+         fig (figure): Plotly figure object that can be displayed using `display(fig)`.
+
+     The plot is based on [Plotly bar charts](https://plotly.com/python/bar-charts/).
+     """
     default_config = eu.AttrDict(
         subplots=eu.AttrDict(
             rows=None,

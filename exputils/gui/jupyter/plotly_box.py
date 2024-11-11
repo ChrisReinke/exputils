@@ -10,11 +10,39 @@
 import exputils as eu
 import numpy as np
 import plotly.subplots
+from typing import Optional
 
 # TODO: Bugfix - if sveral subfigures are shown, then the boxes are positioned in each plot as if they are plotted
 #       in one subfigure
 
-def plotly_box(data=None, config=None, **kwargs):
+def plotly_box(data: Optional[list] = None,
+               config: Optional[dict] = None,
+               **kwargs):
+    """
+     Interactive box plot that shows several statistics such as the mean, std and range of scalars
+     over all repetitions of each experiment.
+
+     TODO: image of plot
+
+     Parameters:
+         data (list): Data to plot.
+         config (dict): Dictionary with configuration of plot.
+
+     __Configuration__:
+
+     - `layout` (`dict`): See [Plotly layout](https://plotly.com/python/reference/layout/) for all possible options.
+         - `xaxis` (`dict`):
+             - `title` (`str`): Title of the x-axis.
+             - `range` (`tuple`): Tuple with min and max values of x-axis. Default is `[None, None]`.
+         - `yaxis` (`dict`)
+             - `title` (`str`): Title of the y-axis.
+             - `range` (`tuple`): Tuple with min and max values of y-axis. Default is `[None, None]`.
+
+     Returns:
+         fig (figure): Plotly figure object that can be displayed using `display(fig)`.
+
+     The plot is based on [Plotly box plots](https://plotly.com/python/box-plots/).
+     """
 
     default_config = eu.AttrDict(
         subplots=eu.AttrDict(

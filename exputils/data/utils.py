@@ -11,9 +11,7 @@ import numpy as np
 
 
 def get_ordered_experiment_ids_from_descriptions(experiment_descriptions):
-    """
-    Returns a sorted list of experiment ids according to the order in the experiment descriptions.
-    """
+    """Returns a sorted list of experiment ids according to the order in the experiment descriptions."""
     if not experiment_descriptions:
         return []
 

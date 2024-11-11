@@ -11,33 +11,55 @@ import numpy as np
 import plotly
 import plotly.subplots
 import exputils as eu
+from typing import Optional
 
 # TODO: Feature - allow to first unselect certain experiments, and then switch to their elements, to just see the selected experiments
 #       https://webappl.blogspot.com/2020/05/plotly-eventregister.html, see plotly_restyle event
 #       I believe I need to create a Figure object for this purpose
 # TODO: Feature - custom x values
 
-def plotly_meanstd_scatter(data=None, config=None, **kwargs):
+def plotly_meanstd_scatter(data: Optional[list] = None,
+                           config: Optional[dict] = None,
+                           **kwargs):
     """
-    Plots a plotly scatter (Scattergl or Scatter) plot.
+    Interactive line plot that shows the mean and std over all repetitions of each experiment or to
+    show the individual repetitions.
 
-    :param data: Data to plot. Should be in the following forms:
-        - [subplot_idx:list][trace_idx:list][elems_per_trace:numpy.ndarray]
-        - [trace_idx:list][elems_per_trace:numpy.ndarray]
-        - elems_per_trace:numpy.ndarray
+    TODO: image of plot
 
-    :param config: Dictionary with configuration of plot.
-        moving_average: Display the moving average over the steps per trace-element.
-            n: number of steps over which the average should be computed.
+    Parameters:
+        data (list): Data to plot. Should be in the following forms:
 
-        data_filter:
-            every_nth_step: Either a integer with the number of steps or a dictionary.
-                            In case of a dictionary:
-                step: Number of steps between taken values. (default=None)
-                include_final_step: Should the final step (the final value) also be included even if outside the stepping. (default=False)
+            - [subplot_idx:list][trace_idx:list][elems_per_trace:numpy.ndarray]
+            - [trace_idx:list][elems_per_trace:numpy.ndarray]
+            - [elems_per_trace:numpy.ndarray]
+        config (dict): Dictionary with configuration of plot.
 
+    __Configuration__:
 
-    :return: Plotly figure object that can be displayed using display(fig_obj).
+    - `layout` (`dict`): See [Plotly layout](https://plotly.com/python/reference/layout/) for all possible options.
+        - `xaxis` (`dict`):
+            - `title` (`str`): Title of the x-axis.
+            - `range` (`tuple`): Tuple with min and max values of x-axis. Default is `[None, None]`.
+        - `yaxis` (`dict`)
+            - `title` (`str`): Title of the y-axis.
+            - `range` (`tuple`): Tuple with min and max values of y-axis. Default is `[None, None]`.
+    -  `moving_average` (`dict`):
+        - `n` (`int`): Number of elements (over the x-axis) over which a moving average should be
+            computed. Default is `1`.
+    - `data_filter` (`dict`):
+        - `every_nth_step` (`int`, `dict`):
+            Either an integer with the number of steps or a dictionary.
+            In case of a dictionary:
+            - `step` (`int`): Number of steps between taken values. Default is `None`.
+            - `include_final_step` (`bool`):
+                Should the final step (the final value) also be included even if outside the stepping.
+                Default is `False`.
+
+    Returns:
+        fig (figure): Plotly figure object that can be displayed using `display(fig)`.
+
+    The plot is based on [Plotly scatter](https://plotly.com/python/line-and-scatter/).
     """
     default_config = eu.AttrDict(
 

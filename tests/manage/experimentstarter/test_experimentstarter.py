@@ -28,7 +28,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, parallel=False)
+    eu.manage.start_experiments(start_scripts='*.sh', directory=directory, parallel=False)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
@@ -44,7 +44,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, parallel=True, verbose=True)
+    eu.manage.start_experiments(start_scripts='*.sh', directory=directory, parallel=True, verbose=True)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
@@ -61,7 +61,7 @@ def test_experimentstarter(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, parallel=True, is_chdir=True)
+    eu.manage.start_experiments(start_scripts='*.sh', directory=directory, parallel=True, is_chdir=True)
 
     # check if the required files have been generated
     assert os.path.isfile(os.path.join(directory, 'job04.txt'))
@@ -82,7 +82,7 @@ def test_get_number_of_scripts_to_execute(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # check
-    n_open_scripts = eu.manage.get_number_of_scripts_to_execute(directory=directory)
+    n_open_scripts = eu.manage.get_number_of_scripts_to_execute(start_scripts='*.sh', directory=directory)
     assert n_open_scripts == 4
 
 
@@ -98,21 +98,21 @@ def test_get_number_of_scripts(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # check
-    n_scripts = eu.manage.get_number_of_scripts(directory=directory)
+    n_scripts = eu.manage.get_number_of_scripts(start_scripts='*.sh', directory=directory)
     assert n_scripts == 5
 
 
 def test_is_to_start_status():
 
-    assert eu.manage.experimentstarter.is_to_start_status('todo')
-    assert eu.manage.experimentstarter.is_to_start_status('error')
-    assert eu.manage.experimentstarter.is_to_start_status('none')
-    assert eu.manage.experimentstarter.is_to_start_status(None)
-    assert eu.manage.experimentstarter.is_to_start_status('unfinished')
+    assert eu.manage.experimentstarter._is_to_start_status('todo')
+    assert eu.manage.experimentstarter._is_to_start_status('error')
+    assert eu.manage.experimentstarter._is_to_start_status('none')
+    assert eu.manage.experimentstarter._is_to_start_status(None)
+    assert eu.manage.experimentstarter._is_to_start_status('unfinished')
 
-    assert eu.manage.experimentstarter.is_to_start_status('running') == False
-    assert eu.manage.experimentstarter.is_to_start_status('running 50%') == False
-    assert eu.manage.experimentstarter.is_to_start_status('dwdw') == False
+    assert eu.manage.experimentstarter._is_to_start_status('running') == False
+    assert eu.manage.experimentstarter._is_to_start_status('running 50%') == False
+    assert eu.manage.experimentstarter._is_to_start_status('dwdw') == False
 
 
 def test_status_file_writing_default_on(tmpdir):
@@ -131,7 +131,7 @@ def test_status_file_writing_default_on(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, parallel=False)
+    eu.manage.start_experiments(start_scripts='*.sh', directory=directory, parallel=False)
 
     # exists a status file?
     status_file_path = os.path.join(directory, 'job04/start.sh.status')
@@ -177,7 +177,7 @@ def test_status_file_writing_off(tmpdir):
     shutil.copytree('./start_scripts', directory)
 
     # run scripts
-    eu.manage.start_experiments(directory=directory, parallel=False, write_status_files_automatically=False)
+    eu.manage.start_experiments(start_scripts='*.sh', directory=directory, parallel=False, write_status_files_automatically=False)
 
     # exists a status file?
     status_file_path = os.path.join(directory, 'job04/start.sh.status')

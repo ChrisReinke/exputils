@@ -19,7 +19,9 @@ from exputils.misc.attrdict import DefaultAttrDict
 from exputils.misc.attrdict import DefaultFactoryAttrDict
 from exputils.misc.attrdict import combine_dicts
 
-from exputils.misc import update_status
+from exputils.misc.misc import create_object_from_config
+from exputils.misc.misc import call_function_from_config
+from exputils.misc.misc import update_status
 
 __version__ = '0.3.6'
 
