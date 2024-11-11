@@ -10,7 +10,7 @@
       
       
       
-        <link rel="next" href="../reference/overview/">
+        <link rel="next" href="install/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -18,7 +18,7 @@
     
     
       
-        <title>Tutorials - Exputils Docs</title>
+        <title>Welcome - Exputils Docs</title>
       
     
     
@@ -71,6 +71,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#welcome-to-exputils" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -103,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Tutorials
+              Welcome
             
           </span>
         </div>
@@ -193,14 +198,44 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../overview.md" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
     Welcome
+  </span>
+  
+
+      </a>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="install/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
   </span>
   
 
@@ -213,26 +248,18 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="tutorials/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Tutorials
+    Tutorial
   </span>
   
 
       </a>
-      
     </li>
   
 
@@ -251,10 +278,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -265,8 +292,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Reference
           </label>
@@ -279,7 +306,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/overview/" class="md-nav__link">
+      <a href="reference/overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -300,7 +327,28 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/logging/" class="md-nav__link">
+      <a href="reference/manage/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/logging/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -321,7 +369,28 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/loading/" class="md-nav__link">
+      <a href="reference/visualization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visualization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/loading/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -342,7 +411,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/io/" class="md-nav__link">
+      <a href="reference/io/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -380,6 +449,8 @@
   
   
   
+    
+  
   
 </nav>
                   </div>
@@ -394,9 +465,27 @@
                   
 
 
-  <h1>Tutorials</h1>
-
-<p>TODO</p>
+<h1 id="welcome-to-exputils">Welcome to Exputils</h1>
+<p>Version: <code>0.3.6</code></p>
+<p>The Experiment Utilities (exputils) contain various tools for the management of scientific experiments and their experimental data. 
+It is especially designed to handle experimental repetitions, including to run different repetitions, to effectively store and load data for them, and to visualize their results.</p>
+<p><em>Main features:</em></p>
+<ul>
+<li>Easy definition of default configurations using nested python dictionaries.</li>
+<li>Setup of experimental configuration parameters with an ODS file for <a href="https://www.libreoffice.org/">Libreoffice</a> (open-source alternative to MS Excel).</li>
+<li>Running experiments and their repetitions in parallel.</li>
+<li>Logging of experimental data (numpy, json) with tensorboard support.</li>
+<li>Loading and filtering of experimental data.</li>
+<li>Interactive Jupyter widgets to load, select and plot data as line, box and bar plots.</li>
+</ul>
+<p>You can find the project with its source code here: <a href="https://github.com/ChrisReinke/exputils">github.com/ChrisReinke/exputils</a> </p>
+<p><strong>Content:</strong></p>
+<p>This documentation provides the following items:</p>
+<ul>
+<li><a href="install/">Installation</a>: How to install exputils.</li>
+<li><a href="tutorials/">Tutorial</a>: An introduction to the use of the exputils. Start here!</li>
+<li><a href="reference/overview/">Reference</a>: The reference for the exputils functions and classes. Look here if you need specific information.</li>
+</ul>
 
 
 
