@@ -16,10 +16,12 @@ _Main features:_
 
 You can find the project with its source code here: [github.com/ChrisReinke/exputils](https://github.com/ChrisReinke/exputils) 
 
+---
+
 __Content:__
 
 This documentation provides the following items:
 
- - [Installation](./install.md): How to install exputils.
- - [Tutorial](./tutorials.md): An introduction to the use of the exputils. Start here!
- - [Reference](./reference/overview.md): The reference for the exputils functions and classes. Look here if you need specific information.
+ - [Installation](install.md): How to install exputils.
+ - [Tutorial](tutorials.md): An introduction to the use of the exputils. Start here!
+ - [Reference](reference/overview.md): The reference for the exputils functions and classes. Look here if you need specific information.

@@ -23,16 +23,16 @@ plugins:
             heading_level: 3
 
 nav:
-  - Welcome: markup/index.md
-  - Installation: markup/install.md
-  - markup/tutorials.md
+  - Welcome: index.md
+  - Installation: install.md
+  - Tutorial: tutorials.md
   - Reference:
-      - Overview: markup/reference/overview.md
-      - Manage: markup/reference/manage.md
-      - Logging: markup/reference/logging.md
-      - Visualization: markup/reference/visualization.md
-      - Loading: markup/reference/loading.md
-      - IO: markup/reference/io.md
+      - Overview: reference/overview.md
+      - Manage: reference/manage.md
+      - Logging: reference/logging.md
+      - Visualization: reference/visualization.md
+      - Loading: reference/loading.md
+      - IO: reference/io.md
 
 
 markdown_extensions:
