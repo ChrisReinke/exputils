@@ -9,8 +9,10 @@
       
       
       
+        <link rel="prev" href="..">
       
-        <link rel="next" href="install/">
+      
+        <link rel="next" href="../tutorials/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -18,7 +20,7 @@
     
     
       
-        <title>Welcome - Exputils Docs</title>
+        <title>Installation - Exputils Docs</title>
       
     
     
@@ -72,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#welcome-to-exputils" class="md-skip">
+        <a href="#installation" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Welcome
+              Installation
             
           </span>
         </div>
@@ -198,6 +200,26 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Welcome
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -210,28 +232,18 @@
         
       
       
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
   
   <span class="md-ellipsis">
-    Welcome
+    Installation
   </span>
   
 
-      </a>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="install/" class="md-nav__link">
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -240,6 +252,44 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-exputils-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      1) Exputils Package
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-jupiter-notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      2) Jupiter Notebook
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -251,7 +301,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tutorials/" class="md-nav__link">
+      <a href="../tutorials/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -306,7 +356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overview/" class="md-nav__link">
+      <a href="../reference/overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -327,7 +377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/manage/" class="md-nav__link">
+      <a href="../reference/manage/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -348,7 +398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/logging/" class="md-nav__link">
+      <a href="../reference/logging/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -369,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/visualization/" class="md-nav__link">
+      <a href="../reference/visualization/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -390,7 +440,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/loading/" class="md-nav__link">
+      <a href="../reference/loading/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -411,7 +461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/io/" class="md-nav__link">
+      <a href="../reference/io/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -452,6 +502,32 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-exputils-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      1) Exputils Package
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-jupiter-notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      2) Jupiter Notebook
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -465,27 +541,33 @@
                   
 
 
-<h1 id="welcome-to-exputils">Welcome to Exputils</h1>
-<p>Version: <code>0.3.6</code></p>
-<p>The Experiment Utilities (exputils) contain various tools for the management of scientific experiments and their experimental data. 
-It is especially designed to handle experimental repetitions, including to run different repetitions, to effectively store and load data for them, and to visualize their results.</p>
-<p><em>Main features:</em></p>
-<ul>
-<li>Easy definition of default configurations using nested python dictionaries.</li>
-<li>Setup of experimental configuration parameters with an ODS file for <a href="https://www.libreoffice.org/">Libreoffice</a> (open-source alternative to MS Excel).</li>
-<li>Running experiments and their repetitions in parallel.</li>
-<li>Logging of experimental data (numpy, json) with tensorboard support.</li>
-<li>Loading and filtering of experimental data.</li>
-<li>Interactive Jupyter widgets to load, select and plot data as line, box and bar plots.</li>
-</ul>
-<p>You can find the project with its source code here: <a href="https://github.com/ChrisReinke/exputils">github.com/ChrisReinke/exputils</a> </p>
-<p><strong>Content:</strong></p>
-<p>This documentation provides the following items:</p>
-<ul>
-<li><a href="install/">Installation</a>: How to install exputils.</li>
-<li><a href="tutorials/">Tutorial</a>: An introduction to the use of the exputils. Start here!</li>
-<li><a href="reference/overview/">Reference</a>: The reference for the exputils functions and classes. Look here if you need specific information.</li>
-</ul>
+<h1 id="installation">Installation</h1>
+<h2 id="1-exputils-package">1) Exputils Package</h2>
+<p>Two options are available, either via pip or directly from the source code. </p>
+<p><strong>PIP (recommended)</strong></p>
+<div class="language-text highlight"><pre><span></span><code>pip install experiment-utilities
+</code></pre></div>
+<p><strong>From Source</strong></p>
+<p>Clone the repository via git and install via pip:</p>
+<div class="language-text highlight"><pre><span></span><code>git clone https://github.com/ChrisReinke/exputils.git .
+pip install ./exputils
+</code></pre></div>
+<p>(To install the library as a developer so that changes to the exputils source code are directly usable in other projects use
+<code>pip install -e ./exputils</code>)</p>
+<h2 id="2-jupiter-notebook">2) Jupiter Notebook</h2>
+<p>For using the exputils GUIs for loading and plotting of data in Jupyter Notebook, the <em>qgrid</em> widget must be activated.
+(Note: The GUI is currently only working for Jupyter notebooks &lt;= 6.5.)
+Activate <em>qgrid</em> with:</p>
+<div class="language-text highlight"><pre><span></span><code>jupyter contrib nbextension install --user
+jupyter nbextension enable --py --sys-prefix widgetsnbextension
+jupyter nbextension enable --py --sys-prefix qgrid
+</code></pre></div>
+<p>It is recommended to use the <a href="https://github.com/ipython-contrib/jupyter_contrib_nbextensions">Jupyter Notebooks Extensions</a> to allow folding of code and headlines.
+This makes the notebooks more readable.
+Activate the extensions with:</p>
+<div class="language-text highlight"><pre><span></span><code>jupyter nbextension enable codefolding/main
+jupyter nbextension enable collapsible_headings/main
+</code></pre></div>
 
 
 
