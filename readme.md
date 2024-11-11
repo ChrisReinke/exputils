@@ -24,27 +24,29 @@ Note: Jupter notebook is used for visualization. Due to some constraints only an
 
 ## Installation 
 
-__1) Exputils__
+### 1) Exputils Package
 
-*Via PIP*
+Two options are available, either via pip or directly from the source code. 
+
+__PIP (recommended)__
 
     pip install experiment-utilities
 
-*From Source*
+__From Source__
 
 Clone the repository via git and install via pip:
     
-    git clone git@gitlab.inria.fr:creinke/exputils.git .
+    git clone https://github.com/ChrisReinke/exputils.git .
     pip install ./exputils
 
-(To install the library as a developer so that changes to its source code are directly usable in other projects:
+(To install the library as a developer so that changes to the exputils source code are directly usable in other projects use
 `pip install -e ./exputils`)
 
 
-__2) Jupiter Notebook__
+### 2) Jupiter Notebook
 
 For using the exputils GUIs for loading and plotting of data in Jupyter Notebook, the *qgrid* widget must be activated.
-(Note: The GUI is currently only tested for Jupyter notebooks. For Jupyterlab, other installation procedures are necessary.)
+(Note: The GUI is currently only working for Jupyter notebooks <= 6.5.)
 Activate *qgrid* with:
 
     jupyter contrib nbextension install --user

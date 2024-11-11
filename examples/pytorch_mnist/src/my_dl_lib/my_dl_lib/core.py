@@ -12,6 +12,9 @@ from .models.neural_network import NeuralNetwork
 def run_training(config=None, **kwargs):
     """Runs the training of a pytorch model on some dataset."""
 
+    #####################################
+    # Configuration
+
     # exputils: define the default configuration
     default_config = eu.AttrDict(
         seed=None,
@@ -33,14 +36,14 @@ def run_training(config=None, **kwargs):
         )
     )
 
+    # exputils: combine the given config with the default configuration
+    config = eu.combine_dicts(kwargs, config, default_config)
+
     # exputils: use the seed property in the config to seed random, numpy.random and torch.random
     eu.misc.seed(config)
 
     #####################################
     # Load Data
-
-    # exputils: combine the given config with the default configuration
-    config = eu.combine_dicts(kwargs, config, default_config)
 
     # exputils: load training data dataset
     training_data = eu.create_object_from_config(
@@ -134,8 +137,8 @@ def test(dataloader, model, loss_fn, device):
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
     test_loss /= num_batches
     correct /= size
-    print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+    print(f"Test Error: \n Accuracy: {(100 * correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 
     # exputils: log the accuracy and loss of each test evaluation with exputils
-    log.add_value('test/accuracy', 100*correct)
+    log.add_value('test/accuracy', 100 * correct)
     log.add_value('test/loss', test_loss)

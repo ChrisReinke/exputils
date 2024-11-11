@@ -11,7 +11,7 @@ function usage {
 }
 
 # handle arguments
-NUM_PROCESSES=True
+NUM_PROCESSES=False
 while getopts ":hn:" arg; do
   case $arg in
     h) usage ; exit 1 ;;

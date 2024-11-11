@@ -1,50 +1,309 @@
-TODO
+# Tutorial
 
-https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html
+## Introduction
 
+This tutorial introduces the basic functionality of the exputils:
+ 
+ - configuring your experiments
+ - logging of data
+ - running and managing experiments
+ - analysis of experimental data
 
-Experiments are stored in a specific folder structure which allows to save and load experimental data in a structured manner.
-Please note that  it represents a default structure which can be adapted if required.
-Elements in brackets (\<custom name>\) can have custom names.   
-Folder structure:
- * **\<main\>** folder: Holds several experimental campaigns. A campaign holds experiments of the same kind but with different parameters.
-    * **analyze** folder: Scripts such as Jupyter notebooks to analyze the different experimental campaigns in this main-folder.
-    * **\<experimental campaign\>** folders:
-        * **analyze** folder: Scripts such as Jupyter notebooks to analyze the different experiments in this experimental campaign. 
-        * **experiment_configurations.ods** file: ODS file that contains the configuration parameters of the different experiments in this campaign.
-        * **src** folder: Holds code templates of the experiments.
-            * **\<repetition code\>** folders: Code templates that are used under the repetition folders of th experiments. These contain the acutal experimental code that should be run.
-            * **\<experiment code\>** folders: Code templates that are used under the experiment folder of the experiment. These contain usually code to compute statistics over all repetitions of an experiment.
-        * **generate_code.sh** file: Script file that generates the experimental code under the **experiments** folder using the configuration in the **experiment_configurations.ods** file and the code under the **src** folder.               
-        * **experiments** folder: Contains generated code for experiments and the collected experimental data.
-            * **experiment_{id}** folders:
-                * **repetition_{id}** folders:
-                    * **data** folder: Experimental data for the single repetitions, such as logs.
-                    * code files: Generated code and resource files.
-                * **data** folder: Experimental data for the whole experiment, e.g. statistics that are calculated over all repetitions.   
-                * **\<code\>** files: Generated code and resource files.
-        * **\<run scripts\>.sh** files: Various shell scripts to run experiments and calculate statistics locally or on clusters.
+The tutorial uses the [_pytorch_mnist_ demo](https://github.com/ChrisReinke/exputils/tree/master/examples/pytorch_mnist) to introduce these concepts.
+It explains how to use the demo and how it works.
+The demo itself is based on the [PyTorch tutorial](https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html) that introduces the basic operations on how to train a DNN on the example of classification.
+If you are new to PyTorch, please follow first the PyTorch tutorial to understand the PyTorch code as this tutorial will concentrate on the exputils functionality. 
 
 
+## Setup 
+
+Download the exputils source code from github and navigate to the _pytorch_mnist_ demo.
+
+    git clone https://github.com/ChrisReinke/exputils.git .
+    cd ./exputils/examples/pytorch_mnist
+
+Create a conda environment (you can also use a venv) and activate it:
+
+    conda create -n exputils_demo python=3.11
+    conda activate exputils_demo
+
+Install the latest exputils library from PyPI:
+
+    pip install experiment-utilities
+
+For using the exputils GUIs to load and plot data in Jupyter Notebook, the *qgrid* widget must be activated.
+
+    jupyter contrib nbextension install --user
+    jupyter nbextension enable --py --sys-prefix widgetsnbextension
+    jupyter nbextension enable --py --sys-prefix qgrid
+
+It is recommended to use the [Jupyter Notebooks Extensions](https://github.com/ipython-contrib/jupyter_contrib_nbextensions) to allow folding of code and headlines.
+This makes the notebooks more readable.
+Activate the extensions with:
+
+    jupyter nbextension enable codefolding/main
+    jupyter nbextension enable collapsible_headings/main
+
+With this we have finished the installation of the exputils package.
+
+Now, we have to install your custom python library which contains the code that is used in experiments.
+In the case of the demo, this is the `my_dl_lib` which is located under `./src`.
+Here we install it in developer mode (`-e`) so that changes to the code are used when the package is imported by other python code.
+
+    pip install -e. ./src/my_dl_lib
+
+Installing the libray will also install missing packages such as PyTorch and torchvision. 
+
+This concludes setting up the exputils and the demo.
+We are now ready to use it.
 
 
-    ./get_status.sh
+##  Project Structure
 
-Output: 
+The exputils are in their functionality very versatile and allow you to freely structure your code and experiments
+how you want. 
+Nonetheless, we recommend to follow a certain project and folder structure for which the default parameters of the exputils functions are configured.
 
-    2024/11/09 20:24:13 ./experiments/experiment_000001/repetition_000000/run_repetition.py.status - running  train epoch 4
-    2024/11/09 20:24:15 ./experiments/experiment_000001/repetition_000001/run_repetition.py.status - running  train epoch 4
-    2024/11/09 20:24:24 ./experiments/experiment_000001/repetition_000002/run_repetition.py.status - running  train epoch 4
-    2024/11/09 20:24:16 ./experiments/experiment_000001/repetition_000003/run_repetition.py.status - running  train epoch 4
-    2024/11/09 20:25:06 ./experiments/experiment_000001/repetition_000004/run_repetition.py.status - finished 
-    2024/11/09 20:24:39 ./experiments/experiment_000002/repetition_000000/run_repetition.py.status - finished 
-    2024/11/09 20:25:09 ./experiments/experiment_000002/repetition_000001/run_repetition.py.status - running  train epoch 5
-    2024/11/09 20:25:06 ./experiments/experiment_000002/repetition_000002/run_repetition.py.status - finished 
-    2024/11/09 20:24:22 ./experiments/experiment_000002/repetition_000003/run_repetition.py.status - running  train epoch 4
-    2024/11/09 20:24:22 ./experiments/experiment_000002/repetition_000004/run_repetition.py.status - running  train epoch 4
-    2024/11/09 20:24:40 ./experiments/experiment_000003/repetition_000000/run_repetition.py.status - running 
-    2024/11/09 20:25:06 ./experiments/experiment_000003/repetition_000001/run_repetition.py.status - running 
-    2024/11/09 20:25:07 ./experiments/experiment_000003/repetition_000002/run_repetition.py.status - running 
-    2024/11/09 20:19:42 ./experiments/experiment_000003/repetition_000003/run_repetition.py.status - todo 
-    2024/11/09 20:19:42 ./experiments/experiment_000003/repetition_000004/run_repetition.py.status - todo 
-    total: 15 | todo: 2 | running: 10 | error: 0 | finished: 3 
+A project consists of two main elements: code (under the `./src` folder) and experiments.
+Of course other elements such as the datasets in our example are possible.
+The project has the following folder structure (entries starting with a `*` can have custom names) where each element will be explained in the following sections in more detail:  
+```bash
+    pytorch_mnist   
+    ├── src  # code
+    │   └── * my_dl_lib  # python package with code for this demo
+    ├── experiments  
+    │   └── * my_campaign 
+    │       ├── * analyze  
+    │       │   └── * analyze.ipynb
+    │       ├── experiments # THIS FOLDER WILL BE AUTOGENERATED!
+    │       │   ├── experiment_000001
+    │       │   │   ├── repeition_000001
+    │       │   │   │   ├── data
+    │       │   │   │   ├── config.py
+    │       │   │   │   ├── run_repetition.py
+    │       │   │   │   └── run_repetition.py.status
+    │       │   │   ├── repeition_000002
+    │       │   │   └─ ...
+    │       │   ├── experiment_000002    
+    │       │   └─ ...
+    │       ├── src
+    │       │   └── rep
+    │       │       ├── config.py
+    │       │       └── run_repetition.py
+    │       ├── experiment_configurations.ods
+    │       ├── generate_experiments.sh
+    │       ├── run_experiments.sh
+    │       └── get_status.sh   
+    └── * datasets 
+```
+
+## Code
+
+First we have to create our code for which we want to run experiments.
+The code will be in form of python packages, which we import when running our experiments.
+If you are unfamiliar with python packages, please have a look at this [tutorial](https://realpython.com/python-modules-packages/).
+
+The _pytorch_mnist_ demo is doing classification experiments using its `my_dl_lib` package under the `src` folder.
+The main functionality under `./src/my_dl_lib/my_dl_lib`  is in the `core.py` which defines how to train and test a neural network models. 
+The model itself is defined in the `models/neural_network.py`.
+
+In the following we will first learn how to configure our experiments before going into how to log data.
+
+
+### Configuration
+
+How you configure your experiments is principle independent of the exputils.
+However, the package provides functions create configurations in form of a nested dictionaries.
+Each important function and class of the code takes such a dictionary as input parameter and define its default configuration in form of it.
+
+#### AttrDict Dictionary
+
+A special dictionary is provided that makes the configuration easier, the [`AttrDict`](../reference/overview/#exputils.misc.attrdict.AttrDict).
+It allows to access its properties similar to properties `dict.value`, thus making it unnecessary to use the `dict['value']` expression.
+
+```python
+import exputils as eu
+config = eu.AttrDict()
+config.learn_rate = 0.01  # set a value
+print(config.learn_rate)  # read a value 
+```
+
+#### Default Configuration
+
+The main function of our code is `run_training(config=None, **kwargs)` in `core.py`.
+The function loads the dataset, creates the network model, loss function, optimizer and runs the training.
+It takes as input a `config` dictionary that contains the configuration of our experiment such as the number of epochs we want to run it.
+
+First, the function defines the default configuration. 
+```python
+default_config = eu.AttrDict(
+    seed=None,
+    n_epochs=5,
+    batch_size=10,
+    dataset=eu.AttrDict(
+        cls=datasets.FashionMNIST,
+        root='./mnist',
+    ),
+    model=eu.AttrDict(
+        cls=NeuralNetwork
+    ),
+    loss=eu.AttrDict(
+        cls=torch.nn.CrossEntropyLoss
+    ),
+    optimizer=eu.AttrDict(
+        cls=torch.optim.SGD,
+        lr=0.01
+    )
+)
+```
+
+The default configuration is then compared with the given configuration to create the `config`:
+```python
+config = eu.combine_dicts(kwargs, config, default_config)
+```
+The [`combine_dicts`](../reference/overview/#exputils.misc.attrdict.combine_dicts) function combines its given dictionaries by comparing their elements also taking into account nested dictionaries. 
+The first given dictionary has priority and overrides the same element of the second dictionary.
+
+<div class="grid cards" markdown>
+- __Example__:   
+
+    ```python
+    dict_a = eu.AttrDict()
+    dict_a.name = 'a'
+    dict_a.x_val = '1'
+    
+    dict_b = eu.AttrDict
+    dict_b.name = 'default'
+    dict_b.x_val = 0
+    dict_b.y_val = 0
+    
+    comb_dict = eu.combine_dicts(dict_a, dict_b)
+    
+    print(comb_dict)
+    ```
+
+    Output:
+    ```
+    AttrDict({'name': 'a', 'x_val': 1, 'y_val': 0})
+    ```
+</div>
+
+#### Using the Config
+
+We are then using the dictionary to seed the random number generators (random, numpy.random, torch.random) through the [`seed`](../reference/overview/#exputils.misc.misc.seed) function that takes as input the config dictionary and uses its `seed` property to set them. If `seed=None` then a random initialization is done. 
+```python
+eu.misc.seed(config)
+``` 
+
+Then we use the config to load the training dataset using the [create_object_from_config](../reference/overview/#exputils.misc.misc.create_object_from_config) function:
+```python
+training_data = eu.create_object_from_config(
+    config.dataset,
+    train=True,
+    transform=ToTensor(),
+)
+```
+The function takes as input a dictionary that defines an object that should be created. 
+In our case, this is a `torch.utils.data.Dataset` object. 
+The given dictionary defines the class (`cls` property) used to create the object and extra parameters that are given to the `__init__` method.
+The default config defines this object of class `FashionMNIST` and having as `root` parameter (location of the dataset on disk) the `./mnist` folder.
+```python
+config.dataset=eu.AttrDict(
+    cls=datasets.FashionMNIST,
+    root='./mnist',
+),
+```
+Our call of the `create_object_from_config` function will also set the `train=True` and `transform=ToTensor()` properties which are not defined in the config. 
+
+We use the same method to create the test_dataset, model, loss_fn and the optimizer objects for our training procedure.
+
+#### Configuration of Classes
+
+We can configure objects from our custom classes in a similar way.
+See the `models/neural_network.py` for an example:
+```python
+import exputils as eu
+from torch import nn
+
+class NeuralNetwork(nn.Module):
+    
+    @staticmethod
+    def default_config():
+        return eu.AttrDict(
+            n_hidden_neurons=512
+        )
+
+    def __init__(self, config=None, **kwargs):
+        super().__init__()
+        self.config = eu.combine_dicts(kwargs, config, self.default_config())
+```
+We define for each class a static method `default_config` that returns the default configuration of the class.
+In the `__init__(self, config=None, **kwargs)` we take as input a config dictionary and combine it with the default configuration to have our `self.config`.
+
+<div class="grid cards" markdown>
+- __Note__: 
+    The use of the `**kwargs` parameter is to allow the setting of the  configuration without the need for a dictionary.
+    The following two expressions are equal:
+
+        NeuralNetwork(config=dict(n_hidden_neurons=8))  
+
+    and 
+    
+        NeuralNetwork(n_hidden_neurons=8) 
+</div>
+
+
+### Logging
+
+The exputils provides several logging functions to log for example the loss of the training over its iterations or the accuracy of the model after each epoch.
+Please see the [Logging section](../reference/logging/#writting) in the references for more details of its various functions .
+
+#### Logging of Loss and Accuracy 
+
+To start logging we import the `exputils.data.logging` module (here as `log`) in the `core.py` and then use its `add_value` function.
+We can see it used in the `train` and `test` functions.
+
+```python
+import exputils.data.logging as log
+
+...
+
+def test(...):
+    ...
+    log.add_value('test/accuracy', 100 * correct)
+    log.add_value('test/loss', test_loss)
+```
+We will see [further below](#analysis) how we can visualize our logged data.
+
+#### Experiment Status 
+
+Sometimes, we want to report the progress or status of our training for the user to see. 
+As we might run several experiments and repetitions in parallel the `print` function is not optimal as the parallel processes all write in the same console output making it difficult to now which output is for which experiment.
+To report the experiment status the exputils provides the [`update_status`](../reference/overview/#exputils.misc.misc.update_status) function.
+
+```python
+def run_training(config=None, ...):
+    ...
+    for t in range(config.n_epochs):
+        eu.update_status(f"train epoch {t+1}")
+        ...
+```
+
+The `update_status` function takes as input a string, here the current epoch number, and will write it in a status file. 
+We will see [further below](#execution) how to visualize this information.
+
+## Experiments
+
+__Comming Soon__
+
+### Definition
+
+__Comming Soon__
+
+### Execution
+
+__Comming Soon__
+
+### Analysis
+
+__Comming Soon__

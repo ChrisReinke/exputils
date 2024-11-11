@@ -1,24 +1,25 @@
+# Exputils Demo: PyTorch - FashionMNIST 
 
+The demo introduces the main functionality of the [exputils](https://github.com/ChrisReinke/exputils) package.
+It can also be used as a template for experimental campaigns that use the exputils.
 
+Please follow the exputils tutorial to understand use and understand the demo: https://chrisreinke.github.io/exputils/tutorials/
 
-
-https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html
-
-
+The demo code is based on the PyTorch tutorial that introduces the basic operations to train a DNN on the example of 
+classification: https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html
 
 ## Setup
 
-Create a conda environment (you can also use a venv) and activate it:
+Create a conda environment (you can also use a venv) and activate it.
 
-`conda create -n exputils_demo python=3.11`
+    conda create -n exputils_demo python=3.11
+    conda activate exputils_demo
 
-`conda activate exputils_demo`
+Install the latest exputils library from PyPI.
 
-Install the latest exputils library from PyPI:
+    pip install experiment-utilities
 
-`pip install experiment-utilities`
-
-For using the exputils GUIs for loading and plotting of data in Jupyter Notebook, the *qgrid* widget must be activated.
+For using the exputils GUIs to load and plot data in Jupyter Notebook, the *qgrid* widget must be activated.
 
     jupyter contrib nbextension install --user
     jupyter nbextension enable --py --sys-prefix widgetsnbextension
@@ -37,7 +38,7 @@ Now, we have to install your custom python library which contains the code that 
 In the case of the demo, this is the `my_dl_lib` which is located under `pytorch_mnist/src`.
 Here we install it in developer mode (`-e`) so that changes to the code are used when the package is imported by other python code.
 
-`pip install -e. ./src/my_dl_lib`
+    pip install -e. ./src/my_dl_lib
 
 Installing the libray will also install missing packages such as PyTorch and torchvision. 
 
@@ -51,37 +52,35 @@ First lets download the FashionMNIST dataset:
     ./download_mnist.py
     cd ..
 
-Output:
+### Run Experiments
 
-    Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz
-    Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz to mnist/FashionMNIST/raw/train-images-idx3-ubyte.gz
-    100.0%
-    Extracting mnist/FashionMNIST/raw/train-images-idx3-ubyte.gz to mnist/FashionMNIST/raw
-    
-    Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz
-    Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz to mnist/FashionMNIST/raw/train-labels-idx1-ubyte.gz
-    Extracting mnist/FashionMNIST/raw/train-labels-idx1-ubyte.gz to mnist/FashionMNIST/raw
-    
-    Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz
-    100.0%
-    Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz to mnist/FashionMNIST/raw/t10k-images-idx3-ubyte.gz
-    100.0%
-    Extracting mnist/FashionMNIST/raw/t10k-images-idx3-ubyte.gz to mnist/FashionMNIST/raw
-    
-    Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz
-    Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz to mnist/FashionMNIST/raw/t10k-labels-idx1-ubyte.gz
-    Extracting mnist/FashionMNIST/raw/t10k-labels-idx1-ubyte.gz to mnist/FashionMNIST/raw
-    
-    100.0%
+To generate, run and get the status of the experiments use the bash scripts in the experimental campaign folder:
 
+    cd ./experiments/my_campaign
 
+To generate the code for experiments under the `./experiments` folder without executing them:
 
+    ./generate_experiments.sh 
 
-To run experiments go to the 
+To run experiments (and generate their code if not done so far):
 
+    ./run_experiments.sh
 
+To run experiments in parallel on several cores use the `-n` option to define how many should run in parallel:
+ 
+    ./run_experiments.sh -n 10
 
+To get the status of the experiments:
 
+    ./get_status.sh
+
+### Analyze Experiment Results
+
+After the experiments have finished, you can analyze them by using Jupyter notebook:
+
+    jupyter notebook
+
+Then navigate to the `./analyze` folder under the experimental campaign (_my_campaign_) and start the notebook `analyze.ipynb`.
 
 
 
