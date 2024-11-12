@@ -34,7 +34,7 @@ class ExperimentDataLoaderWidget(BaseWidget, ipywidgets.VBox):
 
         GUI of the widget:
         <figure markdown="span">
-          ![Image title](../../assets/images/experiment_data_loader_widget.png)
+          ![ExperimentDataLoaderWidget](../assets/images/experiment_data_loader_widget.png)
         </figure>
 
         Functionality:

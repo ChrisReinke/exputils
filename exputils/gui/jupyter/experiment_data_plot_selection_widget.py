@@ -141,7 +141,7 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
 
         GUI of the widget:
         <figure markdown="span">
-          ![Image title](../../assets/images/experiment_data_plot_selection_widget.png)
+          ![ExperimentDataPlotSelectionWidget](../assets/images/experiment_data_plot_selection_widget.png)
         </figure>
 
         Functionality:
