@@ -1048,10 +1048,162 @@ They can be freely defined, but have to be unique per campaign.</p>
 Values can be in any format and even python code.
 The exputils simply takes them as string values and replaces the corresponding placeholder with it.</p>
 <p>You can also use colors or font modifiers to help readability. 
-We can see that we want to have three experiments that differ in the <code>n_hidden_neurons</code> parameter (2,8,32).</p>
+We can see that we want to have three experiments that differ in the <code>n_hidden_neurons</code> parameter (2, 8, 32).</p>
 <p>With this we have defined our experiments and can execute them.</p>
 <h3 id="execution">Execution</h3>
-<p><strong>Comming Soon</strong></p>
+<p>Functions for the execution of experiments are under the <code>exputils.manage</code> module as detailed in the  <a href="../reference/manage/">Manage</a> section of the Reference.
+To manage experiments directly from the command line, three bash commands are provided that call the exputils functions:</p>
+<ul>
+<li><code>generate_experiments.sh</code>: Generate code of experiments and repetitions.</li>
+<li><code>run_experiments.sh</code>: Find which experiments and repetitions need to run and execute them in parallel.</li>
+<li><code>get_status.sh</code>: Print the execution status of experiments.  </li>
+</ul>
+<p>We will detail the use of these commands in the following sections. 
+For more information you can call them with the <code>-h</code> param, for example <code>./get_status.sh -h</code>.</p>
+<div class="grid cards">
+<ul>
+<li><strong>Tip</strong>: The commands have to be copied to each campaign folder that you create. 
+To avoid this, you can create them as system-wide commands. 
+See this tutorial for help: <a href="https://learnubuntu.com/create-custom-commands/#how-to-create-custom-commands-using-scripts">How to create custom commands</a>.</li>
+</ul>
+</div>
+<h4 id="generation-of-experiments">Generation of Experiments</h4>
+<p>Before execution, we have to generate the code for each experiment and repetition.
+This creates for each experiment and repetition a folder that contains the code we defined in the <code>./src/rep</code> folder. 
+Moreover, it replaces the placeholders in the <code>config.py</code> with the values for the experiment and repetition.</p>
+<p>To generate the code, call:</p>
+<div class="language-text highlight"><pre><span></span><code>./generate_experiments.sh
+</code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code>Generate experiments ...
+Finished.
+</code></pre></div>
+<p>The command creates a new folder in der campaign: <code>./experiments</code>, that contains all defined experiments and repetitions.
+When opening the configuration for experiment-ID 1 and its repetition-ID 0 we can see that the placeholders were correctly adjusted according to our <code>experiment_configurations.ods</code>.</p>
+<p>Content of file <code>./experiments/experiment_000001/repetition_000000/config.py</code>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">import</span> <span class="nn">...</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">config</span> <span class="o">=</span> <span class="n">eu</span><span class="o">.</span><span class="n">AttrDict</span><span class="p">(</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>    <span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>    <span class="n">dataset</span> <span class="o">=</span> <span class="n">eu</span><span class="o">.</span><span class="n">AttrDict</span><span class="p">(</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>        <span class="bp">cls</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">FashionMNIST</span><span class="p">,</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>        <span class="n">root</span> <span class="o">=</span> <span class="s1">&#39;../../../../../datasets/mnist&#39;</span>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>    <span class="p">),</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    <span class="n">loss</span> <span class="o">=</span> <span class="n">eu</span><span class="o">.</span><span class="n">AttrDict</span><span class="p">(</span>
+</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>        <span class="bp">cls</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span>
+</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>    <span class="p">),</span>
+</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">eu</span><span class="o">.</span><span class="n">AttrDict</span><span class="p">(</span>
+</span><span id="__span-15-15"><a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>        <span class="bp">cls</span> <span class="o">=</span> <span class="n">my_dl_lib</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">NeuralNetwork</span><span class="p">,</span>
+</span><span id="__span-15-16"><a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>        <span class="n">n_hidden_neurons</span><span class="o">=</span><span class="mi">2</span>
+</span><span id="__span-15-17"><a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a>    <span class="p">),</span>
+</span><span id="__span-15-18"><a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a>    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">eu</span><span class="o">.</span><span class="n">AttrDict</span><span class="p">(</span>
+</span><span id="__span-15-19"><a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a>        <span class="bp">cls</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">,</span>
+</span><span id="__span-15-20"><a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a>        <span class="n">lr</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+</span><span id="__span-15-21"><a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a>    <span class="p">),</span>
+</span><span id="__span-15-22"><a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a><span class="p">)</span>
+</span></code></pre></div>
+The <code>seed</code> is set to the repetition-ID 0 and the <code>n_hidden_neurons</code> is correctly set to 2.</p>
+<p>To test if our experiment runs correctly we can execute this particular repetition:</p>
+<div class="language-text highlight"><pre><span></span><code>cd ./experiments/experiment_000001/repetition_000000
+./run_repetition.py
+cd ../../..
+</code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code>Using cpu device
+Test Error: 
+ Accuracy: 10.0%, Avg loss: 2.359976
+
+Epoch 1
+-------------------------------
+loss: 2.377968  [   10/60000]
+loss: 2.175646  [ 1010/60000]
+
+...
+
+loss: 1.392127  [58010/60000]
+loss: 1.375843  [59010/60000]
+Test Error: 
+ Accuracy: 45.9%, Avg loss: 1.343065
+
+Done!
+</code></pre></div>
+<p>The repetition works as intended. 
+You can also see that it created a <code>data</code> folder in the repetition folder that contains a numpy array file (<code>.npy</code>) for each of the variables that we logged.</p>
+<div class="language-text highlight"><pre><span></span><code>ls ./experiments/experiment_000001/repetition_000000/data
+</code></pre></div>
+<p>Output: </p>
+<div class="language-text highlight"><pre><span></span><code>test_accuracy.npy  test_loss.npy  train_loss.npy
+</code></pre></div>
+<h4 id="running-of-experiments">Running of Experiments</h4>
+<p>Of course, we do not want to start each repetition manually. 
+Moreover, we want to run several of them maybe in parallel on different CPU or GPU cores to save time.
+To achieve this we use the <code>run_experiments.sh</code> command and instruct it to run 10 experiments / repetitions in parallel:</p>
+<div class="language-text highlight"><pre><span></span><code>./run_experiments.sh -n 10
+</code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code>Start experiments ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000001/repetition_000001/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000001/repetition_000002/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000001/repetition_000003/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000001/repetition_000004/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000002/repetition_000000/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000002/repetition_000001/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000002/repetition_000002/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000002/repetition_000003/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000002/repetition_000004/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 09:39:08 start &#39;./experiments/experiment_000003/repetition_000000/run_repetition.py&#39; (previous status: todo) ...
+
+Using cpu device
+Using cpu device
+
+...
+
+Done!
+2024/11/13 09:41:06 finished &#39;./experiments/experiment_000003/repetition_000003/run_repetition.py&#39; (status: finished)
+2024/11/13 09:41:06 finished &#39;./experiments/experiment_000003/repetition_000004/run_repetition.py&#39; (status: finished)
+Finished.
+</code></pre></div>
+<p>Note: If the experiments have not been generated so far then the <code>run_experiments.sh</code> command will generate them.</p>
+<p>The command collects the first 10 repetitions that have not been started so far and executes them in parallel. 
+If the first of the 10 repetitions is finished then the exputils selects the next repetition that has to be executed and starts it until all repetitions have been successfully executed.</p>
+<h4 id="visualizing-the-progress">Visualizing the Progress</h4>
+<p>We can see that the repetitions print outputs are also displayed in parallel making it hard to read them and see the progress.
+For this purpose exists the <code>get_status.sh</code> command.
+While the experiments are running, open another terminal and navigate to the campaign folder.
+Then call:</p>
+<div class="language-text highlight"><pre><span></span><code>./get_status.sh
+</code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code>2024/11/13 09:53:37 ./experiments/experiment_000001/repetition_000000/run_repetition.py.status - running  train epoch 5
+2024/11/13 09:53:44 ./experiments/experiment_000001/repetition_000001/run_repetition.py.status - finished 
+2024/11/13 09:53:36 ./experiments/experiment_000001/repetition_000002/run_repetition.py.status - running  train epoch 5
+2024/11/13 09:53:34 ./experiments/experiment_000001/repetition_000003/run_repetition.py.status - running  train epoch 5
+2024/11/13 09:53:35 ./experiments/experiment_000001/repetition_000004/run_repetition.py.status - running  train epoch 5
+2024/11/13 09:53:32 ./experiments/experiment_000002/repetition_000000/run_repetition.py.status - running  train epoch 5
+2024/11/13 09:53:34 ./experiments/experiment_000002/repetition_000001/run_repetition.py.status - running  train epoch 5
+2024/11/13 09:53:46 ./experiments/experiment_000002/repetition_000002/run_repetition.py.status - finished 
+2024/11/13 09:53:35 ./experiments/experiment_000002/repetition_000003/run_repetition.py.status - running  train epoch 5
+2024/11/13 09:53:38 ./experiments/experiment_000002/repetition_000004/run_repetition.py.status - running  train epoch 5
+2024/11/13 09:53:44 ./experiments/experiment_000003/repetition_000000/run_repetition.py.status - running 
+2024/11/13 09:53:47 ./experiments/experiment_000003/repetition_000001/run_repetition.py.status - running 
+2024/11/13 09:52:35 ./experiments/experiment_000003/repetition_000002/run_repetition.py.status - todo 
+2024/11/13 09:52:35 ./experiments/experiment_000003/repetition_000003/run_repetition.py.status - todo 
+2024/11/13 09:52:35 ./experiments/experiment_000003/repetition_000004/run_repetition.py.status - todo 
+total: 15 | todo: 3 | running: 10 | error: 0 | finished: 2
+</code></pre></div>
+<p>We can see that 2 repetitions are finished, 10 are running and 3 are still to be started. 
+The command also shows us the current training epoch of each repetition that we are reporting using the <a href="../reference/overview/#exputils.misc.misc.update_status"><code>update_status</code></a> function in our code.</p>
+<div class="grid cards">
+<ul>
+<li><strong>Tip</strong>: To get a contiuous update of the status use the <code>-t</code> flag of the <code>get_status.sh</code> command. You can exit it with <code>Ctrl+C</code>.
+ To avoid that it displayes information about already finished experiments use the <code>-u</code> flag.<div class="language-text highlight"><pre><span></span><code>./get_status.sh -t -u
+</code></pre></div>
+</li>
+</ul>
+</div>
+<h4 id="running-additional-experiments">Running Additional Experiments</h4>
 <h3 id="analysis">Analysis</h3>
 <p><strong>Comming Soon</strong></p>
 
