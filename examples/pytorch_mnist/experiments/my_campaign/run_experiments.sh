@@ -28,4 +28,4 @@ exputils.manage.start_experiments(
   start_scripts='run_*.py',
   parallel=$NUM_PROCESSES)"
 
-echo "Finished"
+echo "Finished."

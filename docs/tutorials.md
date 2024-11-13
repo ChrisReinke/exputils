@@ -417,13 +417,224 @@ Values can be in any format and even python code.
 The exputils simply takes them as string values and replaces the corresponding placeholder with it.
 
 You can also use colors or font modifiers to help readability. 
-We can see that we want to have three experiments that differ in the `n_hidden_neurons` parameter (2,8,32).
+We can see that we want to have three experiments that differ in the `n_hidden_neurons` parameter (2, 8, 32).
 
 With this we have defined our experiments and can execute them.
 
 ### Execution
 
-__Comming Soon__
+Functions for the execution of experiments are under the `exputils.manage` module as detailed in the  [Manage](../reference/manage/) section of the Reference.
+To manage experiments directly from the command line, three bash commands are provided that call the exputils functions:
+    
+* `generate_experiments.sh`: Generate code of experiments and repetitions.
+* `run_experiments.sh`: Find which experiments and repetitions need to run and execute them in parallel.
+* `get_status.sh`: Print the execution status of experiments.  
+
+We will detail the use of these commands in the following sections. 
+For more information you can call them with the `-h` param, for example `./get_status.sh -h`.
+
+<div class="grid cards" markdown>
+- __Tip__: The commands have to be copied to each campaign folder that you create. 
+To avoid this, you can create them as system-wide commands. 
+See this tutorial for help: [How to create custom commands](https://learnubuntu.com/create-custom-commands/#how-to-create-custom-commands-using-scripts).
+</div>
+
+
+#### Generation of Experiments
+
+Before execution, we have to generate the code for each experiment and repetition.
+This creates for each experiment and repetition a folder that contains the code we defined in the `./src/rep` folder. 
+Moreover, it replaces the placeholders in the `config.py` with the values for the experiment and repetition.
+
+To generate the code, call:
+
+    ./generate_experiments.sh
+
+Output:
+    
+    Generate experiments ...
+    Finished.
+
+The command creates a new folder in der campaign: `./experiments`, that contains all defined experiments and repetitions.
+When opening the configuration for experiment-ID 1 and its repetition-ID 0 we can see that the placeholders were correctly adjusted according to our `experiment_configurations.ods`.
+
+Content of file `./experiments/experiment_000001/repetition_000000/config.py`:
+```python
+
+import ...
+
+config = eu.AttrDict(
+    seed = 0,
+    n_epochs = 5,
+    batch_size = 10,
+    dataset = eu.AttrDict(
+        cls = datasets.FashionMNIST,
+        root = '../../../../../datasets/mnist'
+    ),
+    loss = eu.AttrDict(
+        cls = nn.CrossEntropyLoss
+    ),
+    model = eu.AttrDict(
+        cls = my_dl_lib.models.NeuralNetwork,
+        n_hidden_neurons=2
+    ),
+    optimizer = eu.AttrDict(
+        cls = torch.optim.SGD,
+        lr = 0.01,
+    ),
+)
+```
+The `seed` is set to the repetition-ID 0 and the `n_hidden_neurons` is correctly set to 2.
+
+#### Running a single Repetition
+
+To test if our experiment runs correctly we can execute a particular repetition:
+
+    cd ./experiments/experiment_000001/repetition_000000
+    ./run_repetition.py
+    cd ../../..
+
+Output:
+
+    Using cpu device
+    Test Error: 
+     Accuracy: 10.0%, Avg loss: 2.359976 
+
+    Epoch 1
+    -------------------------------
+    loss: 2.377968  [   10/60000]
+    loss: 2.175646  [ 1010/60000]
+
+    ...
+
+    loss: 1.392127  [58010/60000]
+    loss: 1.375843  [59010/60000]
+    Test Error: 
+     Accuracy: 45.9%, Avg loss: 1.343065 
+
+    Done!
+
+The repetition works as intended. 
+You can also see that it created a `data` folder in the repetition folder that contains a numpy array file (`.npy`) for each of the variables that we logged.
+
+    ls ./experiments/experiment_000001/repetition_000000/data
+
+Output: 
+
+    test_accuracy.npy  test_loss.npy  train_loss.npy
+
+We will later visualize this data.
+
+#### Running of Experiments
+
+Of course, we do not want to start each repetition manually. 
+Moreover, we want to run several of them in parallel on different CPU or GPU cores to save time.
+To achieve this we use the `run_experiments.sh` command and instruct it to run 10 experiments / repetitions in parallel:
+
+    ./run_experiments.sh -n 10
+
+Output:
+
+    Start experiments ...
+    2024/11/13 09:39:08 start './experiments/experiment_000001/repetition_000001/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000001/repetition_000002/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000001/repetition_000003/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000001/repetition_000004/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000002/repetition_000000/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000002/repetition_000001/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000002/repetition_000002/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000002/repetition_000003/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000002/repetition_000004/run_repetition.py' (previous status: todo) ...
+    2024/11/13 09:39:08 start './experiments/experiment_000003/repetition_000000/run_repetition.py' (previous status: todo) ...
+
+    Using cpu device
+    Using cpu device
+
+    ...
+
+    Done!
+    2024/11/13 09:41:06 finished './experiments/experiment_000003/repetition_000003/run_repetition.py' (status: finished)
+    2024/11/13 09:41:06 finished './experiments/experiment_000003/repetition_000004/run_repetition.py' (status: finished)
+    Finished.
+
+Note: If the experiments have not been generated so far then the `run_experiments.sh` command will generate them.
+
+The command collects the first 10 repetitions that have not been started so far and executes them in parallel. 
+If the first of the 10 repetitions is finished then the exputils selects the next repetition that has to be executed and starts it until all repetitions have been successfully executed.
+
+#### Visualizing the Progress
+
+We can see that the repetitions print outputs are also displayed in parallel making it hard to read them and see the progress.
+For this purpose exists the `get_status.sh` command.
+While the experiments are running, open another terminal and navigate to the campaign folder.
+Then call:
+
+    ./get_status.sh
+
+Output:
+
+    2024/11/13 09:53:37 ./experiments/experiment_000001/repetition_000000/run_repetition.py.status - running  train epoch 5
+    2024/11/13 09:53:44 ./experiments/experiment_000001/repetition_000001/run_repetition.py.status - finished 
+    2024/11/13 09:53:36 ./experiments/experiment_000001/repetition_000002/run_repetition.py.status - running  train epoch 5
+    2024/11/13 09:53:34 ./experiments/experiment_000001/repetition_000003/run_repetition.py.status - running  train epoch 5
+    2024/11/13 09:53:35 ./experiments/experiment_000001/repetition_000004/run_repetition.py.status - running  train epoch 5
+    2024/11/13 09:53:32 ./experiments/experiment_000002/repetition_000000/run_repetition.py.status - running  train epoch 5
+    2024/11/13 09:53:34 ./experiments/experiment_000002/repetition_000001/run_repetition.py.status - running  train epoch 5
+    2024/11/13 09:53:46 ./experiments/experiment_000002/repetition_000002/run_repetition.py.status - finished 
+    2024/11/13 09:53:35 ./experiments/experiment_000002/repetition_000003/run_repetition.py.status - running  train epoch 5
+    2024/11/13 09:53:38 ./experiments/experiment_000002/repetition_000004/run_repetition.py.status - running  train epoch 5
+    2024/11/13 09:53:44 ./experiments/experiment_000003/repetition_000000/run_repetition.py.status - running 
+    2024/11/13 09:53:47 ./experiments/experiment_000003/repetition_000001/run_repetition.py.status - running 
+    2024/11/13 09:52:35 ./experiments/experiment_000003/repetition_000002/run_repetition.py.status - todo 
+    2024/11/13 09:52:35 ./experiments/experiment_000003/repetition_000003/run_repetition.py.status - todo 
+    2024/11/13 09:52:35 ./experiments/experiment_000003/repetition_000004/run_repetition.py.status - todo 
+    total: 15 | todo: 3 | running: 10 | error: 0 | finished: 2 
+
+We can see that 2 repetitions are finished, 10 are running and 3 are still to be started. 
+The command also shows us the current training epoch of each repetition that we are reporting using the [`update_status`](../reference/overview/#exputils.misc.misc.update_status) function in our code.
+
+<div class="grid cards" markdown>
+- __Tip__: To get a contiuous update of the status use the `-t` flag of the `get_status.sh` command. You can exit it with `Ctrl+C`.
+ To avoid that it displayes information about already finished experiments use the `-u` flag.
+        
+        ./get_status.sh -t -u
+</div>
+
+
+#### Running Additional Experiments
+
+Usually our initial experiments are not enough and we have to run further parameters.
+This can be easily done by adding new lines in the `experiment_configurations.ods` file and then by running again the experiments.
+
+Let's add a new experiments (ID: 4) that evaluates our network model with 128 `n_hidden_neurons` to the `experiment_configurations.ods`:
+
+<figure markdown="span">
+  ![experiment_configurations.ods](./assets/images/tutorial_experiment_configuration.ods_2.png)
+</figure>
+
+After saving the file, we use again our command to run experiments. Besides running experiments, it will also generate them first:
+
+    ./run_experiments.sh -n 10
+
+Output:
+
+    Start experiments ...
+    2024/11/13 13:12:53 start './experiments/experiment_000004/repetition_000000/run_repetition.py' (previous status: todo) ...
+    2024/11/13 13:12:53 start './experiments/experiment_000004/repetition_000001/run_repetition.py' (previous status: todo) ...
+    2024/11/13 13:12:53 start './experiments/experiment_000004/repetition_000002/run_repetition.py' (previous status: todo) ...
+    2024/11/13 13:12:53 start './experiments/experiment_000004/repetition_000003/run_repetition.py' (previous status: todo) ...
+    2024/11/13 13:12:53 start './experiments/experiment_000004/repetition_000004/run_repetition.py' (previous status: todo) ...
+    
+    ...
+
+    Finished.
+
+We can observe that the command only starts the repetitions of the new experiment (ID: 4).
+It will not rerun experiments that have been already executed.
+
+__Note__: If you want to rerun experiments, you have to delete their folders under `./experiments`.
+Exputils will then regenerate and rerun them. 
+
 
 ### Analysis
 
