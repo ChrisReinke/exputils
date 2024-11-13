@@ -1105,7 +1105,8 @@ When opening the configuration for experiment-ID 1 and its repetition-ID 0 we ca
 </span><span id="__span-15-22"><a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a><span class="p">)</span>
 </span></code></pre></div>
 The <code>seed</code> is set to the repetition-ID 0 and the <code>n_hidden_neurons</code> is correctly set to 2.</p>
-<p>To test if our experiment runs correctly we can execute this particular repetition:</p>
+<h4 id="running-a-single-repetition">Running a single Repetition</h4>
+<p>To test if our experiment runs correctly we can execute a particular repetition:</p>
 <div class="language-text highlight"><pre><span></span><code>cd ./experiments/experiment_000001/repetition_000000
 ./run_repetition.py
 cd ../../..
@@ -1136,9 +1137,10 @@ You can also see that it created a <code>data</code> folder in the repetition fo
 <p>Output: </p>
 <div class="language-text highlight"><pre><span></span><code>test_accuracy.npy  test_loss.npy  train_loss.npy
 </code></pre></div>
+<p>We will later visualize this data.</p>
 <h4 id="running-of-experiments">Running of Experiments</h4>
 <p>Of course, we do not want to start each repetition manually. 
-Moreover, we want to run several of them maybe in parallel on different CPU or GPU cores to save time.
+Moreover, we want to run several of them in parallel on different CPU or GPU cores to save time.
 To achieve this we use the <code>run_experiments.sh</code> command and instruct it to run 10 experiments / repetitions in parallel:</p>
 <div class="language-text highlight"><pre><span></span><code>./run_experiments.sh -n 10
 </code></pre></div>
@@ -1204,6 +1206,31 @@ The command also shows us the current training epoch of each repetition that we 
 </ul>
 </div>
 <h4 id="running-additional-experiments">Running Additional Experiments</h4>
+<p>Usually our initial experiments are not enough and we have to run further parameters.
+This can be easily done by adding new lines in the <code>experiment_configurations.ods</code> file and then by running again the experiments.</p>
+<p>Let's add a new experiments (ID: 4) that evaluates our network model with 128 <code>n_hidden_neurons</code> to the <code>experiment_configurations.ods</code>:</p>
+<figure>
+  <img alt="experiment_configurations.ods" src="../assets/images/tutorial_experiment_configuration.ods_2.png" />
+</figure>
+<p>After saving the file, we use again our command to run experiments. Besides running experiments, it will also generate them first:</p>
+<div class="language-text highlight"><pre><span></span><code>./run_experiments.sh -n 10
+</code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code>Start experiments ...
+2024/11/13 13:12:53 start &#39;./experiments/experiment_000004/repetition_000000/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 13:12:53 start &#39;./experiments/experiment_000004/repetition_000001/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 13:12:53 start &#39;./experiments/experiment_000004/repetition_000002/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 13:12:53 start &#39;./experiments/experiment_000004/repetition_000003/run_repetition.py&#39; (previous status: todo) ...
+2024/11/13 13:12:53 start &#39;./experiments/experiment_000004/repetition_000004/run_repetition.py&#39; (previous status: todo) ...
+
+...
+
+Finished.
+</code></pre></div>
+<p>We can observe that the command only starts the repetitions of the new experiment (ID: 4).
+It will not rerun experiments that have been already executed.</p>
+<p><strong>Note</strong>: If you want to rerun experiments, you have to delete their folders under <code>./experiments</code>.
+Exputils will then regenerate and rerun them. </p>
 <h3 id="analysis">Analysis</h3>
 <p><strong>Comming Soon</strong></p>
 
