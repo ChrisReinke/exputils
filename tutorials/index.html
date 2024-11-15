@@ -720,8 +720,9 @@
 </ul>
 <p>The tutorial uses the <a href="https://github.com/ChrisReinke/exputils/tree/master/examples/pytorch_mnist"><em>pytorch_mnist</em> demo</a> to introduce these concepts.
 It explains how to use the demo and how it works.
-The demo itself is based on the <a href="https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html">PyTorch tutorial</a> that introduces the basic operations on how to train a DNN on the example of classification.
-If you are new to PyTorch, please follow first the PyTorch tutorial to understand the PyTorch code as this tutorial will concentrate on the exputils functionality. </p>
+The demo itself is based on the <a href="https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html">PyTorch tutorial</a> that introduces how to train a DNN on the example of classification.
+If you are new to PyTorch, please follow first the PyTorch tutorial to understand the training procedure.
+This tutorial will concentrate on the exputils functionality. </p>
 <h2 id="setup">Setup</h2>
 <p>Download the exputils source code from github and navigate to the <em>pytorch_mnist</em> demo.</p>
 <div class="language-text highlight"><pre><span></span><code>git clone https://github.com/ChrisReinke/exputils.git .
@@ -1255,7 +1256,8 @@ Click the '<em>Load Data</em>' button to load the data from the checkmarked (<sp
 Data successfully loaded.
 </code></pre></div>
 <p>The widget loaded all the logged data that was in the <code>data</code> folder of each repetition.
-The data is stored in the nested dictionary <code>experiment_data_loader.experiment_data</code> that has the following general structure:</p>
+If you run new experiments at a later point, click on <em>Update Descriptions</em> to see them in the table and load them.</p>
+<p>The data is stored in the nested dictionary <code>experiment_data_loader.experiment_data</code> that has the following general structure:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>experiment_data_loader.experiment_data:<span class="w"> </span>dict
 </span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>└──<span class="w"> </span>key:<span class="w"> </span>&lt;Experiment-ID&gt;<span class="w"> </span><span class="o">(</span>str<span class="o">)</span>:<span class="w"> </span>dict<span class="w">  </span>
 </span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span>└──<span class="w"> </span>key:<span class="w"> </span><span class="s1">&#39;repetition_data&#39;</span>:<span class="w"> </span>dict
@@ -1376,8 +1378,8 @@ We can use this method to create all the general plots that we need to analyze o
 We discuss them in the following sections.</p>
 <h4 id="box-plots">Box Plots</h4>
 <p>We want to better illustrate the final accuracy of each experiment.
-For this we can use a box plot that compares scalar values between experiments.
-Use again the <a href="../reference/visualization/#exputils.gui.jupyter.experiment_data_plot_selection_widget.ExperimentDataPlotSelectionWidget">ExperimentDataPlotSelectionWidget</a> with the following configuration:</p>
+For this we can use a box plot that compares scalar values between experiments.</p>
+<p>Use again the <a href="../reference/visualization/#exputils.gui.jupyter.experiment_data_plot_selection_widget.ExperimentDataPlotSelectionWidget">ExperimentDataPlotSelectionWidget</a> with the following configuration:</p>
 <ul>
 <li><em>Data Sources</em>: <code>test_accuracy[-1]</code> (This selects the final array element in our datasource.)</li>
 <li><em>Plot Function</em>: <a href="../reference/visualization/#exputils.gui.jupyter.plotly_box.plotly_box">plotly_box</a></li>
@@ -1390,8 +1392,8 @@ Use again the <a href="../reference/visualization/#exputils.gui.jupyter.experime
 If you select the <code>_all_</code> button at the bottom of the plot you can also see the individual outcomes of each repetition as dots next to each box.</p>
 <p>The plot shows use clearly that the accuracy increases with a higher number of hidden neurons in the NeuralNetwork model, but that there is also a diminishing return.</p>
 <h4 id="bar-plots">Bar Plots</h4>
-<p>The next plot is similar, but presents each experiment as a bar. 
-Use: </p>
+<p>The next plot is similar, but presents each experiment as a bar. </p>
+<p>Use: </p>
 <ul>
 <li><em>Data Sources</em>: <code>test_accuracy[-1]</code></li>
 <li><em>Plot Function</em>: <a href="../reference/visualization/#exputils.gui.jupyter.plotly_meanstd_bar.plotly_meanstd_bar">plotly_meanstd_bar</a></li>
@@ -1400,6 +1402,34 @@ Use: </p>
 <figure>
   <img alt="plotly_meanstd_bar" src="../assets/images/plotly_meanstd_bar.png" />
 </figure>
+<h4 id="tables">Tables</h4>
+<p>We can show the information also in a table which allows us also to visualize several datasources together.</p>
+<p>Use:</p>
+<ul>
+<li><em>Data Sources</em>: <code>test_accuracy[-1], test_loss[-1], train_loss[-1]</code></li>
+<li><em>Plot Function</em>: <a href="../reference/visualization/#exputils.gui.jupyter.tabulate_meanstd.tabulate_meanstd">tabulate_meanstd</a></li>
+<li><em>Plot Configuration</em>: <code>flip_rows_and_cols = True, top_left_cell_content = 'Experiment'</code></li>
+</ul>
+<figure>
+  <img alt="tabulate_meanstd" src="../assets/images/tabulate_meanstd.png" width="500" />
+</figure>
+<p>The table shows for the final accuracy and each final loss the average and in brackets the standard deviation over all repetition. </p>
+<h4 id="pairwise-comparison-tables">Pairwise-Comparison Tables</h4>
+<p>We can also compare the one scalar value of each experiment pairwise with each other experiment.
+With this we can compute for example a <a href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">Mann–Whitney U test</a> to see if the results are statistically significant different.</p>
+<p>Use:</p>
+<ul>
+<li><em>Data Sources</em>: <code>test_accuracy[-1]</code></li>
+<li><em>Plot Function</em>: <a href="../reference/visualization/#exputils.gui.jupyter.tabulate_pairwise.tabulate_pairwise">tabulate_pairwise</a></li>
+<li><em>Plot Configuration</em>: Keep the default.</li>
+</ul>
+<figure>
+  <img alt="tabulate_pairwise" src="../assets/images/tabulate_pairwise.png" width="550" />
+</figure>
+<p>The table shows the p-value for each test.
+As they are all way below 0.01 we can establish that the resulting accuracy differences between our models are statistically significant. 
+You can choose which function to use to compare experiments.
+See more details at the reference for <a href="../reference/visualization/#exputils.gui.jupyter.tabulate_pairwise.tabulate_pairwise">tabulate_pairwise</a>.</p>
 
 
 
