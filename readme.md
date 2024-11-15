@@ -1,6 +1,6 @@
 # Experiment Utilities (exputils)
 
-Current version: 0.3.6 (05/11/2023)
+Current version: 0.3.7 (15/11/2024)
 
 Experiment Utilities (exputils) contains various tools for the management of scientific experiments and their experimental data.
 It is especially designed to handle experimental repetitions, including to run different repetitions, to effectively store and load data for them, and to visualize their results.  
@@ -15,13 +15,14 @@ Main features:
 
 You can find the documentation online: [https://chrisreinke.github.io/exputils/](https://chrisreinke.github.io/exputils/)
 
+
 ## Requirements
 
-Developed and tested on Python 3.11 on Linux (Ubuntu 24) but is compatible also with older Python versions.
+Developed and tested on Python 3.11 on Linux (Ubuntu 24) but is compatible also with older Python versions >= 3.8.
 
-Note: Jupter notebook is used for visualization. Due to some constraints only an older version of Jupyter can be used:
+Note: Jupter notebook is used for visualization. Due to some constraints (https://github.com/quantopian/qgrid/issues/372) only an older version of Jupyter can be used:
 * notebook <= 6.5.6  
-* ipywidgets >= 7.5.1,<= 7.6.5  # needs older version due to https://github.com/quantopian/qgrid/issues/372
+* ipywidgets >= 7.5.1,<= 7.6.5
 
 
 ## Installation 
@@ -41,10 +42,6 @@ Clone the repository via git and install via pip:
     git clone https://github.com/ChrisReinke/exputils.git .
     pip install ./exputils
 
-(To install the library as a developer so that changes to the exputils source code are directly usable in other projects use
-`pip install -e ./exputils`)
-
-
 ### 2) Jupiter Notebook
 
 For using the exputils GUIs for loading and plotting of data in Jupyter Notebook, the *qgrid* widget must be activated.
@@ -62,22 +59,28 @@ Activate the extensions with:
     jupyter nbextension enable codefolding/main
     jupyter nbextension enable collapsible_headings/main
 
+
 ## Documentation
 
 The documentation can be found online at [https://chrisreinke.github.io/exputils/](https://chrisreinke.github.io/exputils/).
 
-To generate the documentation manually from the source code use MkDocs which needs to be installed: 
- * mkdocs: `pip install mkdocs`
- * mkdocs python handler: `pip install mkdocstrings-python`
- * material template: `pip install mkdocs-material`
+To generate the documentation MkDocs needs to be installed which can be done via the `docs` option:
 
-Then run: `mkdocs serve`
+    pip install experiment-utilities[docs]
+
+Then run: 
+
+    mkdocs serve
+    
 
 ## Development
 
-If you wish to further develop the exputils or adapt them, then it is useful to run its unittests.
-They are written for pytest which needs to be installed:
- * pytest: `pip install pytest`
+If you wish to further develop the exputils, then it is useful to install it in _editable_ mode and to run its unittests.
+Download and install the source code via: 
 
-To run all tests (otherwise some will be skipped), you need some additional packages:
- * torch: `pip install torch`
+    git clone https://github.com/ChrisReinke/exputils.git .
+    pip install -e ./exputils[test]
+
+To run the tests call:
+
+    pytest

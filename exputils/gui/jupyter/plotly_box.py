@@ -22,7 +22,9 @@ def plotly_box(data: Optional[list] = None,
      Interactive box plot that shows several statistics such as the mean, std and range of scalars
      over all repetitions of each experiment.
 
-     TODO: image of plot
+    <figure markdown="span">
+          ![plotly_box](../assets/images/plotly_box.png)
+    </figure>
 
      Parameters:
          data (list): Data to plot.

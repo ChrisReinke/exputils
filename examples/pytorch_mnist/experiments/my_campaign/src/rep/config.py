@@ -10,7 +10,7 @@ config = eu.AttrDict(
     seed = <repetition_id>,
 
     # number of epochs with default of 5
-    n_epochs = <n_epochs,5>,
+    n_epochs = <n_epochs,10>,
 
     # batch size with default of 10
     batch_size = <batch_size,10>,

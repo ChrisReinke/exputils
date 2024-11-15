@@ -34,7 +34,9 @@ def tabulate_pairwise(data: Optional[list] = None,
     Plots a pairwise comparison between data from experiments based on a pairwise function d = f(exp_a, exp_b).
     By default it performs a Mann-WhitneyU P-Value test to identify significant differences between experiments.
 
-    TODO: image of plot
+    <figure markdown="span">
+          ![tabulate_pairwise](../assets/images/tabulate_pairwise.png){width="550"}
+    </figure>
 
     Parameters:
         data (list): Data to plot.

@@ -25,7 +25,9 @@ def plotly_meanstd_scatter(data: Optional[list] = None,
     Interactive line plot that shows the mean and std over all repetitions of each experiment or to
     show the individual repetitions.
 
-    TODO: image of plot
+    <figure markdown="span">
+          ![plotly_meanstd_scatter](../assets/images/plotly_meanstd_scatter_2.png)
+    </figure>
 
     Parameters:
         data (list): Data to plot. Should be in the following forms:

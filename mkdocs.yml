@@ -4,7 +4,6 @@ theme:
   name: material
   icon:
     logo: material/tools
-
   palette:
       primary: blue
 
@@ -33,7 +32,6 @@ nav:
       - Visualization: reference/visualization.md
       - Loading: reference/loading.md
       - IO: reference/io.md
-
 
 markdown_extensions:
   - attr_list

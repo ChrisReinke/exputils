@@ -18,7 +18,9 @@ def plotly_meanstd_bar(data: Optional[list] = None,
     """
      Interactive bar plot that shows the mean and std of scalars over all repetitions of each experiment.
 
-     TODO: image of plot
+    <figure markdown="span">
+          ![plotly_meanstd_bar](../assets/images/plotly_meanstd_bar.png)
+    </figure>
 
      Parameters:
          data (list): Data to plot.

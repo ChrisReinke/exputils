@@ -21,7 +21,9 @@ def tabulate_meanstd(data: Optional[list] = None,
     Table that shows the mean and std of scalars over all repetitions of each experiment.
     Can be used to display several datasources.
 
-    TODO: image of plot
+    <figure markdown="span">
+          ![tabulate_meanstd](../assets/images/tabulate_meanstd.png){width="500"}
+    </figure>
 
     Parameters:
         data (list): Data to plot.
