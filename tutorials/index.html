@@ -933,7 +933,7 @@ For this purpose, the demo has the <code>./experiments/my_campaign</code> where 
 <p>Each campaign has a recommended folder structure:
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>my_campaign<span class="w"> </span>
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>├──<span class="w"> </span>analyze<span class="w">  </span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>│<span class="w">   </span>└──<span class="w"> </span>analyze.ipynb
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>│<span class="w">   </span>└──<span class="w"> </span>overview.ipynb
 </span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>├──<span class="w"> </span>src
 </span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>│<span class="w">   </span>└──<span class="w"> </span>rep
 </span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>│<span class="w">       </span>├──<span class="w"> </span>config.py
@@ -1232,7 +1232,174 @@ It will not rerun experiments that have been already executed.</p>
 <p><strong>Note</strong>: If you want to rerun experiments, you have to delete their folders under <code>./experiments</code>.
 Exputils will then regenerate and rerun them. </p>
 <h3 id="analysis">Analysis</h3>
-<p><strong>Comming Soon</strong></p>
+<p>After our experiments have been finished we want to look at their results. 
+The exputils provide some useful Jupyter widgets to load our logged data and visualize them with interactive plots.
+For this you have to install some extras for Jupyter notebook as outlined in the <a href="../install/#2-jupiter-notebook">Installation</a> section.</p>
+<p>Inside our campaign start Jupyter notebook:</p>
+<div class="language-text highlight"><pre><span></span><code>jupyter notebook
+</code></pre></div>
+<p>Inside the notebook, open the prepared notebook <code>./analyze/overview.ipynb</code>.</p>
+<h4 id="loading-data">Loading Data</h4>
+<p>The first cell imports the exputils and opens the <a href="../reference/visualization/#exputils.gui.jupyter.experiment_data_loader_widget.ExperimentDataLoaderWidget">ExperimentDataLoaderWidget</a>.</p>
+<div class="language-text highlight"><pre><span></span><code>import exputils as eu
+experiment_data_loader = eu.gui.jupyter.ExperimentDataLoaderWidget()
+display(experiment_data_loader)
+</code></pre></div>
+<figure>
+  <img alt="ExperimentDataLoaderWidget" src="../assets/images/experiment_data_loader_widget.png" />
+</figure>
+<p>We can see all the experiments that we executed and that we can load.
+Click the '<em>Load Data</em>' button to load the data from the checkmarked (<span style="color:green"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 .018-1.042.75.75 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0"/></svg></span></span>) items.</p>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code>Load data ...
+Data successfully loaded.
+</code></pre></div>
+<p>The widget loaded all the logged data that was in the <code>data</code> folder of each repetition.
+The data is stored in the nested dictionary <code>experiment_data_loader.experiment_data</code> that has the following general structure:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>experiment_data_loader.experiment_data:<span class="w"> </span>dict
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>└──<span class="w"> </span>key:<span class="w"> </span>&lt;Experiment-ID&gt;<span class="w"> </span><span class="o">(</span>str<span class="o">)</span>:<span class="w"> </span>dict<span class="w">  </span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span>└──<span class="w"> </span>key:<span class="w"> </span><span class="s1">&#39;repetition_data&#39;</span>:<span class="w"> </span>dict
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">        </span>└──<span class="w"> </span>key:<span class="w"> </span>&lt;Repetition-ID&gt;<span class="w"> </span><span class="o">(</span>int<span class="o">)</span>:<span class="w"> </span>dict<span class="w">    </span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">            </span>└──<span class="w"> </span>key:<span class="w"> </span>&lt;datasource_name&gt;<span class="w"> </span><span class="o">(</span>int<span class="o">)</span>:<span class="w"> </span>data<span class="w"> </span>usually<span class="w"> </span>as<span class="w"> </span>numpy<span class="w"> </span>array
+</span></code></pre></div>
+<p>The next cell prints the data in a 'pretty' way:</p>
+<div class="language-text highlight"><pre><span></span><code>def pretty(d, indent=0):
+   for key, value in d.items():
+      print(&#39;\t&#39; * indent + str(key))
+      if isinstance(value, dict):
+         pretty(value, indent+1)
+      else:
+         print(&#39;\t&#39; * (indent+1) + str(value))
+
+pretty(experiment_data_loader.experiment_data)
+</code></pre></div>
+<p>Output (shortened):</p>
+<div class="language-text highlight"><pre><span></span><code>000001
+    repetition_data
+        0
+            test_loss
+                [2.35997581 1.73878336 1.5804979  1.46617584 1.37025173 1.34306539]
+            train_loss
+                [2.37796783 2.38081217 2.57028079 ... 1.57344127 1.52922952 1.03360915]
+            test_accuracy
+                [10.         33.215      32.38333333 44.97166667 46.80833333 45.94833333]
+        1
+        ...
+000002
+...
+</code></pre></div>
+<h4 id="visualizing-data">Visualizing Data</h4>
+<p>With the data loaded, we can now visualize it.
+The <a href="../reference/visualization/#exputils.gui.jupyter.experiment_data_plot_selection_widget.ExperimentDataPlotSelectionWidget">ExperimentDataPlotSelectionWidget</a>
+allows to select which datasources (variables that we logged) to plot and by which plotting tool.
+The next cell calls it:</p>
+<div class="language-text highlight"><pre><span></span><code>experiment_data_plotter = eu.gui.jupyter.ExperimentDataPlotSelectionWidget(experiment_data_loader)
+display(experiment_data_plotter)
+</code></pre></div>
+<figure>
+  <img alt="ExperimentDataPlotSelectionWidget" src="../assets/images/experiment_data_plot_selection_widget.png" />
+</figure>
+<p>In the <em>Data Sources</em> field we input the name of the datasource we want to plot.
+Under <em>Plot Function</em> we can select the plotting tool which can be configured in the <em>Plot Configuration</em> section.</p>
+<h4 id="line-plots">Line Plots</h4>
+<p>First, we would like to plot the <code>test_accuracy</code> data in a line plot.
+For this we enter <code>test_accuracy</code> in the the <em>Data Sources</em> field, select<br />
+<a href="../reference/visualization/#exputils.gui.jupyter.plotly_meanstd_scatter.plotly_meanstd_scatter">plotly_meanstd_scatter</a> 
+as <em>Plot Function</em> and press the <em>Plot Data</em> button.</p>
+<figure>
+  <img alt="plotly_meanstd_scatter" src="../assets/images/plotly_meanstd_scatter.png" />
+</figure>
+<p>The interactive plot shows us the accuracy over training epochs.
+Each line represents the mean accuracy per experiment and the shaded area the standard deviation.
+All plots are based on <a href="https://plotly.com/python/">plotly</a>, so they are interactive.
+You can zoom in the plot or select which data curve should be only visible by clicking on the labels.
+The buttons on the bottom also allow to view for example the individual elements (repetitions) or each experiment. </p>
+<h4 id="changing-the-plot-configuration">Changing the Plot Configuration</h4>
+<p>We can modify the configuration of the plot to make things more clear. 
+Replace the <em>Plot Configuration</em> with the following config to modify the labels of the x-axis and y-axis:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">layout</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="n">xaxis</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;epoch&#39;</span><span class="p">),</span> 
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>    <span class="n">yaxis</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;accuracy&#39;</span><span class="p">),</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>Moreover, we want to change the labels of the experiments.
+For, this go back to the ExperimentDataLoaderWidget (the table that shows which data to load) and change the <em>name</em> of each experiment.
+(Note: You do not need to reload the data.)</p>
+<div class="language-text highlight"><pre><span></span><code>exp 000001 --&gt; n_hidden: 2
+exp 000002 --&gt; n_hidden: 8
+exp 000003 --&gt; n_hidden: 32
+exp 000004 --&gt; n_hidden: 128
+</code></pre></div>
+<p>With these changes plot the data again using the <em>Plot Data</em> button.</p>
+<figure>
+  <img alt="plotly_meanstd_scatter" src="../assets/images/plotly_meanstd_scatter_2.png" />
+</figure>
+<h4 id="creating-dedicated-plots">Creating Dedicated Plots</h4>
+<p>Instead of using in the future always the ExperimentDataPlotSelectionWidget to plot the accuracy data we can also create a dedicated cell to plot the figure that we configured.
+Open the <em>Code Production</em> selection of the Plot Selection Widget and select <em>Multi Line</em>.
+This creates a new cell below the current one with:</p>
+<p><div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># Plotting of [&#39;test_accuracy&#39;] </span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="kn">import</span> <span class="nn">exputils</span> <span class="k">as</span> <span class="nn">eu</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="kn">from</span> <span class="nn">exputils.gui.jupyter.plotly_meanstd_scatter</span> <span class="kn">import</span> <span class="n">plotly_meanstd_scatter</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="n">plot_config</span> <span class="o">=</span> <span class="n">eu</span><span class="o">.</span><span class="n">AttrDict</span><span class="p">(</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="n">layout</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>    <span class="n">xaxis</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;epoch&#39;</span><span class="p">),</span> 
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>    <span class="n">yaxis</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;accuracy&#39;</span><span class="p">),</span>
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="p">)</span>
+</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="p">)</span>
+</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>
+</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="n">selection_widget</span> <span class="o">=</span> <span class="n">eu</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">jupyter</span><span class="o">.</span><span class="n">ExperimentDataPlotSelectionWidget</span><span class="p">(</span>
+</span><span id="__span-18-13"><a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>    <span class="n">experiment_data_loader</span><span class="p">,</span>
+</span><span id="__span-18-14"><a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>    <span class="n">datasources</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;test_accuracy&#39;</span><span class="p">],</span>
+</span><span id="__span-18-15"><a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>    <span class="n">experiment_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
+</span><span id="__span-18-16"><a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>    <span class="n">repetition_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
+</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>    <span class="n">output_format</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">),</span>
+</span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>    <span class="n">data_filter</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+</span><span id="__span-18-19"><a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a>    <span class="n">plot_function</span><span class="o">=</span><span class="n">plotly_meanstd_scatter</span><span class="p">,</span>
+</span><span id="__span-18-20"><a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a>    <span class="n">plot_function_config</span><span class="o">=</span><span class="n">plot_config</span><span class="p">,</span>
+</span><span id="__span-18-21"><a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a>    <span class="n">state_backup_name</span><span class="o">=</span><span class="s1">&#39;state_backup_153826407&#39;</span><span class="p">,</span>
+</span><span id="__span-18-22"><a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a>    <span class="n">state_backup_variable_filter</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;experiment_ids&#39;</span><span class="p">,</span> <span class="s1">&#39;repetition_ids&#39;</span><span class="p">],</span>  <span class="c1"># only save these variables as backup</span>
+</span><span id="__span-18-23"><a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a>    <span class="n">is_datasources_selection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-18-24"><a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>    <span class="n">is_output_format_selection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-18-25"><a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a>    <span class="n">is_data_filter_selection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-18-26"><a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a>    <span class="n">is_plot_function_selection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-18-27"><a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a>    <span class="n">is_plot_function_config_editor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-18-28"><a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a>    <span class="n">is_code_producer</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> 
+</span><span id="__span-18-29"><a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a><span class="n">display</span><span class="p">(</span><span class="n">selection_widget</span><span class="p">)</span>
+</span><span id="__span-18-30"><a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a><span class="n">selection_widget</span><span class="o">.</span><span class="n">plot_data</span><span class="p">()</span>
+</span></code></pre></div>
+If you execute the cell, you can see that it replicates the plot.
+The configuration for the plot can now be directly changed through this code.
+We can use this method to create all the general plots that we need to analyze our campaign.</p>
+<p>In the rest of our notebook there are already several of these plots created. 
+We discuss them in the following sections.</p>
+<h4 id="box-plots">Box Plots</h4>
+<p>We want to better illustrate the final accuracy of each experiment.
+For this we can use a box plot that compares scalar values between experiments.
+Use again the <a href="../reference/visualization/#exputils.gui.jupyter.experiment_data_plot_selection_widget.ExperimentDataPlotSelectionWidget">ExperimentDataPlotSelectionWidget</a> with the following configuration:</p>
+<ul>
+<li><em>Data Sources</em>: <code>test_accuracy[-1]</code> (This selects the final array element in our datasource.)</li>
+<li><em>Plot Function</em>: <a href="../reference/visualization/#exputils.gui.jupyter.plotly_box.plotly_box">plotly_box</a></li>
+<li><em>Plot Configuration</em>: <code>layout = dict(yaxis = dict(title = 'accuracy'))</code></li>
+</ul>
+<figure>
+  <img alt="plotly_box" src="../assets/images/plotly_box.png" />
+</figure>
+<p>The interactive plot shows you several statistics such as the mean, median, min and max of each final accuracy over the 5 repetitions per experiment.
+If you select the <code>_all_</code> button at the bottom of the plot you can also see the individual outcomes of each repetition as dots next to each box.</p>
+<p>The plot shows use clearly that the accuracy increases with a higher number of hidden neurons in the NeuralNetwork model, but that there is also a diminishing return.</p>
+<h4 id="bar-plots">Bar Plots</h4>
+<p>The next plot is similar, but presents each experiment as a bar. 
+Use: </p>
+<ul>
+<li><em>Data Sources</em>: <code>test_accuracy[-1]</code></li>
+<li><em>Plot Function</em>: <a href="../reference/visualization/#exputils.gui.jupyter.plotly_meanstd_bar.plotly_meanstd_bar">plotly_meanstd_bar</a></li>
+<li><em>Plot Configuration</em>: <code>layout = dict(yaxis = dict(title='accuracy', range=[0,100]))</code></li>
+</ul>
+<figure>
+  <img alt="plotly_meanstd_bar" src="../assets/images/plotly_meanstd_bar.png" />
+</figure>
 
 
 
