@@ -5,3 +5,65 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 filterwarnings = [ "ignore::DeprecationWarning" ]
+
+[project]
+name = "experiment-utilities"
+version = "0.3.7"
+description = "Management of scientific experiments including their configuration, logging of data, execution and visualization of results."
+authors = [
+  {name = "Chris Reinke", email = "c.reinke85@gmail.com"},
+]
+readme = "readme.md"
+license = {file = "LICENSE"}
+keywords = ["automation", "research", "tool"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities"
+]
+requires-python = ">=3.8"
+dependencies = [
+  "numpy >= 1.19.5",
+  "six >= 1.15.0",
+  "notebook <= 6.5.6",  # exputils notebook widgets do not support new notebook version of 7
+  "ipywidgets >= 7.5.1,<= 7.6.5",  # https://github.com/quantopian/qgrid/issues/372
+  "jupyter_contrib_nbextensions >= 0.7.0",
+  "qgrid >= 1.3.1",
+  "ipynbname >= 2023.2.0.0",
+  "plotly >= 4.13.0",
+  "cloudpickle >= 1.6.0",
+  "dill >= 0.3.3",
+  "odfpy >= 1.4.1",
+  "tabulate >= 0.8.9",
+  "scipy >= 1.5.4",
+  "tensorboard >= 1.15.0",
+  "fasteners >= 0.18",
+  "pyyaml >= 6.0"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "torch"
+]
+docs = [
+    "mkdocs",
+    "mkdocstrings-python",
+    "mkdocs-material"
+]
+
+
+[tool.setuptools]
+packages = [
+    "exputils"
+]
+
+[project.urls]
+Homepage = "https://github.com/ChrisReinke/exputils"
+Documentation = "https://chrisreinke.github.io/exputils"
+Repository = "https://github.com/ChrisReinke/exputils.git"
+Issues = "https://github.com/ChrisReinke/exputils/issues"

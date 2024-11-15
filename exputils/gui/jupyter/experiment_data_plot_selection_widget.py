@@ -148,7 +148,7 @@ class ExperimentDataPlotSelectionWidget(ExperimentDataSelectionWidget):
 
         - _Data Sources_: Allows to define the datasource or datasources that should be plotted.
             The datasource names correspond to the filenames under the data folder of repetitions and
-            correspond to the names that were used by the [logging](../logging/#writting) functions.
+            correspond to the names that were used by the [logging](logging.md#writting) functions.
             A comma-seperated list of datasources can be provided for table plots ([tabulate_meanstd][exputils.gui.jupyter.tabulate_meanstd.tabulate_meanstd]).
             It is also possible to extract single elements from data arrays using bracket operation after the name.
             For example `loss[-1]` will access the final loss value.

@@ -4,7 +4,7 @@ Functions to load the logged data from experiments and their repetitions and the
 
 The functions can be accessed under the module: ``exputils.data``
 
-Usually the data is loaded in Jupyter notebook using the [`ExperimentDataLoaderWidget`](../visualization/#exputils.gui.jupyter.experiment_data_loader_widget.ExperimentDataLoaderWidget).
+Usually the data is loaded in Jupyter notebook using the [`ExperimentDataLoaderWidget`](visualization.md#exputils.gui.jupyter.experiment_data_loader_widget.ExperimentDataLoaderWidget).
 The following loading functions can be used if data should be loaded for a custom analysis or plots.
 
 ::: exputils.data.loading

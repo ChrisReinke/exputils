@@ -2,7 +2,7 @@
 
 Functions to log data for experiments.
 
-All functions can be accessed under the module: ``exputils.data``
+All functions can be accessed under the module: ``exputils.data.logging``
 
 
 ## Usage 
@@ -14,7 +14,7 @@ Scalars and arrays will be logged as numpy arrays in the memory.
 
 :warning: To write the logged values to disk it is necessary to call the [save](#exputils.data.logging.save) function.
 
-__Example__: 
+__Example__:
     ```python
     # import the logging module as log
     import exputils.data.logging as log
