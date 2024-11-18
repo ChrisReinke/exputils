@@ -57,10 +57,8 @@ docs = [
 ]
 
 
-[tool.setuptools]
-packages = [
-    "exputils"
-]
+[tool.setuptools.packages]
+find = {}
 
 [project.urls]
 Homepage = "https://github.com/ChrisReinke/exputils"
