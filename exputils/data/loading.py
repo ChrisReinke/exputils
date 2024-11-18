@@ -7,7 +7,7 @@
 ##
 ## exputils is provided under GPL-3.0-or-later
 ##
-
+from __future__ import annotations # see https://stackoverflow.com/questions/63460126/typeerror-type-object-is-not-subscriptable-in-a-function-signature
 import os
 import sys
 import exputils as eu

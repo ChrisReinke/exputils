@@ -23,7 +23,7 @@ from exputils.misc.misc import create_object_from_config
 from exputils.misc.misc import call_function_from_config
 from exputils.misc.misc import update_status
 
-__version__ = '0.3.7'
+__version__ = '0.3.8'
 
 DEFAULT_ODS_CONFIGURATION_FILE = 'experiment_configurations.ods'
 DEFAULT_EXPERIMENTS_DIRECTORY = 'experiments'

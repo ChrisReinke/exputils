@@ -1,7 +1,5 @@
 # Experiment Utilities (exputils)
 
-Current version: 0.3.7 (15/11/2024)
-
 Experiment Utilities (exputils) contains various tools for the management of scientific experiments and their experimental data.
 It is especially designed to handle experimental repetitions, including to run different repetitions, to effectively store and load data for them, and to visualize their results.  
  

@@ -8,7 +8,7 @@ filterwarnings = [ "ignore::DeprecationWarning" ]
 
 [project]
 name = "experiment-utilities"
-version = "0.3.7"
+version = "0.3.8"
 description = "Management of scientific experiments including their configuration, logging of data, execution and visualization of results."
 authors = [
   {name = "Chris Reinke", email = "c.reinke85@gmail.com"},
@@ -56,11 +56,9 @@ docs = [
     "mkdocs-material"
 ]
 
-
-[tool.setuptools]
-packages = [
-    "exputils"
-]
+[tool.setuptools.packages.find]
+include = ["exputils*"]
+namespaces = false
 
 [project.urls]
 Homepage = "https://github.com/ChrisReinke/exputils"
