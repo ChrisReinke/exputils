@@ -10,9 +10,69 @@
 import os
 import exputils as eu
 import shutil
+from datetime import datetime
+
+def is_valid_date(date_str: str) -> bool:
+    """Helper function to check if date and time string in a status file is valid."""
+    try:
+        datetime.strptime(date_str, "%Y/%m/%d %H:%M:%S")
+        return True
+    except ValueError:
+        return False
 
 
-def test_experimentstarter(tmpdir):
+def test_experimentstarter_on_campaign(tmpdir):
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    # change working directory to this path
+    os.chdir(dir_path)
+
+    ############################################################################
+    ## test 01 - serial
+
+    # copy the scripts in the temporary folder
+    directory = os.path.join(tmpdir.strpath, 'test_experimentstarter_on_campaign_01')
+    shutil.copytree('./campaign', directory)
+
+    experiments_dir = os.path.join(directory, 'experiments')
+
+    # run scripts
+    eu.manage.start_experiments(directory=experiments_dir, parallel=False)
+
+    # check if the required files have been generated
+    # exp 1 - rep 0 - started
+    assert os.path.isfile(os.path.join(experiments_dir, 'experiment_000001/repetition_000000/output.txt'))
+    assert os.path.isfile(os.path.join(experiments_dir, 'experiment_000001/repetition_000000/run_repetition.py.status'))
+    with open(os.path.join(experiments_dir, 'experiment_000001/repetition_000000/run_repetition.py.status'), 'r') as file:
+        lines = file.readlines()
+        assert is_valid_date(lines[-2].replace('\n',''))
+        assert lines[-1] == 'finished\n'
+    # exp 1 - rep 1 - ignored
+    assert os.path.isfile(os.path.join(experiments_dir, 'experiment_000001/repetition_000001/output.txt'))
+    assert os.path.isfile(os.path.join(experiments_dir, 'experiment_000001/repetition_000001/run_repetition.py.status'))
+    with open(os.path.join(experiments_dir, 'experiment_000001/repetition_000001/run_repetition.py.status'), 'r') as file:
+        lines = file.readlines()
+        assert is_valid_date(lines[-2].replace('\n',''))
+        assert lines[-1] == 'finished\n'
+    # exp 2 - rep 0 - ignored
+    assert not os.path.isfile(os.path.join(experiments_dir, 'experiment_000002/repetition_000000/output.txt'))
+    # exp 2 - rep 1 - ignored
+    assert not os.path.isfile(os.path.join(experiments_dir, 'experiment_000002/repetition_000001/output.txt'))
+    # exp 3 - rep 0 - started
+    assert not os.path.isfile(os.path.join(experiments_dir, 'experiment_000003/repetition_000000/output.txt'))
+    # exp 3 - rep 1 - ignored
+    assert os.path.isfile(os.path.join(experiments_dir, 'experiment_000003/repetition_000001/output.txt'))
+    assert os.path.isfile(os.path.join(experiments_dir, 'experiment_000003/repetition_000001/run_repetition.py.status'))
+    with open(os.path.join(experiments_dir, 'experiment_000003/repetition_000001/run_repetition.py.status'), 'r') as file:
+        lines = file.readlines()
+        assert is_valid_date(lines[-2].replace('\n',''))
+        assert lines[-1] == 'finished\n'
+
+
+
+
+def test_experimentstarter_on_open_format(tmpdir):
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -68,38 +128,6 @@ def test_experimentstarter(tmpdir):
     assert os.path.isfile(os.path.join(directory, 'job01/job01.txt'))
     assert os.path.isfile(os.path.join(directory, 'job02/job02.txt'))
     assert not os.path.isfile(os.path.join(directory, 'job03/job03.txt'))
-
-
-def test_get_number_of_scripts_to_execute(tmpdir):
-
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-
-    # change working directory to this path
-    os.chdir(dir_path)
-
-    # copy the scripts in the temporary folder
-    directory = os.path.join(tmpdir.strpath, 'test_experimentstarter_01')
-    shutil.copytree('./start_scripts', directory)
-
-    # check
-    n_open_scripts = eu.manage.get_number_of_scripts_to_execute(start_scripts='*.sh', directory=directory)
-    assert n_open_scripts == 4
-
-
-def test_get_number_of_scripts(tmpdir):
-
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-
-    # change working directory to this path
-    os.chdir(dir_path)
-
-    # copy the scripts in the temporary folder
-    directory = os.path.join(tmpdir.strpath, 'test_experimentstarter_01')
-    shutil.copytree('./start_scripts', directory)
-
-    # check
-    n_scripts = eu.manage.get_number_of_scripts(start_scripts='*.sh', directory=directory)
-    assert n_scripts == 5
 
 
 def test_is_to_start_status():

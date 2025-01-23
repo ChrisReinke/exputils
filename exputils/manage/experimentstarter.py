@@ -305,58 +305,6 @@ def get_script_status(script_file: str) -> Optional[str]:
     return status
 
 
-def get_number_of_scripts_to_execute(directory: Optional[str] = None,
-                                     start_scripts: str = 'run_*.py') -> int:
-    """
-    Identifies the number of scripts that have to be executed in the experiments directory.
-    Scripts that have to be executed have either the status 'none', 'todo', 'error', or 'unfinished'.
-
-    Parameters:
-        directory (str):
-            Directory in which the start scripts are searched.
-            Default is `'./experiments'`.
-        start_scripts (str):
-            Filename of the start script file that are searched under the given target directory.
-            Can include '*' to search for scripts, for example 'run_*.py'.
-            The default `'run_*'` will look for all files that start with 'run' and try to start them.
-
-    Returns:
-        n_scripts (int): Number of scripts that have to be executed.
-    """
-
-    scripts = get_scripts(directory=directory, start_scripts=start_scripts)
-
-    n = 0
-    for script in scripts:
-        status = get_script_status(script)
-        if _is_to_start_status(status):
-            n += 1
-
-    return n
-
-
-def get_number_of_scripts(directory: Optional[str] = None,
-                          start_scripts: str = 'run_*.py'):
-    """
-    Identifies the number of all scripts in the experiments directory regardless of their execution
-    status.
-
-    Parameters:
-        directory (str):
-            Directory in which the start scripts are searched.
-            Default is `'./experiments'`.
-        start_scripts (str):
-            Filename of the start script file that are searched under the given target directory.
-            Can include '*' to search for scripts, for example 'run_*.py'.
-            The default `'run_*'` will look for all files that start with 'run' and try to start them.
-
-    Returns:
-        n_scripts (int): Number of scripts.
-    """
-
-    scripts = get_scripts(directory=directory, start_scripts=start_scripts)
-    return len(scripts)
-
 
 
 

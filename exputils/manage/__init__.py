@@ -12,8 +12,9 @@ from exputils.manage.experimentstarter import start_experiments
 from exputils.manage.experimentstarter import start_slurm_experiments
 from exputils.manage.experimentstarter import start_torque_experiments
 from exputils.manage.experimentstarter import get_scripts
-from exputils.manage.experimentstarter import get_number_of_scripts_to_execute
-from exputils.manage.experimentstarter import get_number_of_scripts
+from exputils.manage.misc import get_number_of_scripts_to_execute
+from exputils.manage.misc import get_number_of_scripts
+from exputils.manage.misc import get_experiments_status
 
 
 

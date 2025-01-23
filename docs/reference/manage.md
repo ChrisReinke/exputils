@@ -52,3 +52,10 @@ provide to required resources such as the number of cores.
             - get_script_status
             - get_number_of_scripts
             - get_number_of_scripts_to_execute
+
+::: exputils.manage.misc
+    options:
+        members:
+            - get_number_of_scripts
+            - get_number_of_scripts_to_execute
+            - get_experiments_status
