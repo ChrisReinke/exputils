@@ -8,7 +8,7 @@ filterwarnings = [ "ignore::DeprecationWarning" ]
 
 [project]
 name = "experiment-utilities"
-version = "0.3.8"
+version = "0.3.9"
 description = "Management of scientific experiments including their configuration, logging of data, execution and visualization of results."
 authors = [
   {name = "Chris Reinke", email = "c.reinke85@gmail.com"},
