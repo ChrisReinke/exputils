@@ -9,3 +9,4 @@
 ##
 import exputils.gui.jupyter
 import exputils.gui.misc
+import exputils.gui.dash

@@ -1,8 +1,10 @@
 *.egg-info/
 .idea/
+.vscode/
 build/
 site/
 dist/
+tmp/
 **/__pycache__/
 **/.ipynb_checkpoints/
 **/.ipython_config/

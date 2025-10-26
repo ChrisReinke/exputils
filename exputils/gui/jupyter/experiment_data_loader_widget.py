@@ -10,7 +10,10 @@
 import exputils as eu
 import ipywidgets
 import pandas as pd
-import qgrid
+
+
+
+# import qgrid
 import os
 from exputils.gui.jupyter.base_widget import BaseWidget
 import IPython

@@ -7,7 +7,8 @@
 ##
 ## exputils is provided under GPL-3.0-or-later
 ##
-from exputils.gui.jupyter.experiment_data_loader_widget import ExperimentDataLoaderWidget
+
+# from exputils.gui.jupyter.experiment_data_loader_widget import ExperimentDataLoaderWidget
 from exputils.gui.jupyter.multi_selection_widget import MultiSelectionWidget
 from exputils.gui.jupyter.experiment_ids_selection_widget import ExperimentIDsSelectionWidget
 from exputils.gui.jupyter.repetition_ids_selection_widget import RepetitionIDsSelectionWidget
